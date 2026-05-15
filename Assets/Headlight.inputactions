@@ -1,0 +1,67 @@
+{
+    "version": 1,
+    "name": "Headlight",
+    "maps": [
+        {
+            "name": "Game",
+            "id": "d60e0531-75e5-4687-bad4-11b7f1b5c8cd",
+            "actions": [
+                {
+                    "name": "High",
+                    "type": "Button",
+                    "id": "e111aaea-4de7-4204-93bc-9cab670cd666",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Low",
+                    "type": "Button",
+                    "id": "bc4abc20-e4d7-4fae-837f-242ccb90e194",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "23cf87e1-6f46-4ead-b93d-ea5d59d5ee8e",
+                    "path": "<Keyboard>/h",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "High",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8bd168d4-530d-463a-9556-6e8d2e7b3fac",
+                    "path": "<Keyboard>/l",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Low",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "Keyboard",
+            "bindingGroup": "Keyboard",
+            "devices": [
+                {
+                    "devicePath": "<Keyboard>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        }
+    ]
+}
