@@ -1,2 +1,9 @@
+#include "core/Game.hpp"
 
-int main() { return 0; }
+int main() {
+
+  bh::Game game;
+  game.run();
+
+  return 0;
+}

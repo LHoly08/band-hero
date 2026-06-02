@@ -44,6 +44,7 @@ private:
     POP,
     REPLACE,
   };
+
   struct Action {
     Actions type{Actions::NONE};
     std::optional<std::unique_ptr<State>> state{std::nullopt};
