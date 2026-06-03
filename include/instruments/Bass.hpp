@@ -16,8 +16,7 @@ public:
   inline constexpr unsigned char getNumberStrings() const noexcept {
     return NumberStrings;
   }
-  bool getPlay(const unsigned char index,
-               const unsigned char stringVal) const noexcept;
+  bool getPlay(const std::bitset<NumberStrings> &played) const noexcept;
 
 private:
   std::bitset<NumberStrings> m_stringsPlay{};
@@ -31,8 +30,8 @@ public:
   inline constexpr unsigned char getNumberStrings() const noexcept {
     return NumberStrings;
   }
-  bool getPlay(const unsigned char index,
-               const unsigned char fretVal) const noexcept;
+  bool getPlay(
+      const std::array<unsigned char, NumberStrings> &played) const noexcept;
 
 private:
   std::array<unsigned char, NumberStrings> m_fretsRequired{};
