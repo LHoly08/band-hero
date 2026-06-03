@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.25)
 project(BandHero VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_package(SFML 3.1.0 REQUIRED COMPONENTS Graphics Window System Audio Network)
+find_package(SFML 3.0.2 REQUIRED COMPONENTS Graphics Window System Audio Network)
 
 set(SRC_FILES src/main.cpp)
 file(GLOB_RECURSE SRC_FILES "src/*.cpp")

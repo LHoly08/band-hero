@@ -13,3 +13,5 @@ CMakeUserPresets.json
 build/
 sdkconfig
 .clangd
+
+.vscode/
