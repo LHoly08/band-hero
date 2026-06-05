@@ -6,15 +6,33 @@
 
 namespace bh {
 
-template <unsigned char NumberPedals, unsigned char NumberDrums>
-class Drums : public Instrument {
+template <Difficulty Dif> struct DrumsNums;
+
+template <> struct DrumsNums<Difficulty::EASY> {
+  enum {
+    Pedals = 1,
+    Pads = 3,
+  };
+};
+
+template <> struct DrumsNums<Difficulty::HARD> {
+  enum {
+    Pedals = 2,
+    Pads = 6,
+  };
+};
+
+template <Difficulty Dif> class Drums : public Instrument {
 public:
-  bool getPlay(const std::bitset<NumberPedals> &pedals,
-               const std::bitset<NumberDrums> &drums);
+  inline bool getPlay(const std::uint32_t &pedalsPads) const noexcept {
+    return !(
+        (m_pads.to_ulong() | (m_pedals.to_ulong() << DrumsNums<Dif>::Pads)) ^
+        pedalsPads);
+  }
 
 private:
-  std::bitset<NumberPedals> m_pedals;
-  std::bitset<NumberDrums> m_drums;
+  std::bitset<DrumsNums<Dif>::Pedals> m_pedals{};
+  std::bitset<DrumsNums<Dif>::Pads> m_pads{};
 };
 
 } // namespace bh

@@ -9,4 +9,11 @@ enum class Difficulty {
 
 class Instrument {};
 
+template <Difficulty Dif> struct NumberStrings {
+  enum {
+    Bass = 4,
+    Guitar = 6,
+  };
+};
+
 } // namespace bh
