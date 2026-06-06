@@ -1,5 +1,10 @@
 #pragma once
-#include "states/State.hpp"
+#include <SFML/Window/Event.hpp>
+
+#include <memory>
+#include <optional>
+
+#include "core/StateStack.hpp"
 
 #include "instruments/Bass.hpp"
 #include "instruments/Drums.hpp"
@@ -7,14 +12,12 @@
 #include "instruments/Instrument.hpp"
 
 #include "serial/serialib.h"
+
 #include "settings/Device.hpp"
 
-#include "core/StateStack.hpp"
-
-#include <SFML/Window/Event.hpp>
-
-#include <memory>
-#include <optional>
+#include "states/ConnectionState.hpp"
+#include "states/PauseMenuState.hpp"
+#include "states/State.hpp"
 
 namespace bh {
 
@@ -23,7 +26,7 @@ public:
   explicit GameState(StateStack &stack, std::optional<Bass<Dif>> bass,
                      std::optional<Guitar<Dif>> guitar,
                      std::optional<Drums<Dif>> drums,
-                     std::unique_ptr<Instrument> instrumet) noexcept;
+                     std::unique_ptr<Instrument> instrumet);
   virtual ~GameState() = default;
 
   virtual void draw(sf::RenderTarget &target) const noexcept override;
@@ -47,21 +50,18 @@ template <Difficulty Dif>
 GameState<Dif>::GameState(StateStack &stack, std::optional<Bass<Dif>> bass,
                           std::optional<Guitar<Dif>> guitar,
                           std::optional<Drums<Dif>> drums,
-                          std::unique_ptr<Instrument> instrumet) noexcept
+                          std::unique_ptr<Instrument> instrumet)
     : State(stack), m_custom(std::move(instrumet)), m_bass(std::move(bass)),
-      m_guitar(std::move(guitar)), m_drums(std::move(drums)) {
-
-  m_serial.openDevice(Device::PortName().c_str(), Device::BaudRate());
-}
+      m_guitar(std::move(guitar)), m_drums(std::move(drums)) {}
 
 template <Difficulty Dif>
 void GameState<Dif>::handleEvents(const sf::Event &event) noexcept {
 
-  if (const auto *key = event.getIf<sf::Event::KeyPressed>()) {
+  if (const auto *keyPressed = event.getIf<sf::Event::KeyPressed>()) {
 
-    switch (key->scancode) {
+    switch (keyPressed->scancode) {
     case sf::Keyboard::Scancode::Escape:
-      m_stack.pop();
+      m_stack.push<PauseMenuState>();
       break;
 
     default:
@@ -70,7 +70,16 @@ void GameState<Dif>::handleEvents(const sf::Event &event) noexcept {
   }
 }
 
-template <Difficulty Dif> void GameState<Dif>::onEnter() noexcept {}
+template <Difficulty Dif> void GameState<Dif>::onEnter() noexcept {
+
+  auto serialPort = Device::PortName();
+
+  if (serialPort) {
+    m_serial.openDevice(Device::PortName()->c_str(), Device::BaudRate());
+  } else {
+    m_stack.push<ConnectionState>();
+  }
+}
 
 template <Difficulty Dif> void GameState<Dif>::onExit() noexcept {}
 

@@ -4,7 +4,7 @@
 
 #include <concepts>
 #include <memory>
-#include <optional>
+#include <queue>
 #include <utility>
 #include <vector>
 
@@ -39,38 +39,34 @@ public:
 
 private:
   enum class Actions {
-    NONE = 0,
-    PUSH,
+    PUSH = 0,
     POP,
     REPLACE,
   };
 
   struct Action {
-    Actions type{Actions::NONE};
-    std::optional<std::unique_ptr<State>> state{std::nullopt};
+    Actions type;
+    std::unique_ptr<State> state{nullptr};
 
-    inline void reset() noexcept {
-      type = Actions::NONE;
-      state = std::nullopt;
-    }
+    Action(Actions type, std::unique_ptr<State> state)
+        : type(type), state(std::move(state)) {}
   };
 
   std::vector<std::unique_ptr<State>> m_stack;
-  Action m_action;
+  std::queue<Action> m_actions;
 };
 
 template <StateDerived S, typename... Args>
 void StateStack::push(Args &&...args) {
-
-  m_action = {Actions::PUSH,
-              std::make_unique<S>(*this, std::forward<Args>(args)...)};
+  m_actions.push(
+      {Actions::PUSH, std::make_unique<S>(*this, std::forward<Args>(args)...)});
 }
 
 template <StateDerived S, typename... Args>
 void StateStack::replace(Args &&...args) {
 
-  m_action = {Actions::REPLACE,
-              std::make_unique<S>(*this, std::forward<Args>(args)...)};
+  m_actions.push({Actions::REPLACE,
+                  std::make_unique<S>(*this, std::forward<Args>(args)...)});
 }
 
 } // namespace bh

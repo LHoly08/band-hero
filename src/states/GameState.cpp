@@ -1,11 +1,12 @@
-#include "states/GameState.hpp"
-
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
+#include <cstdint>
+
 #include <array>
 #include <bit>
 #include <bitset>
-#include <cstdint>
+
+#include "states/GameState.hpp"
 
 namespace bh {
 
@@ -64,6 +65,7 @@ template <> void GameState<Difficulty::EASY>::update(const float dt) noexcept {
 template <>
 void GameState<Difficulty::EASY>::draw(
     sf::RenderTarget &target) const noexcept {
+
   target.clear(sf::Color::Red);
 }
 
@@ -108,6 +110,9 @@ template <> void GameState<Difficulty::HARD>::update(const float dt) noexcept {
 
 template <>
 void GameState<Difficulty::HARD>::draw(
-    sf::RenderTarget &target) const noexcept {}
+    sf::RenderTarget &target) const noexcept {
+
+  target.clear(sf::Color::Green);
+}
 
 } // namespace bh

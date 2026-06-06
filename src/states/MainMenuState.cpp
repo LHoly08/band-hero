@@ -1,10 +1,14 @@
+#include <SFML/Window/Keyboard.hpp>
+
+#include <optional>
+
 #include "states/MainMenuState.hpp"
 
 #include "core/StateStack.hpp"
 
 #include "instruments/Instrument.hpp"
+
 #include "states/GameState.hpp"
-#include <optional>
 
 namespace bh {
 
@@ -14,11 +18,15 @@ void MainMenuState::draw(sf::RenderTarget &target) const noexcept {}
 
 void MainMenuState::handleEvents(const sf::Event &event) noexcept {
 
-  if (const auto *key = event.getIf<sf::Event::KeyPressed>()) {
+  if (const auto *keyPressed = event.getIf<sf::Event::KeyPressed>()) {
 
-    switch (key->scancode) {
+    switch (keyPressed->scancode) {
     case sf::Keyboard::Scancode::Escape:
       m_stack.push<GameState<Difficulty::EASY>>(std::nullopt, std::nullopt,
+                                                std::nullopt, nullptr);
+      break;
+    case sf::Keyboard::Scancode::E:
+      m_stack.push<GameState<Difficulty::HARD>>(std::nullopt, std::nullopt,
                                                 std::nullopt, nullptr);
       break;
 

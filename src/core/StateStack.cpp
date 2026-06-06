@@ -1,7 +1,5 @@
 #include <SFML/Window/Event.hpp>
 
-#include <optional>
-
 #include "core/StateStack.hpp"
 
 #include "states/MainMenuState.hpp"
@@ -15,46 +13,49 @@ StateStack::StateStack() {
   act();
 }
 
-void StateStack::pop() noexcept { m_action = {Actions::POP, std::nullopt}; }
+void StateStack::pop() noexcept { m_actions.push({Actions::POP, nullptr}); }
 
 void StateStack::act() noexcept {
-  switch (m_action.type) {
-  case Actions::NONE:
-    break;
 
-  case Actions::PUSH: {
+  while (!m_actions.empty()) {
+    auto &front = m_actions.front();
 
-    if (!m_stack.empty()) {
-      m_stack.back()->onExit();
+    switch (front.type) {
+
+    case Actions::PUSH: {
+
+      if (!m_stack.empty()) {
+        m_stack.back()->onExit();
+      }
+      m_stack.push_back(std::move(front.state));
+      m_stack.back()->onEnter();
+
+    } break;
+
+    case Actions::POP: {
+
+      if (!m_stack.empty()) {
+        m_stack.back()->onExit();
+        m_stack.pop_back();
+        m_stack.empty() ? void() : m_stack.back()->onEnter();
+      }
+
+    } break;
+
+    case Actions::REPLACE: {
+
+      if (!m_stack.empty()) {
+        m_stack.back()->onExit();
+        m_stack.pop_back();
+      }
+      m_stack.push_back(std::move(front.state));
+      m_stack.back()->onEnter();
+
+    } break;
     }
-    m_stack.push_back(std::move(*m_action.state));
-    m_stack.back()->onEnter();
 
-  } break;
-
-  case Actions::POP: {
-
-    if (!m_stack.empty()) {
-      m_stack.back()->onExit();
-      m_stack.pop_back();
-      m_stack.empty() ? void() : m_stack.back()->onEnter();
-    }
-
-  } break;
-
-  case Actions::REPLACE: {
-
-    if (!m_stack.empty()) {
-      m_stack.back()->onExit();
-      m_stack.pop_back();
-    }
-    m_stack.push_back(std::move(*m_action.state));
-    m_stack.back()->onEnter();
-
-  } break;
+    m_actions.pop();
   }
-
-  m_action.reset();
 }
 
 void StateStack::handleEvents(const sf::Event &event) noexcept {

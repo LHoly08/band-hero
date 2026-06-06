@@ -8,7 +8,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(SFML_STATIC_LIBRARIES FALSE)
 find_package(SFML 3.0.2 REQUIRED COMPONENTS Graphics Window System Audio Network)
 
-set(SRC_FILES src/main.cpp)
 file(GLOB_RECURSE SRC_FILES "src/*.cpp")
 
 add_executable(BandHero ${SRC_FILES})
@@ -28,3 +27,13 @@ if(MSVC)
 else()
   target_compile_options(BandHero PRIVATE -Wall -Wextra -Wpedantic)
 endif()
+
+set(ASSETS_SRC "${CMAKE_CURRENT_SOURCE_DIR}/assets")
+set(ASSETS_DEST "$<TARGET_FILE_DIR:BandHero>/assets")
+
+add_custom_command(TARGET BandHero POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${ASSETS_SRC}"
+        "${ASSETS_DEST}"
+    COMMENT "Copying assets to the build output directory..."
+)

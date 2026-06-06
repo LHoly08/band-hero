@@ -1,9 +1,9 @@
-#include "states/PauseMenuState.hpp"
+#include <SFML/Window/Event.hpp>
+#include <SFML/Window/Keyboard.hpp>
 
 #include "core/StateStack.hpp"
 
-#include <SFML/Window/Event.hpp>
-#include <SFML/Window/Keyboard.hpp>
+#include "states/PauseMenuState.hpp"
 
 namespace bh {
 

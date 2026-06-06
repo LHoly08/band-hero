@@ -5,10 +5,10 @@
 
 namespace bh {
 
-class MainMenuState : public State {
+class ConnectionState : public State {
 public:
-  explicit MainMenuState(StateStack &stack) noexcept;
-  virtual ~MainMenuState() = default;
+  explicit ConnectionState(StateStack &stack) noexcept;
+  virtual ~ConnectionState() = default;
 
   virtual void draw(sf::RenderTarget &target) const noexcept override;
   virtual void handleEvents(const sf::Event &event) noexcept override;

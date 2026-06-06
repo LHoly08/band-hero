@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -30,20 +31,22 @@ public:
     return Get().Iconfigure<0>(port, baud);
   };
 
-  static std::string PortName() noexcept { return Get().IportName(); };
+  static std::optional<std::string> PortName() noexcept {
+    return Get().IportName();
+  };
   static unsigned int BaudRate() noexcept { return Get().m_baud; };
 
 private:
   Device() = default;
   void Iinit() noexcept;
 
-  std::string IportName() const noexcept;
+  std::optional<std::string> IportName() const noexcept;
   void Iscan() noexcept;
   template <unsigned char Type>
   void Iconfigure(const size_t port, const unsigned int baud) noexcept;
 
-  unsigned int m_baud;
-  size_t m_port;
+  unsigned int m_baud{115200};
+  size_t m_port{0};
   std::vector<std::string> m_availablePorts;
 };
 

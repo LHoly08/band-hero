@@ -1,5 +1,8 @@
 #pragma once
 
+#include <fstream>
+#include <thread>
+
 namespace bh {
 
 enum class Difficulty {
@@ -7,7 +10,11 @@ enum class Difficulty {
   HARD,
 };
 
-class Instrument {};
+class Instrument {
+protected:
+  std::thread m_loader;
+  std::fstream m_file;
+};
 
 template <Difficulty Dif> struct NumberStrings {
   enum {
