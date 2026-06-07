@@ -2,6 +2,7 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 
 #include "states/State.hpp"
+#include "ui/Button.hpp"
 
 namespace bh {
 
@@ -16,6 +17,9 @@ public:
 
   virtual void onEnter() noexcept override;
   virtual void onExit() noexcept override;
+
+private:
+  const Button m_button;
 };
 
 } // namespace bh

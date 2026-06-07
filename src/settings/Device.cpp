@@ -1,5 +1,3 @@
-#include <filesystem>
-#include <ostream>
 
 #include "settings/Device.hpp"
 
@@ -30,7 +28,7 @@ void Device::Iscan() noexcept {
 #if defined(_WIN32)
 
   for (int i = 1; i <= 32; ++i) {
-    std::string portPath = "\\\\.\\COM" + std::to_string(i);
+    std::string portPath = "COM" + std::to_string(i);
 
     if (testSerial.openDevice(portPath.c_str(), 115200) == 1) {
 

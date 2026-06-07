@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Window/Event.hpp>
 
+#include <iostream>
 #include <memory>
 #include <optional>
 

@@ -5,6 +5,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+if(WIN32)
+    list(APPEND CMAKE_PREFIX_PATH "C:/msys64/ucrt64")
+    include_directories(SYSTEM "C:/msys64/ucrt64/include") 
+endif()
+
 set(SFML_STATIC_LIBRARIES FALSE)
 find_package(SFML 3.0.2 REQUIRED COMPONENTS Graphics Window System Audio Network)
 

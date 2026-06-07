@@ -1,3 +1,4 @@
+#include <SFML/Window/Event.hpp>
 #include <SFML/Window/Keyboard.hpp>
 
 #include <optional>
@@ -12,9 +13,14 @@
 
 namespace bh {
 
-MainMenuState::MainMenuState(StateStack &stack) noexcept : State(stack) {}
+MainMenuState::MainMenuState(StateStack &stack) noexcept
+    : State(stack),
+      m_button({100, 100}, {200, 100}, "assets/texture/MainMenu/UI/Button.png",
+               "Easy Mode", "assets/font/NIRVANA.TTF") {}
 
-void MainMenuState::draw(sf::RenderTarget &target) const noexcept {}
+void MainMenuState::draw(sf::RenderTarget &target) const noexcept {
+  m_button.draw(target);
+}
 
 void MainMenuState::handleEvents(const sf::Event &event) noexcept {
 
@@ -32,6 +38,12 @@ void MainMenuState::handleEvents(const sf::Event &event) noexcept {
 
     default:
       break;
+    }
+  } else if (const auto *mousePressed =
+                 event.getIf<sf::Event::MouseButtonPressed>()) {
+    if (m_button.pressed(mousePressed->position)) {
+      m_stack.replace<GameState<Difficulty::EASY>>(std::nullopt, std::nullopt,
+                                                   std::nullopt, nullptr);
     }
   }
 }
