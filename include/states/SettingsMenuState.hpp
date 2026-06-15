@@ -1,14 +1,13 @@
 #pragma once
-#include <SFML/Graphics/RenderTarget.hpp>
 
 #include "states/State.hpp"
 
 namespace bh {
 
-class ConnectionState final : public State {
+class SettingsMenuState final : public State {
 public:
-  explicit ConnectionState(StateStack &stack) noexcept;
-  ~ConnectionState() = default;
+  explicit SettingsMenuState(StateStack &stack) noexcept;
+  ~SettingsMenuState() = default;
 
   void draw(sf::RenderTarget &target) const noexcept override;
   void handleEvents(const sf::Event &event) noexcept override;
@@ -16,6 +15,8 @@ public:
 
   void onEnter() noexcept override;
   void onExit() noexcept override;
+
+private:
 };
 
 } // namespace bh

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <bitset>
+#include <cstdint>
 
 #include "instruments/Instrument.hpp"
 
@@ -22,17 +22,20 @@ template <> struct DrumsNums<Difficulty::HARD> {
   };
 };
 
-template <Difficulty Dif> class Drums : public Instrument {
+template <Difficulty Dif> class Drums final : public Instrument<Dif> {
 public:
-  inline bool getPlay(const std::uint32_t &pedalsPads) const noexcept {
-    return !(
-        (m_pads.to_ulong() | (m_pedals.to_ulong() << DrumsNums<Dif>::Pads)) ^
-        pedalsPads);
-  }
+  explicit Drums(std::string filename) noexcept;
 
-private:
-  std::bitset<DrumsNums<Dif>::Pedals> m_pedals{};
-  std::bitset<DrumsNums<Dif>::Pads> m_pads{};
+  inline constexpr std::uint8_t getNumberPads() const noexcept {
+    return DrumsNums<Dif>::Pads;
+  }
+  inline constexpr std::uint8_t getNumberPedals() const noexcept {
+    return DrumsNums<Dif>::Pedals;
+  }
 };
+
+template <Difficulty Dif>
+Drums<Dif>::Drums(std::string filename) noexcept
+    : Instrument<Dif>("drums/" + filename) {}
 
 } // namespace bh

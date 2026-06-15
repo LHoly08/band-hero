@@ -1,42 +1,21 @@
 #pragma once
-#include <bitset>
 #include <cstdint>
 
 #include "instruments/Instrument.hpp"
 
 namespace bh {
 
-template <Difficulty Dif> class Guitar;
-
-/* Easy Guitar */
-
-template <> class Guitar<Difficulty::EASY> : Instrument {
+template <Difficulty Dif> class Guitar final : public Instrument<Dif> {
 public:
-  inline constexpr unsigned char getNumberStrings() const noexcept {
-    return NumberStrings<Difficulty::EASY>::Guitar;
-  }
-  inline bool getPlay(const std::bitset<NumberStrings<Difficulty::EASY>::Guitar>
-                          &played) const noexcept {
-    return !((played ^ m_stringsPlay).any());
-  }
+  explicit Guitar(std::string filename) noexcept;
 
-private:
-  std::bitset<NumberStrings<Difficulty::EASY>::Guitar> m_stringsPlay{};
+  inline constexpr std::uint8_t getNumberStrings() const noexcept {
+    return NumberStrings<Dif>::Guitar;
+  }
 };
 
-/* Hard Guitar */
-
-template <> class Guitar<Difficulty::HARD> : Instrument {
-public:
-  inline constexpr unsigned char getNumberStrings() const noexcept {
-    return NumberStrings<Difficulty::HARD>::Guitar;
-  }
-  inline bool getPlay(const std::uint32_t &played) const noexcept {
-    return !(played ^ m_fretsRequired);
-  }
-
-private:
-  std::uint32_t m_fretsRequired{};
-};
+template <Difficulty Dif>
+Guitar<Dif>::Guitar(std::string filename) noexcept
+    : Instrument<Dif>("guitar/" + filename) {}
 
 } // namespace bh
