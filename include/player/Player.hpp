@@ -5,12 +5,14 @@
 
 namespace bh {
 
-tempalte <typename T>
-concept InstrumentType = std::derived_from<T, Instrument>
+tempalte <template <Difficulty> class T, Difficulty Dif>
+concept InstrumentType = std::derived_from<T<Dif>, Instrument<Dif>>
 
+template <Difficulty Dif>
 class Player {
 public:
-template <InstrumentType T, typename ...Args>
+  template <template <Difficulty> class T, typename ...Args>
+    requires InstrumentType<T, Dif>
   explicit Player(Args&&... args);
   ~Player() = default;
   Player(const Player&) = delete;
@@ -18,16 +20,18 @@ template <InstrumentType T, typename ...Args>
   Player(Player&&) = delete;
   void operator=(Player &&) = delete;
 
-  void play();
+  void play(std::uint32_t &val);
   void getScore();
 
 private:
-  std::unique_ptr<Instrument> m_instrument{};
+  std::unique_ptr<Instrument<Dif>> m_instrument{};
   unsigned int m_totalScore{};
   unsigned int m_score{};
 };
 
-template <InstrumentType T, typename ...Args>
-Player::Player(Args&&... args) : m_instrument(std::make_unique<T>(std::forward(args)...)) {}
+template <Difficulty Dif>
+template <template <Difficulty> class T, typename ...Args>
+  requires InstrumentType<T, Dif>
+Player<Dif>::Player(Args&&... args) : m_instrument(std::make_unique<T<Dif>>(std::forward<Args>(args)...)) {}
 
 } // namespace bh
