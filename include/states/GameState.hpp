@@ -35,20 +35,15 @@ public:
   void onExit() noexcept override;
 
 private:
-  std::unique_ptr<Instrument<Dif>> m_custom;
-
   serialib m_serial;
 
-  Bass<Dif> m_bass;
-  Guitar<Dif> m_guitar;
-  Drums<Dif> m_drums;
+  std::array<Player<Dif>, 4> m_players;
+  const std::uint8_t m_playerCount;
 };
 
 template <Difficulty Dif>
-GameState<Dif>::GameState(StateStack &stack, std::string songName,
-                          std::unique_ptr<Instrument<Dif>> instrumet)
-    : State(stack), m_custom(std::move(instrumet)), m_bass(songName),
-      m_guitar(songName), m_drums(songName) {}
+GameState<Dif>::GameState(StateStack &stack, std::string songName, std::uint8_t playerCount)
+    : State(stack), m_playerCount(playerCount) {}
 
 template <Difficulty Dif>
 void GameState<Dif>::handleEvents(const sf::Event &event) noexcept {
@@ -73,57 +68,11 @@ template <Difficulty Dif> void GameState<Dif>::update(float dt) noexcept {
 
     std::uint32_t val = std::bit_cast<std::uint32_t>(buffer);
 
-    switch (val & 0b11) {
-
-    case 0: // Bass
-    {
-      val >>= 2;
-
-      if constexpr (Dif == Difficulty::EASY) {
-
-        for (std::uint8_t i{}, string = (val & 0x1F);
-             i < m_bass.getNumberStrings();
-             string = (val >> (++i * 5)) & 0x1F) {
-
-          val |= (string != 0) * (0x1F << (i * 5));
-        }
-      }
-      bool _ = m_bass.getPlay(val);
-    } break;
-
-    case 1: // Guitar
-    {
-      val >>= 2;
-
-      if constexpr (Dif == Difficulty::EASY) {
-
-        for (std::uint8_t i{}, string = (val & 0x1F);
-             i < m_guitar.getNumberStrings();
-             string = (val >> (++i * 5)) & 0x1F) {
-
-          val |= (string != 0) * (0x1F << (i * 5));
-        }
-      }
-
-      bool _ = m_guitar.getPlay(val);
-    } break;
-
-    case 2: // Drums
-    {
-      val >>= 2;
-
-      bool _ = m_drums.getPlay(val);
-    } break;
-
-    case 3: // Custom
-    {
-      val >>= 2;
-
-      if (m_custom) {
-        bool _ = m_custom->getPlay(val);
-      }
-
-    } break;
+    std::uint8_t ind {static_cast<std::uint8_t>(val & 0b11)};
+    val >>= 2;
+    
+    if (ind < m_playerCount) {
+      m_players[ind].play(val);
     }
   }
 }
