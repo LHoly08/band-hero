@@ -9,7 +9,7 @@ template <Difficulty Dif> class Bass final : public Instrument<Dif> {
 public:
   explicit Bass(std::string filename) noexcept;
 
-  inline bool getPlay(std::uint32_t &val) const noexcept {
+  inline bool getPlay(std::uint32_t &val) const noexcept override {
     if constexpr (Dif == Difficulty::EASY) {
       for (std::uint8_t i{}, string = (val & 0x1F);
         i < NumberStrings<Dif>::Bass;
