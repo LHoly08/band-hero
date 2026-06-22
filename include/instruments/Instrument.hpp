@@ -44,7 +44,7 @@ public:
   Instrument(Instrument &&) = delete;
   Instrument &operator=(Instrument &&) = delete;
 
-  inline virtual bool getPlay(const std::uint32_t &played) const noexcept {
+  inline virtual bool getPlay(std::uint32_t &played) const noexcept {
     return !(played ^ m_toPlay);
   }
   void loadFile(std::stop_token stop_token, std::string filename) noexcept;
