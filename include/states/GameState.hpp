@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <optional>
+#include <bit>
 
 #include "core/StateStack.hpp"
 
@@ -72,6 +73,10 @@ template <Difficulty Dif> void GameState<Dif>::update(float dt) noexcept {
       m_serial.readBytes(buffer.data(), buffer.size(), 1)) {
 
     std::uint32_t val = std::bit_cast<std::uint32_t>(buffer);
+
+    if constexpr (std::endian::native == std::endian::big) {
+      val = std::byteswap(val);
+    }
 
     switch (val & 0b11) {
 
