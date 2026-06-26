@@ -11,14 +11,14 @@ template <Difficulty Dif> struct DrumsNums;
 template <> struct DrumsNums<Difficulty::EASY> {
   enum {
     Pedals = 1,
-    Pads = 3,
+    Pads = 5,
   };
 };
 
 template <> struct DrumsNums<Difficulty::HARD> {
   enum {
     Pedals = 2,
-    Pads = 6,
+    Pads = 8,
   };
 };
 

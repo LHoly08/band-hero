@@ -12,13 +12,12 @@ public:
   inline bool getPlay(std::uint32_t &val) const noexcept override {
     if constexpr (Dif == Difficulty::EASY) {
       for (std::uint8_t i{}, string = (val & 0x1F);
-        i < NumberStrings<Dif>::Guitar;
-        string = (val >> (++i * 5)) & 0x1F) {
+           i < NumberStrings<Dif>::Guitar; string = (val >> (++i * 5)) & 0x1F) {
 
         val |= (string != 0) * (0x1F << (i * 5));
       }
     }
-    return Instrument::getPlay(val);
+    return Instrument<Dif>::getPlay(val);
   }
 };
 

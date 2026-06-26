@@ -1,27 +1,26 @@
-#pramga once
-#include <memory>
-#include <concepts>
+#pragma once
 #include "instruments/Instrument.hpp"
+#include <concepts>
+#include <cstdint>
+#include <memory>
 
 namespace bh {
 
-tempalte <template <Difficulty> class T, Difficulty Dif>
-concept InstrumentType = std::derived_from<T<Dif>, Instrument<Dif>>
-
-template <Difficulty Dif>
-class Player {
+template <Difficulty Dif> class Player {
 public:
-  template <template <Difficulty> class T, typename ...Args>
-    requires InstrumentType<T, Dif>
-  explicit Player(Args&&... args);
+  explicit Player(std::unique_ptr<Instrument<Dif>> instrument);
+
   ~Player() = default;
-  Player(const Player&) = delete;
+  Player(const Player &) = delete;
   void operator=(const Player &) = delete;
-  Player(Player&&) = delete;
-  void operator=(Player &&) = delete;
+  Player(Player &&) = default;
+  Player &operator=(Player &&) = default;
 
   void play(std::uint32_t &val);
   void getScore();
+
+  inline void startThread() noexcept { m_instrument->startThread(); }
+  inline void pauseThread() noexcept { m_instrument->pauseThread(); }
 
 private:
   std::unique_ptr<Instrument<Dif>> m_instrument{};
@@ -30,8 +29,7 @@ private:
 };
 
 template <Difficulty Dif>
-template <template <Difficulty> class T, typename ...Args>
-  requires InstrumentType<T, Dif>
-Player<Dif>::Player(Args&&... args) : m_instrument(std::make_unique<T<Dif>>(std::forward<Args>(args)...)) {}
+Player<Dif>::Player(std::unique_ptr<Instrument<Dif>> instrument)
+    : m_instrument(std::move(instrument)) {}
 
 } // namespace bh

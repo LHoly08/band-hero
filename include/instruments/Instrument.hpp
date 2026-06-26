@@ -41,8 +41,8 @@ public:
   virtual ~Instrument() = default;
   Instrument(const Instrument &) = delete;
   void operator=(const Instrument &) = delete;
-  Instrument(Instrument &&) = delete;
-  Instrument &operator=(Instrument &&) = delete;
+  Instrument(Instrument &&) = default;
+  Instrument &operator=(Instrument &&) = default;
 
   inline virtual bool getPlay(std::uint32_t &played) const noexcept {
     return !(played ^ m_toPlay);

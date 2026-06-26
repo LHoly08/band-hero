@@ -1,15 +1,14 @@
 #pragma once
 #include <SFML/Window/Event.hpp>
 
-#include <memory>
+#include <bit>
 #include <optional>
+#include <ranges>
 
 #include "core/StateStack.hpp"
 
-#include "instruments/Bass.hpp"
-#include "instruments/Drums.hpp"
-#include "instruments/Guitar.hpp"
 #include "instruments/Instrument.hpp"
+#include "player/Player.hpp"
 
 #include "serial/serialib.h"
 
@@ -24,7 +23,7 @@ namespace bh {
 template <Difficulty Dif> class GameState final : public State {
 public:
   explicit GameState(StateStack &stack, std::string songName,
-                     std::unique_ptr<Instrument<Dif>> instrumet);
+                     std::uint8_t playerCount);
   ~GameState() = default;
 
   void draw(sf::RenderTarget &target) const noexcept override;
@@ -42,7 +41,8 @@ private:
 };
 
 template <Difficulty Dif>
-GameState<Dif>::GameState(StateStack &stack, std::string songName, std::uint8_t playerCount)
+GameState<Dif>::GameState(StateStack &stack, std::string songName,
+                          std::uint8_t playerCount)
     : State(stack), m_playerCount(playerCount) {}
 
 template <Difficulty Dif>
@@ -68,9 +68,13 @@ template <Difficulty Dif> void GameState<Dif>::update(float dt) noexcept {
 
     std::uint32_t val = std::bit_cast<std::uint32_t>(buffer);
 
-    std::uint8_t ind {static_cast<std::uint8_t>(val & 0b11)};
+    if constexpr (std::endian::native == std::endian::big) {
+      val = std::byteswap(val);
+    }
+
+    std::uint8_t ind{static_cast<std::uint8_t>(val & 0b11)};
     val >>= 2;
-    
+
     if (ind < m_playerCount) {
       m_players[ind].play(val);
     }
@@ -86,8 +90,16 @@ template <Difficulty Dif> void GameState<Dif>::onEnter() noexcept {
   } else {
     m_stack.push<ConnectionState>();
   }
+
+  for (auto &player : m_players | std::ranges::views::take(m_playerCount)) {
+    player.startThread();
+  }
 }
 
-template <Difficulty Dif> void GameState<Dif>::onExit() noexcept {}
+template <Difficulty Dif> void GameState<Dif>::onExit() noexcept {
+  for (auto &player : m_players | std::ranges::views::take(m_playerCount)) {
+    player.pauseThread();
+  }
+}
 
 } // namespace bh
