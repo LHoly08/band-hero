@@ -22,7 +22,7 @@ add_executable(BandHero ${SRC_FILES})
 
 target_include_directories(BandHero PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-target_link_libraries(BandHero PRIVATE raylib::raylib)
+target_link_libraries(BandHero PRIVATE raylib)
 
 
 if(MSVC)
