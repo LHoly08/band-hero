@@ -1,26 +1,30 @@
 cmake_minimum_required(VERSION 3.30)
 project(BandHero VERSION 1.0.0 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if(WIN32)
-    list(APPEND CMAKE_PREFIX_PATH "C:/msys64/ucrt64")
-    include_directories(SYSTEM "C:/msys64/ucrt64/include") 
-endif()
-
-find_package(raylib REQUIRED)
-
 include(FetchContent)
 
-set(FETCHCONTENT_TRY_FIND_PACKAGE_MODE NEVER)
-set(CMAKE_FETCHCONTENT_FULLY_DISCONNECTED FALSE)
+FetchContent_Declare(
+    raylib
+    GIT_REPOSITORY https://github.com/raysan5/raylib.git
+    GIT_TAG        5.5
+)
+
+set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+FetchContent_MakeAvailable(raylib)
+
 file(GLOB_RECURSE SRC_FILES "src/*.cpp")
 
 add_executable(BandHero ${SRC_FILES})
 
-target_include_directories(BandHero PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(BandHero PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${raylib_SOURCE_DIR}/src
+)
 
 target_link_libraries(BandHero PRIVATE raylib)
 
