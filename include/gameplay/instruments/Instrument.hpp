@@ -60,6 +60,8 @@ public:
 
     return !m_playingNote;
   }
+  virtual void draw() const noexcept = 0;
+  virtual void update(float dt) noexcept = 0;
 
 protected:
   using NoteType = Note<Type>;

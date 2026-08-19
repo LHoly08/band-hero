@@ -38,9 +38,20 @@ public:
 
   inline bool getPlay(std::uint32_t playedNote) noexcept override;
 
+  void draw() const noexcept override;
+  void update(float dt) noexcept override;
+
 private:
   std::string m_name;
   InstrumentComposition<Type> m_composition;
 };
+
+template <InstrumentType Type, Difficulty Dif>
+  requires CustomType<Type>
+void Custom<Type, Dif>::draw() const noexcept {}
+
+template <InstrumentType Type, Difficulty Dif>
+  requires CustomType<Type>
+void Custom<Type, Dif>::update(float dt) noexcept {}
 
 } // namespace bh

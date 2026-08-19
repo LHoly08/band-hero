@@ -56,7 +56,14 @@ public:
     return Base::getPlay(playedNote);
   }
 
+  void draw() const noexcept override;
+  void update(float dt) noexcept override;
+
 private:
 };
+
+template <Difficulty Dif> void Guitar<Dif>::draw() const noexcept {}
+
+template <Difficulty Dif> void Guitar<Dif>::update(float dt) noexcept {}
 
 } // namespace bh
