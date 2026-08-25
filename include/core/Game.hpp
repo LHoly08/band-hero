@@ -11,7 +11,8 @@ namespace bh {
 
 class Game {
 public:
-  Game(const Vector2 &&windowSize, const std::string &&windowName) noexcept;
+  Game(const Vector2 &&windowSize,
+       const std::string_view &&windowName) noexcept;
   ~Game() noexcept;
 
   inline void run() {
@@ -20,6 +21,7 @@ public:
       events();
       update(GetFrameTime());
       draw();
+
       m_stack.act();
     }
   }

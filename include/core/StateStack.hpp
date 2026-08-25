@@ -51,6 +51,7 @@ public:
     }
   }
   void act() noexcept;
+  inline void clear() noexcept { m_stack.clear(); }
 
 private:
   enum class ActionType : std::uint8_t {

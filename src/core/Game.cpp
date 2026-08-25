@@ -1,20 +1,28 @@
-#include <any>
+#include <string_view>
 
 #include "core/Game.hpp"
 
 #include "raylib.h"
 
+#include "states/MainMenuState.hpp"
+
 namespace bh {
 
 Game::Game(const Vector2 &&windowSize,
-           const std::string &&windowName) noexcept {
-  InitWindow(windowSize.x, windowSize.y, windowName.c_str());
+           const std::string_view &&windowName) noexcept {
+  InitWindow(windowSize.x, windowSize.y, windowName.data());
   SetExitKey(KeyboardKey::KEY_NULL);
 
   // TODO: make loading of config file
   SetTargetFPS(60);
+
+  m_stack.push<MainMenuState>();
+  m_stack.act();
 }
 
-Game::~Game() noexcept { CloseWindow(); }
+Game::~Game() noexcept {
+  m_stack.clear();
+  CloseWindow();
+}
 
 } // namespace bh

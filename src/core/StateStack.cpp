@@ -4,19 +4,16 @@
 
 namespace bh {
 
-StateStack::StateStack() {
-  m_stack.reserve(3);
-
-  push<MainMenuState>();
-  act();
-}
+StateStack::StateStack() { m_stack.reserve(3); }
 
 void StateStack::act() noexcept {
 
   switch (action.type) {
 
   case ActionType::Push: {
-    m_stack.back()->onExit();
+    if (!m_stack.empty()) {
+      m_stack.back()->onExit();
+    }
     m_stack.push_back(std::move(action.state));
     m_stack.back()->onEnter();
     break;

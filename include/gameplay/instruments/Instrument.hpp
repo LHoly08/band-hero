@@ -2,6 +2,7 @@
 
 #include <cstdint>
 
+#include <bitset>
 #include <thread>
 #include <vector>
 
@@ -36,7 +37,6 @@ struct Note<Type> {
 
   std::uint32_t note{};
   float positionY{};
-  std::uint8_t stringNumber;
 };
 
 // Size: 104 | Align: 8
@@ -44,6 +44,8 @@ template <InstrumentType Type, Difficulty Dif> class Instrument {
 public:
   explicit Instrument(std::uint32_t &noteCount);
   virtual ~Instrument() = default;
+
+  inline void updateSpeed(const float *ptr) noexcept { m_speed = ptr; }
 
   virtual inline bool getPlay(std::uint32_t playedNote) noexcept {
 
@@ -60,7 +62,7 @@ public:
 
     return !m_playingNote;
   }
-  virtual void draw() const noexcept = 0;
+  virtual void draw(std::uint32_t startingPositionX) const noexcept = 0;
   virtual void update(float dt) noexcept = 0;
 
 protected:
@@ -74,6 +76,7 @@ protected:
   std::vector<NoteType> m_downloadingBuffer;
   std::thread m_loadingThread;
   std::uint32_t &m_noteCount;
+  const float *m_speed;
 };
 
 template <InstrumentType Type, Difficulty Dif>

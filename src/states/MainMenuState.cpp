@@ -4,7 +4,7 @@
 
 namespace bh {
 
-void MainMenuState::draw() const noexcept {}
+void MainMenuState::draw() const noexcept { m_playButton.draw(); }
 
 void MainMenuState::update(float dt) noexcept {}
 

@@ -5,6 +5,9 @@
 #include <string>
 
 #include "Instrument.hpp"
+#include "raylib.h"
+
+#include "../Settings.hpp"
 
 namespace bh {
 
@@ -38,7 +41,7 @@ public:
 
   inline bool getPlay(std::uint32_t playedNote) noexcept override;
 
-  void draw() const noexcept override;
+  void draw(std::uint32_t startingPositionX) const noexcept override;
   void update(float dt) noexcept override;
 
 private:
@@ -48,7 +51,30 @@ private:
 
 template <InstrumentType Type, Difficulty Dif>
   requires CustomType<Type>
-void Custom<Type, Dif>::draw() const noexcept {}
+void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
+
+  if constexpr (Type == InstrumentType::Custom_1) {
+
+    static Texture2D noteTexture =
+        LoadTexture("assets/texture/Gameplay/Note.png");
+
+    for (const auto &note : this->m_activeBuffer) {
+      for (std::uint8_t i{}; i < m_composition.NumberSections; ++i) {
+
+        std::uint8_t fretVal =
+            (note.note >> (i * m_composition.NumberBitsSection)) &
+            m_composition.NumberBitsSection;
+
+        if (fretVal) {
+          DrawTexture(noteTexture, startingPositionX + fretVal * 50,
+                      note.positionY, Settings::getNoteTint(note.stringNumber));
+        }
+      }
+    }
+
+  } else if constexpr (Type == InstrumentType::Custom_2) {
+  }
+}
 
 template <InstrumentType Type, Difficulty Dif>
   requires CustomType<Type>

@@ -41,13 +41,14 @@ public:
     return Base::getPlay(playedNote);
   }
 
-  void draw() const noexcept override;
+  void draw(std::uint32_t startingPositionX) const noexcept override;
   void update(float dt) noexcept override;
 
 private:
 };
 
-template <Difficulty Dif> void Drums<Dif>::draw() const noexcept {}
+template <Difficulty Dif>
+void Drums<Dif>::draw(std::uint32_t startingPositionX) const noexcept {}
 
 template <Difficulty Dif> void Drums<Dif>::update(float dt) noexcept {}
 

@@ -2,11 +2,15 @@
 
 #include "states/State.hpp"
 
+#include "ui/Button.hpp"
+
 namespace bh {
 
 class MainMenuState final : public State {
 public:
-  inline MainMenuState(StateStack &stack) noexcept : State(stack) {}
+  inline MainMenuState(StateStack &stack) noexcept
+      : State(stack), m_playButton("assets/textures/MainMenu/UI/Button.png",
+                                   {.x = 100, .y = 100}) {}
   ~MainMenuState() override = default;
 
   void draw() const noexcept override;
@@ -16,5 +20,7 @@ public:
   void onExit() noexcept override;
 
 private:
+  Button m_playButton;
 };
+
 } // namespace bh
