@@ -30,6 +30,8 @@ private:
   inline void draw() const noexcept {
     BeginDrawing();
 
+    ClearBackground(WHITE);
+
     m_stack.draw();
 
     EndDrawing();

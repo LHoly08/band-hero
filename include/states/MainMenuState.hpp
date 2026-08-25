@@ -10,7 +10,9 @@ class MainMenuState final : public State {
 public:
   inline MainMenuState(StateStack &stack) noexcept
       : State(stack), m_playButton("assets/textures/MainMenu/UI/Button.png",
-                                   {.x = 100, .y = 100}) {}
+                                   {.x = 100, .y = 100}),
+        m_quitButton("assets/textures/MainMenu/UI/Button.png",
+                     {.x = 500, .y = 500}) {}
   ~MainMenuState() override = default;
 
   void draw() const noexcept override;
@@ -21,6 +23,8 @@ public:
 
 private:
   Button m_playButton;
+  Button m_quitButton;
+  Button m_settingsButton;
 };
 
 } // namespace bh
