@@ -28,6 +28,13 @@ target_include_directories(BandHero PRIVATE
 
 target_link_libraries(BandHero PRIVATE raylib)
 
+if(WIN32)
+  target_compile_definitions(BandHero PRIVATE
+    WIN32_LEAN_AND_MEAN
+    NOGDI
+    NOUSER
+  )
+endif()
 
 if(MSVC)
   target_compile_options(BandHero PRIVATE /W4)

@@ -3,6 +3,8 @@
 #include <cstdint>
 
 #include <array>
+#include <memory>
+#include <utility>
 
 #include "gameplay/Player.hpp"
 
@@ -19,7 +21,10 @@ template <std::uint8_t PlayerCount>
   requires MaxPlayerAmount<PlayerCount>
 class GameState final : public State {
 public:
-  inline GameState(StateStack &stack) noexcept : State(stack) {}
+  inline GameState(
+      StateStack &stack,
+      std::array<std::unique_ptr<PlayerBase>, PlayerCount> &&players) noexcept
+      : State(stack), m_players(std::move(players)) {}
   ~GameState() override = default;
 
   void draw() const noexcept override;
@@ -43,23 +48,9 @@ void GameState<PlayerCount>::update(float dt) noexcept {
 
   if (std::uint32_t buffer{}; m_serial.readBytes(&buffer, sizeof(buffer), 1)) {
 
-    switch (buffer & 0b11) {
-    case 0: {
-      buffer >>= 2;
-      break;
-    }
-    case 1: {
-      buffer >>= 2;
-      break;
-    }
-    case 2: {
-      buffer >>= 2;
-      break;
-    }
-    case 3: {
-      buffer >>= 2;
-      break;
-    }
+    if (std::uint8_t index = buffer & 0b11; index < PlayerCount) {
+      buffer <<= 2;
+      m_players[index]->play(buffer);
     }
   }
 }

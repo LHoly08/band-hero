@@ -12,7 +12,9 @@ public:
       : State(stack), m_playButton("assets/textures/MainMenu/UI/Button.png",
                                    {.x = 100, .y = 100}),
         m_quitButton("assets/textures/MainMenu/UI/Button.png",
-                     {.x = 500, .y = 500}) {}
+                     {.x = 500, .y = 500}),
+        m_settingsButton("assets/textures/MainMenu/UI/Button.png",
+                         {.x = 1000, .y = 300}) {}
   ~MainMenuState() override = default;
 
   void draw() const noexcept override;
