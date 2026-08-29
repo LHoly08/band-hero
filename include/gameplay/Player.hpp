@@ -17,19 +17,22 @@ namespace bh {
 
 namespace detail {
 
-template <InstrumentType Type, Difficulty Dif>
+template <InstrumentType Type, Difficulty Dif, typename... Args>
 std::unique_ptr<Instrument<Type, Dif>>
-makePlayerInstrument(std::uint32_t &noteCount) {
+makePlayerInstrument(std::uint32_t &noteCount, Args &&...args) {
   if constexpr (Type == InstrumentType::Bass) {
-    return std::make_unique<Bass<Dif>>(noteCount);
+    return std::make_unique<Bass<Dif>>(noteCount, std::forward<Args>(args)...);
   } else if constexpr (Type == InstrumentType::Drums) {
-    return std::make_unique<Drums<Dif>>(noteCount);
+    return std::make_unique<Drums<Dif>>(noteCount, std::forward<Args>(args)...);
   } else if constexpr (Type == InstrumentType::Guitar) {
-    return std::make_unique<Guitar<Dif>>(noteCount);
+    return std::make_unique<Guitar<Dif>>(noteCount,
+                                         std::forward<Args>(args)...);
   } else if constexpr (Type == InstrumentType::Custom_1) {
-    return std::make_unique<Custom<InstrumentType::Custom_1, Dif>>(noteCount);
+    return std::make_unique<Custom<InstrumentType::Custom_1, Dif>>(
+        noteCount, std::forward<Args>(args)...);
   } else {
-    return std::make_unique<Custom<InstrumentType::Custom_2, Dif>>(noteCount);
+    return std::make_unique<Custom<InstrumentType::Custom_2, Dif>>(
+        noteCount, std::forward<Args>(args)...);
   }
 }
 
@@ -54,14 +57,15 @@ protected:
   inline static std::uint8_t PlayerCount = 1;
 };
 
-template <InstrumentType Type, Difficulty Dif> class Player final : PlayerBase {
+template <InstrumentType Type, Difficulty Dif, typename... Args>
+class Player final : public PlayerBase {
 public:
-  Player(std::uint32_t id);
+  Player(std::uint32_t id, Args &&...args);
   ~Player() override = default;
   Player(const Player &) = delete;
-  Player operator=(const Player &) = delete;
+  Player &operator=(const Player &) = delete;
   Player(Player &&) = default;
-  Player operator=(Player &&) = default;
+  Player &operator=(Player &&) = default;
 
   inline void updateInstrumentSpeed(const float &speed) noexcept override {
     m_speed = speed;
@@ -87,9 +91,9 @@ private:
   std::unique_ptr<Instrument<Type, Dif>> m_instrument;
 };
 
-template <InstrumentType Type, Difficulty Dif>
-Player<Type, Dif>::Player(std::uint32_t id)
-    : id(id),
-      m_instrument(detail::makePlayerInstrument<Type, Dif>(m_passedNotes)) {}
+template <InstrumentType Type, Difficulty Dif, typename... Args>
+Player<Type, Dif>::Player(std::uint32_t id, Args &&...args)
+    : id(id), m_instrument(detail::makePlayerInstrument<Type, Dif>(
+                  m_passedNotes, std::forward<Args>(args)...)) {}
 
 } // namespace bh

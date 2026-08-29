@@ -1,8 +1,15 @@
 #pragma once
 
+#include "gameplay/instruments/Custom.hpp"
+#include "gameplay/instruments/Instrument.hpp"
 #include "states/State.hpp"
 
+#include "gameplay/Player.hpp"
 #include "ui/Button.hpp"
+#include <filesystem>
+#include <inplace_vector>
+#include <memory>
+#include <variant>
 
 namespace bh {
 
@@ -26,13 +33,24 @@ public:
   void onExit() noexcept override;
 
 private:
-  bool m_choosingCount{true};
-  char m_playerCount{'1'};
+  struct CustomInstrumentComposition {
+    std::string name;
+    std::variant<InstrumentComposition<InstrumentType::Custom_1>,
+                 InstrumentComposition<InstrumentType::Custom_2>>
+        composition;
+  };
+  std::vector<CustomInstrumentComposition> m_customInstruments;
 
   Button m_backNextButton;
   Button m_increaseCountButton;
   Button m_decreaseCountButton;
   Button m_startButton;
+
+  std::inplace_vector<std::unique_ptr<PlayerBase>, 4> m_players;
+  std::inplace_vector<std::uint8_t, 4> m_playerChoices;
+
+  bool m_choosingCount{true};
+  char m_playerCount{'1'};
 };
 
 } // namespace bh

@@ -36,7 +36,8 @@ class Custom final : public Instrument<Type, Dif> {
 public:
   using Base = Instrument<Type, Dif>;
 
-  inline explicit Custom(std::uint32_t &noteCount) : Base(noteCount) {}
+  explicit Custom(std::uint32_t &noteCount, std::string_view instrumentName,
+                  InstrumentComposition<Type> instrumentComposition);
   ~Custom() override = default;
 
   inline bool getPlay(std::uint32_t playedNote) noexcept override;
@@ -48,6 +49,13 @@ private:
   std::string m_name;
   InstrumentComposition<Type> m_composition;
 };
+
+template <InstrumentType Type, Difficulty Dif>
+  requires CustomType<Type>
+Custom<Type, Dif>::Custom(std::uint32_t &noteCount,
+                          std::string_view instrumentName,
+                          InstrumentComposition<Type> instrumentComposition)
+    : Base(noteCount) {}
 
 template <InstrumentType Type, Difficulty Dif>
   requires CustomType<Type>

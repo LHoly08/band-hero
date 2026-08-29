@@ -1,9 +1,14 @@
 #include "states/PlayerSelectState.hpp"
 
+#include "gameplay/instruments/Custom.hpp"
+#include "gameplay/instruments/Guitar.hpp"
+#include "gameplay/instruments/Instrument.hpp"
+
 #include "raylib.h"
 
 #include "core/StateStack.hpp"
 #include "states/GameState.hpp"
+#include <variant>
 
 namespace bh {
 
@@ -25,6 +30,18 @@ void PlayerSelectState::events() noexcept {
 
       m_choosingCount = !m_choosingCount;
 
+      const std::uint8_t loopTimes = (m_playerCount - '1') + 1;
+
+      m_players.clear();
+      for (std::uint8_t i{}; i < loopTimes; ++i) {
+        m_players.emplace_back(nullptr);
+      }
+
+      m_playerChoices.clear();
+      for (std::uint8_t i{}; i < loopTimes; ++i) {
+        m_playerChoices.emplace_back(1);
+      }
+
     } else if (m_increaseCountButton.pressed(MousePos)) {
 
       const bool condition{(++m_playerCount) <= '4'};
@@ -36,28 +53,110 @@ void PlayerSelectState::events() noexcept {
       m_playerCount = (m_playerCount * condition) + ('4' * !condition);
 
     } else if (m_startButton.pressed(MousePos)) {
+
+      for (std::uint8_t i{}; i < m_playerChoices.size(); ++i) {
+        const auto &playerChoice = m_playerChoices[i];
+
+        switch (playerChoice >> 1) {
+        case 0: {
+          if (playerChoice & 1) {
+            m_players[i] = std::make_unique<
+                Player<InstrumentType::Guitar, Difficulty::Easy>>(i);
+          } else {
+            m_players[i] = std::make_unique<
+                Player<InstrumentType::Guitar, Difficulty::Hard>>(i);
+          }
+          break;
+        }
+
+        case 1: {
+          if (playerChoice & 1) {
+            m_players[i] = std::make_unique<
+                Player<InstrumentType::Bass, Difficulty::Easy>>(i);
+          } else {
+            m_players[i] = std::make_unique<
+                Player<InstrumentType::Bass, Difficulty::Hard>>(i);
+          }
+          break;
+        }
+
+        case 2: {
+          if (playerChoice & 1) {
+            m_players[i] = std::make_unique<
+                Player<InstrumentType::Drums, Difficulty::Easy>>(i);
+          } else {
+            m_players[i] = std::make_unique<
+                Player<InstrumentType::Drums, Difficulty::Hard>>(i);
+          }
+          break;
+        }
+
+        default: {
+          auto customComposition =
+              m_customInstruments.at((playerChoice >> 1) - 3).composition;
+
+          if (playerChoice & 1) {
+
+            if (std::holds_alternative<
+                    InstrumentComposition<InstrumentType::Custom_1>>(
+                    customComposition)) {
+
+              m_players[i] = std::make_unique<
+                  Player<InstrumentType::Custom_1, Difficulty::Easy>>(
+                  i, std::get<InstrumentComposition<InstrumentType::Custom_1>>(
+                         customComposition));
+            } else {
+              m_players[i] = std::make_unique<
+                  Player<InstrumentType::Custom_2, Difficulty::Easy>>(i, );
+            }
+
+          } else {
+            if (std::holds_alternative<
+                    InstrumentComposition<InstrumentType::Custom_1>>(
+                    customComposition)) {
+
+              m_players[i] = std::make_unique<
+                  Player<InstrumentType::Custom_1, Difficulty::Hard>>(i, );
+            } else {
+              m_players[i] = std::make_unique<
+                  Player<InstrumentType::Custom_2, Difficulty::Hard>>(i, );
+            }
+          }
+          break;
+        }
+        }
+      }
+
+      for (auto &player : m_players) {
+        player->setPlayerCount((m_playerCount - '1') + 1);
+      }
+
       switch (m_playerCount) {
       case '1': {
-        m_stack.push<GameState<1>>(
-            std::array<std::unique_ptr<PlayerBase>, 1>{});
+
+        m_stack.push<GameState<1>>(std::array<std::unique_ptr<PlayerBase>, 1>{
+            std::move(m_players[0])});
         break;
       }
       case '2': {
-        m_stack.push<GameState<2>>(
-            std::array<std::unique_ptr<PlayerBase>, 2>{});
+        m_stack.push<GameState<2>>(std::array<std::unique_ptr<PlayerBase>, 2>{
+            std::move(m_players[0]), std::move(m_players[1])});
         break;
       }
       case '3': {
-        m_stack.push<GameState<3>>(
-            std::array<std::unique_ptr<PlayerBase>, 3>{});
+        m_stack.push<GameState<3>>(std::array<std::unique_ptr<PlayerBase>, 3>{
+            std::move(m_players[0]), std::move(m_players[1]),
+            std::move(m_players[2])});
         break;
       }
       case '4': {
-        m_stack.push<GameState<4>>(
-            std::array<std::unique_ptr<PlayerBase>, 4>{});
+        m_stack.push<GameState<4>>(std::array<std::unique_ptr<PlayerBase>, 4>{
+            std::move(m_players[0]), std::move(m_players[1]),
+            std::move(m_players[2]), std::move(m_players[3])});
         break;
       }
       }
+      m_players.clear();
     }
   }
 }
