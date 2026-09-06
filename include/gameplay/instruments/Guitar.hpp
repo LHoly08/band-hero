@@ -80,7 +80,7 @@ void Guitar<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 
       if (fretVal) {
         DrawTexture(noteTexture, startingPositionX + fretVal * 50,
-                    note.positionY, Settings::getNoteTint(note.stringNumber));
+                    note.positionY, Settings::getNoteTint(i));
       }
     }
   }

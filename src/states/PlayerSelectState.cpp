@@ -1,14 +1,16 @@
+#include <variant>
+
 #include "states/PlayerSelectState.hpp"
+
+#include "raylib.h"
+
+#include "core/StateStack.hpp"
 
 #include "gameplay/instruments/Custom.hpp"
 #include "gameplay/instruments/Guitar.hpp"
 #include "gameplay/instruments/Instrument.hpp"
 
-#include "raylib.h"
-
-#include "core/StateStack.hpp"
 #include "states/GameState.hpp"
-#include <variant>
 
 namespace bh {
 
@@ -92,8 +94,9 @@ void PlayerSelectState::events() noexcept {
         }
 
         default: {
-          auto customComposition =
-              m_customInstruments.at((playerChoice >> 1) - 3).composition;
+          const auto &customInstrument =
+              m_customInstruments.at((playerChoice >> 1) - 3);
+          const auto &customComposition = customInstrument.composition;
 
           if (playerChoice & 1) {
 
@@ -103,23 +106,37 @@ void PlayerSelectState::events() noexcept {
 
               m_players[i] = std::make_unique<
                   Player<InstrumentType::Custom_1, Difficulty::Easy>>(
-                  i, std::get<InstrumentComposition<InstrumentType::Custom_1>>(
-                         customComposition));
+                  i, customInstrument.name,
+                  std::get<InstrumentComposition<InstrumentType::Custom_1>>(
+                      customComposition));
             } else {
+
               m_players[i] = std::make_unique<
-                  Player<InstrumentType::Custom_2, Difficulty::Easy>>(i, );
+                  Player<InstrumentType::Custom_2, Difficulty::Easy>>(
+                  i, customInstrument.name,
+                  std::get<InstrumentComposition<InstrumentType::Custom_2>>(
+                      customComposition));
             }
 
           } else {
+
             if (std::holds_alternative<
                     InstrumentComposition<InstrumentType::Custom_1>>(
                     customComposition)) {
 
               m_players[i] = std::make_unique<
-                  Player<InstrumentType::Custom_1, Difficulty::Hard>>(i, );
+                  Player<InstrumentType::Custom_1, Difficulty::Hard>>(
+                  i, customInstrument.name,
+                  std::get<InstrumentComposition<InstrumentType::Custom_1>>(
+                      customComposition));
+
             } else {
+
               m_players[i] = std::make_unique<
-                  Player<InstrumentType::Custom_2, Difficulty::Hard>>(i, );
+                  Player<InstrumentType::Custom_2, Difficulty::Hard>>(
+                  i, customInstrument.name,
+                  std::get<InstrumentComposition<InstrumentType::Custom_2>>(
+                      customComposition));
             }
           }
           break;

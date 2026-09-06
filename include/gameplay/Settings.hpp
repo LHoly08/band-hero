@@ -60,6 +60,8 @@ public:
   Settings operator=(Settings &&) = delete;
   Settings(Settings &&) = delete;
 
+  static constexpr std::string startupFile{"startup.bin"};
+
 private:
   Settings();
 

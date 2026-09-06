@@ -33,7 +33,7 @@ public:
   inline explicit Bass(std::uint32_t &noteCount) : Base(noteCount) {}
   ~Bass() override = default;
 
-  inline bool getPlay(std::uint32_t playedNote) const noexcept override {
+  inline bool getPlay(std::uint32_t playedNote) noexcept override {
 
     playedNote &= ((1 << (BassComposition<Dif>::FretBits *
                           BassComposition<Dif>::Strings)) -
@@ -69,6 +69,7 @@ template <Difficulty Dif>
 void Bass<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
   static Texture2D noteTexture =
       LoadTexture("assets/texture/Gameplay/Note.png");
+
   for (const auto &note : this->m_activeBuffer) {
     for (std::uint8_t i{}; i < BassComposition<Dif>::Strings; ++i) {
 
@@ -78,7 +79,7 @@ void Bass<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 
       if (fretVal) {
         DrawTexture(noteTexture, startingPositionX + fretVal * 50,
-                    note.positionY, Settings::getNoteTint(note.stringNumber));
+                    note.positionY, Settings::getNoteTint(i));
       }
     }
   }

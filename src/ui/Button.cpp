@@ -1,14 +1,16 @@
+#include <cassert>
+
+#include <fstream>
+
 #include "ui/Button.hpp"
 
 #include "raylib.h"
-#include <cassert>
-#include <fstream>
 
 namespace bh {
 
 Button::Button(std::string_view &&texturePath, Vector2 position,
                std::string_view &&text)
-    : m_texture(LoadTexture(texturePath.data())), m_text(text.data()),
+    : m_text(text.data()), m_texture(LoadTexture(texturePath.data())),
       m_position(position) {
   assert(std::ifstream(texturePath.data()).is_open());
 }

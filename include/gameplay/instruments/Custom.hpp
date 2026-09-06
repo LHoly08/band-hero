@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include <string>
+#include <variant>
 
 #include "Instrument.hpp"
 #include "raylib.h"
@@ -29,6 +30,13 @@ template <> struct InstrumentComposition<InstrumentType::Custom_2> {
   std::uint8_t NumberEffectiveBitsHard{};
 };
 
+struct CustomInstrumentComposition {
+  std::string name;
+  std::variant<InstrumentComposition<InstrumentType::Custom_1>,
+               InstrumentComposition<InstrumentType::Custom_2>>
+      composition;
+};
+
 // Size: 136 | Align: 8
 template <InstrumentType Type, Difficulty Dif>
   requires CustomType<Type>
@@ -40,7 +48,9 @@ public:
                   InstrumentComposition<Type> instrumentComposition);
   ~Custom() override = default;
 
-  inline bool getPlay(std::uint32_t playedNote) noexcept override;
+  inline bool getPlay(std::uint32_t playedNote) noexcept override {
+    return Base::getPlay(playedNote);
+  }
 
   void draw(std::uint32_t startingPositionX) const noexcept override;
   void update(float dt) noexcept override;
@@ -55,7 +65,8 @@ template <InstrumentType Type, Difficulty Dif>
 Custom<Type, Dif>::Custom(std::uint32_t &noteCount,
                           std::string_view instrumentName,
                           InstrumentComposition<Type> instrumentComposition)
-    : Base(noteCount) {}
+    : Base(noteCount), m_name(instrumentName),
+      m_composition(instrumentComposition) {}
 
 template <InstrumentType Type, Difficulty Dif>
   requires CustomType<Type>
@@ -75,7 +86,7 @@ void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 
         if (fretVal) {
           DrawTexture(noteTexture, startingPositionX + fretVal * 50,
-                      note.positionY, Settings::getNoteTint(note.stringNumber));
+                      note.positionY, Settings::getNoteTint(i));
         }
       }
     }
