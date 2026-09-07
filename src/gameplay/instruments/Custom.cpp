@@ -5,7 +5,7 @@
 namespace bh {
 
 template <>
-inline bool Custom<InstrumentType::Custom_1, Difficulty::Easy>::getPlay(
+bool Custom<InstrumentType::Custom_1, Difficulty::Easy>::getPlay(
     std::uint32_t playedNote) noexcept {
 
   playedNote &=
@@ -30,7 +30,7 @@ inline bool Custom<InstrumentType::Custom_1, Difficulty::Easy>::getPlay(
 }
 
 template <>
-inline bool Custom<InstrumentType::Custom_1, Difficulty::Hard>::getPlay(
+bool Custom<InstrumentType::Custom_1, Difficulty::Hard>::getPlay(
     std::uint32_t playedNote) noexcept {
 
   playedNote &=
@@ -41,7 +41,7 @@ inline bool Custom<InstrumentType::Custom_1, Difficulty::Hard>::getPlay(
 }
 
 template <>
-inline bool Custom<InstrumentType::Custom_2, Difficulty::Easy>::getPlay(
+bool Custom<InstrumentType::Custom_2, Difficulty::Easy>::getPlay(
     std::uint32_t playedNote) noexcept {
 
   const std::uint32_t UsedBits =

@@ -60,6 +60,22 @@ private:
   InstrumentComposition<Type> m_composition;
 };
 
+template <>
+bool Custom<InstrumentType::Custom_1, Difficulty::Easy>::getPlay(
+    std::uint32_t playedNote) noexcept;
+
+template <>
+bool Custom<InstrumentType::Custom_1, Difficulty::Hard>::getPlay(
+    std::uint32_t playedNote) noexcept;
+
+template <>
+bool Custom<InstrumentType::Custom_2, Difficulty::Easy>::getPlay(
+    std::uint32_t playedNote) noexcept;
+
+template <>
+bool Custom<InstrumentType::Custom_2, Difficulty::Hard>::getPlay(
+    std::uint32_t playedNote) noexcept;
+
 template <InstrumentType Type, Difficulty Dif>
   requires CustomType<Type>
 Custom<Type, Dif>::Custom(std::uint32_t &noteCount,
