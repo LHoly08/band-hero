@@ -1,8 +1,9 @@
 #include "core/Game.hpp"
+#include "core/Scale.hpp"
 
 int main() {
 
-  bh::Game game({.x = 1280, .y = 720}, "Band Hero");
+  bh::Game game(bh::OriginalWindowSize, "Band Hero");
   game.run();
 
   return 0;

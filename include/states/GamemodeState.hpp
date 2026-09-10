@@ -9,12 +9,13 @@ namespace bh {
 class GamemodeState final : public State {
 public:
   inline GamemodeState(StateStack &stack) noexcept
-      : State(stack), m_localButton("assets/textures/MainMenu/UI/Button.png",
-                                    {.x = 100, .y = 100}),
-        m_lanButton("assets/textures/MainMenu/UI/Button.png",
-                    {.x = 500, .y = 500}),
-        m_onlineButton("assets/textures/MainMenu/UI/Button.png",
-                       {.x = 1000, .y = 300}) {}
+      : State(stack),
+        m_localButton({.x = 100, .y = 100},
+                      {.x = 0, .y = 0, .width = 500, .height = 200}),
+        m_lanButton({.x = 500, .y = 500},
+                    {.x = 0, .y = 0, .width = 500, .height = 200}),
+        m_onlineButton({.x = 1000, .y = 300},
+                       {.x = 0, .y = 0, .width = 500, .height = 200}) {}
   ~GamemodeState() override = default;
 
   void draw() const noexcept override;

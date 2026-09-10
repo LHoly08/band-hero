@@ -60,12 +60,16 @@ private:
     Replace,
     None,
   };
+
+  std::vector<std::unique_ptr<State>> m_stack;
+
   struct Action {
     std::unique_ptr<State> state{nullptr};
     ActionType type{ActionType::None};
   } action;
 
-  std::vector<std::unique_ptr<State>> m_stack;
+public:
+  bool quit{false};
 };
 
 } // namespace bh

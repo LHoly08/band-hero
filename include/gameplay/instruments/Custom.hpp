@@ -2,13 +2,18 @@
 
 #include <cstdint>
 
+#include <random>
 #include <string>
+#include <string_view>
 #include <variant>
 
-#include "Instrument.hpp"
 #include "raylib.h"
 
-#include "../Settings.hpp"
+#include "core/Scale.hpp"
+
+#include "gameplay/Settings.hpp"
+
+#include "gameplay/instruments/Instrument.hpp"
 
 namespace bh {
 
@@ -88,10 +93,10 @@ template <InstrumentType Type, Difficulty Dif>
   requires CustomType<Type>
 void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 
-  if constexpr (Type == InstrumentType::Custom_1) {
+  static std::random_device r;
+  static std::default_random_engine el(r());
 
-    static Texture2D noteTexture =
-        LoadTexture("assets/texture/Gameplay/Note.png");
+  if constexpr (Type == InstrumentType::Custom_1) {
 
     for (const auto &note : this->m_activeBuffer) {
       for (std::uint8_t i{}; i < m_composition.NumberSections; ++i) {
@@ -101,8 +106,12 @@ void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
             m_composition.NumberBitsSection;
 
         if (fretVal) {
-          DrawTexture(noteTexture, startingPositionX + fretVal * 50,
-                      note.positionY, Settings::getNoteTint(i));
+
+          this->drawNote(
+              {.x = scaledSize<float, ScreenAxis::X>(startingPositionX +
+                                                     fretVal * 50),
+               .y = scaledSize<float, ScreenAxis::Y>(note.positionY)},
+              Settings::getNoteTint(i));
         }
       }
     }

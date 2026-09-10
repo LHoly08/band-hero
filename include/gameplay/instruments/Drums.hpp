@@ -2,7 +2,11 @@
 
 #include <cstdint>
 
-#include "Instrument.hpp"
+#include "core/Scale.hpp"
+
+#include "gameplay/Settings.hpp"
+
+#include "gameplay/instruments/Instrument.hpp"
 
 namespace bh {
 

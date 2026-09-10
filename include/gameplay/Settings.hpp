@@ -12,7 +12,7 @@ namespace bh {
 
 class Settings {
 public:
-  inline static Settings &get() {
+  inline static Settings &get() noexcept {
     static Settings s_instance{};
     return s_instance;
   }
@@ -53,6 +53,10 @@ public:
     return found;
   }
 
+  inline static void defaultStartupSettings() noexcept {
+    return get().iDefaultStartupSettings();
+  }
+
   ~Settings() = default;
 
   Settings operator=(const Settings &) = delete;
@@ -70,6 +74,8 @@ private:
   void iSaveSettings() noexcept;
   bool iDetectSerialPort() noexcept;
   bool iSetSerialBaudRate(std::uint32_t baudRate) noexcept;
+
+  void iDefaultStartupSettings() noexcept;
 
   inline Color iGetNoteTint(std::uint8_t index) const noexcept {
     try {

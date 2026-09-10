@@ -19,14 +19,10 @@ namespace bh {
 class PlayerSelectState final : public State {
 public:
   inline PlayerSelectState(StateStack &stack) noexcept
-      : State(stack), m_backNextButton("assets/textures/MainMenu/UI/Button.png",
-                                       {.x = 100, .y = 100}),
-        m_increaseCountButton("assets/textures/MainMenu/UI/Button.png",
-                              {.x = 500, .y = 500}),
-        m_decreaseCountButton("assets/textures/MainMenu/UI/Button.png",
-                              {.x = 1000, .y = 300}),
-        m_startButton("assets/textures/MainMenu/UI/Button.png",
-                      {.x = 800, .y = 600}) {}
+      : State(stack), m_backNextButton({.x = 100, .y = 100}, {0, 0, 500, 200}),
+        m_increaseCountButton({.x = 500, .y = 500}, {0, 0, 500, 200}),
+        m_decreaseCountButton({.x = 1000, .y = 300}, {0, 0, 500, 200}),
+        m_startButton({.x = 800, .y = 600}, {0, 0, 500, 200}) {}
 
   ~PlayerSelectState() override = default;
 

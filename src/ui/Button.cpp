@@ -1,40 +1,17 @@
-#include <cassert>
-
-#include <fstream>
-
 #include "ui/Button.hpp"
-
-#include "raylib.h"
 
 namespace bh {
 
-Button::Button(std::string_view &&texturePath, Vector2 position,
-               std::string_view &&text)
-    : m_text(text.data()), m_texture(LoadTexture(texturePath.data())),
-      m_position(position) {
-  assert(std::ifstream(texturePath.data()).is_open());
-}
-
-inline void Button::changeTexture(std::string_view &&texturePath) noexcept {
-  UnloadTexture(m_texture);
-  m_texture = LoadTexture(texturePath.data());
-  assert(std::ifstream(texturePath.data()).is_open());
-}
-
-inline void Button::changeText(std::string_view &&text) noexcept {
-  m_text = text.data();
-}
-
-void Button::draw() const noexcept {
-  DrawTexture(m_texture, m_position.x, m_position.y, WHITE);
-}
-
 bool Button::pressed(Vector2 mousePosition) const noexcept {
-  bool insideX = (m_position.x <= mousePosition.x &&
-                  mousePosition.x <= m_position.x + m_texture.width);
+  const Vector2 pos = scaledSize(m_position);
 
-  bool insideY = (m_position.y <= mousePosition.y &&
-                  mousePosition.y <= m_position.y + m_texture.height);
+  bool insideX = (pos.x <= mousePosition.x &&
+                  mousePosition.x <=
+                      pos.x + scaledSize<float, ScreenAxis::X>(m_rect.width));
+
+  bool insideY = (pos.y <= mousePosition.y &&
+                  mousePosition.y <=
+                      pos.y + scaledSize<float, ScreenAxis::Y>(m_rect.height));
 
   return insideX && insideY;
 }

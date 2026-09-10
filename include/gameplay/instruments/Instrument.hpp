@@ -2,9 +2,11 @@
 
 #include <cstdint>
 
-#include <bitset>
+#include <random>
 #include <thread>
 #include <vector>
+
+#include "raylib.h"
 
 namespace bh {
 
@@ -66,6 +68,26 @@ public:
   virtual void update(float dt) noexcept = 0;
 
 protected:
+  inline void drawNote(const Vector2 &position,
+                       const Color &tint) const noexcept {
+
+    static std::random_device r;
+    static std::default_random_engine el(r());
+
+    static std::uniform_int_distribution<std::uint8_t> dist(1, 2);
+    const std::uint8_t noteShape = dist(el);
+
+    static Texture2D noteTexture =
+        LoadTexture("assets/texture/Gameplay/Notes.png");
+
+    DrawTextureRec(noteTexture,
+                   {.x = 150 * (noteShape - 1.f),
+                    .y = 0.f,
+                    .width = 150.f,
+                    .height = 150.f},
+                   position, tint);
+  }
+
   using NoteType = Note<Type>;
 
   std::uint32_t m_originalNote{};

@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "gameplay/Settings.hpp"
+
 #include "serial/serialib.h"
 
 #if defined(_WIN32)
@@ -13,6 +14,7 @@
 #endif
 
 namespace bh {
+
 namespace {
 
 std::vector<std::string> serialPortCandidates() {
@@ -28,14 +30,13 @@ std::vector<std::string> serialPortCandidates() {
   }
 #elif defined(__linux__) || defined(__APPLE__)
   std::error_code error;
-  for (const auto &entry :
-       std::filesystem::directory_iterator{"/dev", error}) {
+  for (const auto &entry : std::filesystem::directory_iterator{"/dev", error}) {
     const std::string name = entry.path().filename().string();
 #if defined(__APPLE__)
     const bool isSerialPort = name.starts_with("cu.");
 #else
-    constexpr std::array prefixes{"ttyACM", "ttyUSB", "ttyS", "ttyAMA",
-                                  "ttyTHS", "rfcomm"};
+    constexpr std::array prefixes{"ttyACM", "ttyUSB", "ttyS",
+                                  "ttyAMA", "ttyTHS", "rfcomm"};
     const bool isSerialPort =
         std::ranges::any_of(prefixes, [&name](std::string_view prefix) {
           return name.starts_with(prefix);
@@ -89,8 +90,8 @@ void Settings::iLoadSettings() noexcept {
   std::array<unsigned char, 2> encodedLength{};
   if (file.read(reinterpret_cast<char *>(encodedLength.data()),
                 encodedLength.size())) {
-    const std::size_t length = encodedLength[0] |
-                               (static_cast<std::size_t>(encodedLength[1]) << 8);
+    const std::size_t length =
+        encodedLength[0] | (static_cast<std::size_t>(encodedLength[1]) << 8);
     serialPort.resize(length);
     if (!file.read(serialPort.data(), static_cast<std::streamsize>(length))) {
       serialPort.clear();
@@ -107,7 +108,6 @@ void Settings::iLoadSettings() noexcept {
         (static_cast<std::uint32_t>(encodedBaudRate[3]) << 24);
     iSetSerialBaudRate(baudRate);
   }
-
 }
 
 void Settings::iSaveSettings() noexcept {
@@ -162,5 +162,7 @@ bool Settings::iSetSerialBaudRate(std::uint32_t baudRate) noexcept {
   serialBaudRate = baudRate;
   return true;
 }
+
+void Settings::iDefaultStartupSettings() noexcept {}
 
 } // namespace bh

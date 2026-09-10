@@ -2,10 +2,13 @@
 
 #include <cstdint>
 
-#include "Instrument.hpp"
 #include "raylib.h"
 
-#include "../Settings.hpp"
+#include "core/Scale.hpp"
+
+#include "gameplay/Settings.hpp"
+
+#include "gameplay/instruments/Instrument.hpp"
 
 namespace bh {
 
@@ -68,9 +71,6 @@ private:
 template <Difficulty Dif>
 void Guitar<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 
-  static Texture2D noteTexture =
-      LoadTexture("assets/texture/Gameplay/Note.png");
-
   for (const auto &note : this->m_activeBuffer) {
     for (std::uint8_t i{}; i < GuitarComposition<Dif>::Strings; ++i) {
 
@@ -79,8 +79,11 @@ void Guitar<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
           GuitarComposition<Dif>::FretBits;
 
       if (fretVal) {
-        DrawTexture(noteTexture, startingPositionX + fretVal * 50,
-                    note.positionY, Settings::getNoteTint(i));
+
+        this->drawNote({.x = scaledSize<float, ScreenAxis::X>(
+                            startingPositionX + fretVal * 50),
+                        .y = scaledSize<float, ScreenAxis::Y>(note.positionY)},
+                       Settings::getNoteTint(i));
       }
     }
   }

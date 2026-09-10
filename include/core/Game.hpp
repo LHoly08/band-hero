@@ -11,14 +11,17 @@ namespace bh {
 
 class Game {
 public:
-  Game(const Vector2 &&windowSize,
-       const std::string_view &&windowName) noexcept;
+  Game(const Vector2 &windowSize, const std::string_view &&windowName) noexcept;
   ~Game() noexcept;
 
   inline void run() {
     while (!WindowShouldClose()) {
 
       events();
+      if (m_stack.quit) {
+        break;
+      }
+
       update(GetFrameTime());
       draw();
 

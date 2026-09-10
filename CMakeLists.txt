@@ -39,7 +39,7 @@ endif()
 if(MSVC)
   target_compile_options(BandHero PRIVATE /W4)
 else()
-  target_compile_options(BandHero PRIVATE -Wall -Wextra -Wpedantic)
+  target_compile_options(BandHero PRIVATE -Wall -Wextra -Wpedantic -freflection)
 endif()
 
 set(ASSETS_SRC "${CMAKE_CURRENT_SOURCE_DIR}/assets")

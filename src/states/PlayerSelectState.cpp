@@ -19,7 +19,9 @@ void PlayerSelectState::draw() const noexcept {
   m_increaseCountButton.draw();
   m_decreaseCountButton.draw();
 
-  DrawText(&m_playerCount, 100, 200, 21, BLACK);
+  const char playerCountText[]{m_playerCount, '\0'};
+  ResourceManager::drawText<Fonts::Type::Default>(
+      playerCountText, Vector2{100.f, 200.f}, 21, BLACK);
 }
 
 void PlayerSelectState::update(float dt) noexcept {}

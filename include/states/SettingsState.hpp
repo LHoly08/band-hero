@@ -11,12 +11,9 @@ namespace bh {
 class SettingsState final : public State {
 public:
   inline SettingsState(StateStack &stack) noexcept
-      : State(stack), m_saveButton("assets/textures/MainMenu/UI/Button.png",
-                                   {.x = 500, .y = 500}),
-        m_menuButton("assets/textures/MainMenu/UI/Button.png",
-                     {.x = 1000, .y = 300}),
-        m_defaultButton("assets/textures/MainMenu/UI/Button.png",
-                        {.x = 700, .y = 100}) {}
+      : State(stack), m_saveButton({.x = 500, .y = 500}, {0, 0, 500, 200}),
+        m_menuButton({.x = 1000, .y = 300}, {0, 0, 500, 200}),
+        m_defaultButton({.x = 700, .y = 100}, {0, 0, 500, 200}) {}
   ~SettingsState() override = default;
 
   void draw() const noexcept override;
