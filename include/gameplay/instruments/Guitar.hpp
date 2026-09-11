@@ -80,9 +80,8 @@ void Guitar<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 
       if (fretVal) {
 
-        this->drawNote({.x = scaledSize<float, ScreenAxis::X>(
-                            startingPositionX + fretVal * 50),
-                        .y = scaledSize<float, ScreenAxis::Y>(note.positionY)},
+        this->drawNote({.x = static_cast<float>(startingPositionX + fretVal * 50),
+                        .y = note.positionY},
                        Settings::getNoteTint(i));
       }
     }
@@ -90,8 +89,9 @@ void Guitar<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 }
 
 template <Difficulty Dif> void Guitar<Dif>::update(float dt) noexcept {
+
   for (auto &note : this->m_activeBuffer) {
-    note.positionY -= ((*(this->m_speed)) * dt);
+    note.positionY -= scaledSize<float, ScreenAxis::Y>((*(this->m_speed)) * dt);
   }
 }
 

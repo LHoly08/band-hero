@@ -108,9 +108,8 @@ void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
         if (fretVal) {
 
           this->drawNote(
-              {.x = scaledSize<float, ScreenAxis::X>(startingPositionX +
-                                                     fretVal * 50),
-               .y = scaledSize<float, ScreenAxis::Y>(note.positionY)},
+              {.x = static_cast<float>(startingPositionX + fretVal * 50),
+               .y = note.positionY},
               Settings::getNoteTint(i));
         }
       }

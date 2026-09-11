@@ -17,7 +17,6 @@ struct Textures {
   enum class Type : std::uint8_t {
     Buttons = 0,
     Notes,
-
   };
 
   static consteval std::uint8_t size() noexcept {

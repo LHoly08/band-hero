@@ -1,12 +1,13 @@
 #pragma once
 
 #include <cstdint>
-
 #include <random>
 #include <thread>
 #include <vector>
 
 #include "raylib.h"
+
+#include "core/ResourceManager.hpp"
 
 namespace bh {
 
@@ -52,6 +53,7 @@ public:
   virtual inline bool getPlay(std::uint32_t playedNote) noexcept {
 
     // Return false if bits that are not meant to be played are played
+    // or if nothing was played
     if ((playedNote & (~m_playingNote)) || !m_playingNote) {
       return false;
     }
@@ -68,24 +70,19 @@ public:
   virtual void update(float dt) noexcept = 0;
 
 protected:
+  // Position uses reference layout coordinates; drawImage applies screen scaling.
   inline void drawNote(const Vector2 &position,
                        const Color &tint) const noexcept {
 
     static std::random_device r;
     static std::default_random_engine el(r());
 
-    static std::uniform_int_distribution<std::uint8_t> dist(1, 2);
+    static std::uniform_int_distribution<std::uint8_t> dist(0, 1);
     const std::uint8_t noteShape = dist(el);
 
-    static Texture2D noteTexture =
-        LoadTexture("assets/texture/Gameplay/Notes.png");
-
-    DrawTextureRec(noteTexture,
-                   {.x = 150 * (noteShape - 1.f),
-                    .y = 0.f,
-                    .width = 150.f,
-                    .height = 150.f},
-                   position, tint);
+    ResourceManager::drawImage<Textures_t::Notes>(
+        {.x = 150.f * noteShape, .y = 0, .width = 150, .height = 150}, position,
+        tint);
   }
 
   using NoteType = Note<Type>;

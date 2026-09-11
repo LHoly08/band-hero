@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstdint>
-
 #include <memory>
 #include <utility>
 
@@ -19,31 +18,24 @@ namespace bh {
 namespace detail {
 
 template <InstrumentType Type, Difficulty Dif, typename... Args>
-std::unique_ptr<Instrument<Type, Dif>>
-makePlayerInstrument(std::uint32_t &noteCount, Args &&...args) {
+Instrument<Type, Dif> makePlayerInstrument(std::uint32_t &noteCount,
+                                           Args &&...args) {
 
   if constexpr (Type == InstrumentType::Bass) {
 
-    return std::make_unique<Bass<Dif>>(noteCount, std::forward<Args>(args)...);
+    return Bass<Dif>(noteCount, std::forward<Args>(args)...);
 
   } else if constexpr (Type == InstrumentType::Drums) {
 
-    return std::make_unique<Drums<Dif>>(noteCount, std::forward<Args>(args)...);
+    return Drums<Dif>(noteCount, std::forward<Args>(args)...);
 
   } else if constexpr (Type == InstrumentType::Guitar) {
 
-    return std::make_unique<Guitar<Dif>>(noteCount,
-                                         std::forward<Args>(args)...);
+    return Guitar<Dif>(noteCount, std::forward<Args>(args)...);
 
-  } else if constexpr (Type == InstrumentType::Custom_1) {
+  } else if constexpr (CustomType<Type>) {
 
-    return std::make_unique<Custom<InstrumentType::Custom_1, Dif>>(
-        noteCount, std::forward<Args>(args)...);
-
-  } else {
-
-    return std::make_unique<Custom<InstrumentType::Custom_2, Dif>>(
-        noteCount, std::forward<Args>(args)...);
+    return Custom<Type, Dif>(noteCount, std::forward<Args>(args)...);
   }
 }
 
@@ -68,6 +60,73 @@ protected:
   inline static std::uint8_t PlayerCount = 1;
 };
 
+template <InstrumentType Type, Difficulty Dif> class CorrespondingInstrument;
+
+template <Difficulty Dif>
+class CorrespondingInstrument<InstrumentType::Bass, Dif> {
+public:
+  template <typename... Args>
+  inline CorrespondingInstrument(std::uint32_t &noteCount, Args &&...args)
+      : instrument(noteCount, std::forward<Args>(args)...) {}
+
+  ~CorrespondingInstrument() = default;
+
+  Bass<Dif> *operator->() { return &instrument; }
+  const Bass<Dif> *operator->() const { return &instrument; }
+
+private:
+  Bass<Dif> instrument;
+};
+
+template <Difficulty Dif>
+class CorrespondingInstrument<InstrumentType::Guitar, Dif> {
+public:
+  template <typename... Args>
+  inline CorrespondingInstrument(std::uint32_t &noteCount, Args &&...args)
+      : instrument(noteCount, std::forward<Args>(args)...) {}
+
+  ~CorrespondingInstrument() = default;
+
+  Guitar<Dif> *operator->() { return &instrument; }
+  const Guitar<Dif> *operator->() const { return &instrument; }
+
+private:
+  Guitar<Dif> instrument;
+};
+
+template <Difficulty Dif>
+class CorrespondingInstrument<InstrumentType::Drums, Dif> {
+public:
+  template <typename... Args>
+  inline CorrespondingInstrument(std::uint32_t &noteCount, Args &&...args)
+      : instrument(noteCount, std::forward<Args>(args)...) {}
+
+  ~CorrespondingInstrument() = default;
+
+  Drums<Dif> *operator->() { return &instrument; }
+  const Drums<Dif> *operator->() const { return &instrument; }
+
+private:
+  Drums<Dif> instrument;
+};
+
+template <InstrumentType Type, Difficulty Dif>
+  requires CustomType<Type>
+class CorrespondingInstrument<Type, Dif> {
+public:
+  template <typename... Args>
+  inline CorrespondingInstrument(std::uint32_t &noteCount, Args &&...args)
+      : instrument(noteCount, std::forward<Args>(args)...) {}
+
+  ~CorrespondingInstrument() = default;
+
+  Custom<Type, Dif> *operator->() { return &instrument; }
+  const Custom<Type, Dif> *operator->() const { return &instrument; }
+
+private:
+  Custom<Type, Dif> instrument;
+};
+
 template <InstrumentType Type, Difficulty Dif>
 class Player final : public PlayerBase {
 public:
@@ -88,7 +147,7 @@ public:
   }
 
   inline void draw() const noexcept override {
-    m_instrument->draw((GetScreenWidth() / PlayerCount) * id);
+    m_instrument->draw((OriginalWindowSize.x / PlayerCount) * id);
   }
 
   inline void update(float dt) noexcept override { m_instrument->update(dt); }
@@ -99,13 +158,12 @@ private:
   std::uint32_t m_score{};
   std::uint32_t m_passedNotes{};
   float m_speed;
-  std::unique_ptr<Instrument<Type, Dif>> m_instrument;
+  CorrespondingInstrument<Type, Dif> m_instrument;
 };
 
 template <InstrumentType Type, Difficulty Dif>
 template <typename... Args>
 Player<Type, Dif>::Player(std::uint32_t id, Args &&...args)
-    : id(id), m_instrument(detail::makePlayerInstrument<Type, Dif>(
-                  m_passedNotes, std::forward<Args>(args)...)) {}
+    : id(id), m_instrument(m_passedNotes, std::forward<Args>(args)...) {}
 
 } // namespace bh
