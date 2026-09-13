@@ -15,32 +15,6 @@
 
 namespace bh {
 
-namespace detail {
-
-template <InstrumentType Type, Difficulty Dif, typename... Args>
-Instrument<Type, Dif> makePlayerInstrument(std::uint32_t &noteCount,
-                                           Args &&...args) {
-
-  if constexpr (Type == InstrumentType::Bass) {
-
-    return Bass<Dif>(noteCount, std::forward<Args>(args)...);
-
-  } else if constexpr (Type == InstrumentType::Drums) {
-
-    return Drums<Dif>(noteCount, std::forward<Args>(args)...);
-
-  } else if constexpr (Type == InstrumentType::Guitar) {
-
-    return Guitar<Dif>(noteCount, std::forward<Args>(args)...);
-
-  } else if constexpr (CustomType<Type>) {
-
-    return Custom<Type, Dif>(noteCount, std::forward<Args>(args)...);
-  }
-}
-
-} // namespace detail
-
 class PlayerBase {
 public:
   virtual ~PlayerBase() = default;
@@ -60,72 +34,28 @@ protected:
   inline static std::uint8_t PlayerCount = 1;
 };
 
-template <InstrumentType Type, Difficulty Dif> class CorrespondingInstrument;
+template <InstrumentType Type, Difficulty Dif> struct InstrumentFor;
 
-template <Difficulty Dif>
-class CorrespondingInstrument<InstrumentType::Bass, Dif> {
-public:
-  template <typename... Args>
-  inline CorrespondingInstrument(std::uint32_t &noteCount, Args &&...args)
-      : instrument(noteCount, std::forward<Args>(args)...) {}
-
-  ~CorrespondingInstrument() = default;
-
-  Bass<Dif> *operator->() { return &instrument; }
-  const Bass<Dif> *operator->() const { return &instrument; }
-
-private:
-  Bass<Dif> instrument;
+template <Difficulty Dif> struct InstrumentFor<InstrumentType::Bass, Dif> {
+  using type = Bass<Dif>;
 };
 
-template <Difficulty Dif>
-class CorrespondingInstrument<InstrumentType::Guitar, Dif> {
-public:
-  template <typename... Args>
-  inline CorrespondingInstrument(std::uint32_t &noteCount, Args &&...args)
-      : instrument(noteCount, std::forward<Args>(args)...) {}
-
-  ~CorrespondingInstrument() = default;
-
-  Guitar<Dif> *operator->() { return &instrument; }
-  const Guitar<Dif> *operator->() const { return &instrument; }
-
-private:
-  Guitar<Dif> instrument;
+template <Difficulty Dif> struct InstrumentFor<InstrumentType::Guitar, Dif> {
+  using type = Guitar<Dif>;
 };
 
-template <Difficulty Dif>
-class CorrespondingInstrument<InstrumentType::Drums, Dif> {
-public:
-  template <typename... Args>
-  inline CorrespondingInstrument(std::uint32_t &noteCount, Args &&...args)
-      : instrument(noteCount, std::forward<Args>(args)...) {}
-
-  ~CorrespondingInstrument() = default;
-
-  Drums<Dif> *operator->() { return &instrument; }
-  const Drums<Dif> *operator->() const { return &instrument; }
-
-private:
-  Drums<Dif> instrument;
+template <Difficulty Dif> struct InstrumentFor<InstrumentType::Drums, Dif> {
+  using type = Drums<Dif>;
 };
 
 template <InstrumentType Type, Difficulty Dif>
   requires CustomType<Type>
-class CorrespondingInstrument<Type, Dif> {
-public:
-  template <typename... Args>
-  inline CorrespondingInstrument(std::uint32_t &noteCount, Args &&...args)
-      : instrument(noteCount, std::forward<Args>(args)...) {}
-
-  ~CorrespondingInstrument() = default;
-
-  Custom<Type, Dif> *operator->() { return &instrument; }
-  const Custom<Type, Dif> *operator->() const { return &instrument; }
-
-private:
-  Custom<Type, Dif> instrument;
+struct InstrumentFor<Type, Dif> {
+  using type = Custom<Type, Dif>;
 };
+
+template <InstrumentType Type, Difficulty Dif>
+using InstrumentFor_t = typename InstrumentFor<Type, Dif>::type;
 
 template <InstrumentType Type, Difficulty Dif>
 class Player final : public PlayerBase {
@@ -134,31 +64,31 @@ public:
   ~Player() override = default;
   Player(const Player &) = delete;
   Player &operator=(const Player &) = delete;
-  Player(Player &&) = default;
-  Player &operator=(Player &&) = default;
+  Player(Player &&) = delete;
+  Player &operator=(Player &&) = delete;
 
   inline void updateInstrumentSpeed(const float &speed) noexcept override {
     m_speed = speed;
-    m_instrument->updateSpeed(&m_speed);
+    m_instrument.updateSpeed(&m_speed);
   }
 
   inline void play(std::uint32_t notePlayed) noexcept override {
-    m_score += m_instrument->getPlay(notePlayed);
+    m_score += m_instrument.getPlay(notePlayed);
   }
 
   inline void draw() const noexcept override {
-    m_instrument->draw((OriginalWindowSize.x / PlayerCount) * id);
+    m_instrument.draw((OriginalWindowSize.x / PlayerCount) * id);
   }
 
-  inline void update(float dt) noexcept override { m_instrument->update(dt); }
+  inline void update(float dt) noexcept override { m_instrument.update(dt); }
 
 private:
   const std::uint32_t id;
 
   std::uint32_t m_score{};
   std::uint32_t m_passedNotes{};
-  float m_speed;
-  CorrespondingInstrument<Type, Dif> m_instrument;
+  float m_speed{};
+  InstrumentFor_t<Type, Dif> m_instrument;
 };
 
 template <InstrumentType Type, Difficulty Dif>

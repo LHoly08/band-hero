@@ -38,9 +38,13 @@ public:
 
   inline bool getPlay(std::uint32_t playedNote) noexcept override {
 
-    playedNote &= ((1 << (GuitarComposition<Dif>::FretBits *
-                          GuitarComposition<Dif>::Strings)) -
-                   1);
+    playedNote &= [] consteval {
+      std::uint8_t GuitarBits = std::min(GuitarComposition<Dif>::FretBits *
+                                             GuitarComposition<Dif>::Strings,
+                                         30);
+
+      return ((1 << GuitarBits) - 1);
+    }();
 
     if constexpr (Dif == Difficulty::Easy) {
 
@@ -80,9 +84,10 @@ void Guitar<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 
       if (fretVal) {
 
-        this->drawNote({.x = static_cast<float>(startingPositionX + fretVal * 50),
-                        .y = note.positionY},
-                       Settings::getNoteTint(i));
+        this->drawNote(
+            {.x = static_cast<float>(startingPositionX + fretVal * 50),
+             .y = note.positionY},
+            Settings::getNoteTint(i));
       }
     }
   }
@@ -91,7 +96,7 @@ void Guitar<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 template <Difficulty Dif> void Guitar<Dif>::update(float dt) noexcept {
 
   for (auto &note : this->m_activeBuffer) {
-    note.positionY -= scaledSize<float, ScreenAxis::Y>((*(this->m_speed)) * dt);
+    note.positionY -= *(this->m_speed) * dt;
   }
 }
 

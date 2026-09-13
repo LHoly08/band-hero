@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-
 #include <random>
 #include <string>
 #include <string_view>
@@ -53,7 +52,7 @@ public:
                   InstrumentComposition<Type> instrumentComposition);
   ~Custom() override = default;
 
-  inline bool getPlay(std::uint32_t playedNote) noexcept override {
+  bool getPlay(std::uint32_t playedNote) noexcept override {
     return Base::getPlay(playedNote);
   }
 

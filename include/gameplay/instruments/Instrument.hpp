@@ -48,29 +48,16 @@ public:
   explicit Instrument(std::uint32_t &noteCount);
   virtual ~Instrument() = default;
 
-  inline void updateSpeed(const float *ptr) noexcept { m_speed = ptr; }
+  inline void updateSpeed(const float &speed) noexcept { m_speed = speed; }
 
-  virtual inline bool getPlay(std::uint32_t playedNote) noexcept {
+  virtual bool getPlay(std::uint32_t playedNote) noexcept;
 
-    // Return false if bits that are not meant to be played are played
-    // or if nothing was played
-    if ((playedNote & (~m_playingNote)) || !m_playingNote) {
-      return false;
-    }
-
-    // Update for bits that have not been played yet
-    m_playingNote ^= (playedNote & m_playingNote);
-
-    // Return true and clear needed notes if played is equal to original
-    m_playingNote *= (bool)(m_originalNote ^ playedNote);
-
-    return !m_playingNote;
-  }
   virtual void draw(std::uint32_t startingPositionX) const noexcept = 0;
   virtual void update(float dt) noexcept = 0;
 
 protected:
-  // Position uses reference layout coordinates; drawImage applies screen scaling.
+  // Position uses reference layout coordinates; drawImage applies screen
+  // scaling.
   inline void drawNote(const Vector2 &position,
                        const Color &tint) const noexcept {
 
@@ -95,11 +82,29 @@ protected:
   std::vector<NoteType> m_downloadingBuffer;
   std::thread m_loadingThread;
   std::uint32_t &m_noteCount;
-  const float *m_speed;
+  float m_speed{};
 };
 
 template <InstrumentType Type, Difficulty Dif>
 Instrument<Type, Dif>::Instrument(std::uint32_t &noteCount)
     : m_noteCount(noteCount) {}
+
+template <InstrumentType Type, Difficulty Dif>
+bool Instrument<Type, Dif>::getPlay(std::uint32_t playedNote) noexcept {
+
+  // Return false if bits that are not meant to be played are played
+  // or if nothing was played
+  if ((playedNote & (~m_playingNote)) || !m_playingNote) {
+    return false;
+  }
+
+  // Update for bits that have not been played yet
+  m_playingNote ^= (playedNote & m_playingNote);
+
+  // Return true and clear needed notes if played is equal to original
+  m_playingNote *= static_cast<bool>(m_originalNote ^ playedNote);
+
+  return !m_playingNote;
+}
 
 } // namespace bh

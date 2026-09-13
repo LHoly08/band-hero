@@ -36,12 +36,14 @@ public:
 
   inline bool getPlay(std::uint32_t playedNote) noexcept override {
 
-    constexpr std::uint8_t NumberBits{DrumsComposition<Dif>::Pedals +
-                                      DrumsComposition<Dif>::DrumsCymbals};
+    playedNote &= [] consteval {
+      std::uint8_t NumberBits = std::min(
+          DrumsComposition<Dif>::Pedals + DrumsComposition<Dif>::DrumsCymbals,
+          30);
 
-    constexpr std::uint32_t UsedBits = (1 << NumberBits) - 1;
+      return (1 << NumberBits) - 1;
+    }();
 
-    playedNote &= UsedBits;
     return Base::getPlay(playedNote);
   }
 

@@ -38,9 +38,12 @@ public:
 
   inline bool getPlay(std::uint32_t playedNote) noexcept override {
 
-    playedNote &= ((1 << (BassComposition<Dif>::FretBits *
-                          BassComposition<Dif>::Strings)) -
-                   1);
+    playedNote &= [] consteval {
+      std::uint8_t BassBits = std::min(
+          BassComposition<Dif>::FretBits * BassComposition<Dif>::Strings, 30);
+
+      ((1 << BassBits) - 1);
+    }();
 
     if constexpr (Dif == Difficulty::Easy) {
 
@@ -80,9 +83,10 @@ void Bass<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 
       if (fretVal) {
 
-        this->drawNote({.x = static_cast<float>(startingPositionX + fretVal * 50),
-                        .y = note.positionY},
-                       Settings::getNoteTint(i));
+        this->drawNote(
+            {.x = static_cast<float>(startingPositionX + fretVal * 50),
+             .y = note.positionY},
+            Settings::getNoteTint(i));
       }
     }
   }

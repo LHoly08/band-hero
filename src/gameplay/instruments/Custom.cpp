@@ -48,6 +48,7 @@ bool Custom<InstrumentType::Custom_2, Difficulty::Easy>::getPlay(
       (1 << m_composition.NumberEffectiveBitsEasy) - 1;
 
   playedNote &= UsedBits;
+
   return Base::getPlay(playedNote);
 }
 
