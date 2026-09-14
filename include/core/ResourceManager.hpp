@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <meta>
 #include <ranges>
+#include <utility>
 #include <vector>
 
 #include "raylib.h"
@@ -13,31 +14,116 @@
 
 namespace bh {
 
-struct Textures {
-  enum class Type : std::uint8_t {
+class Textures {
+public:
+  enum class UI : std::uint8_t {
     Buttons = 0,
-    Notes,
   };
 
-  static consteval std::uint8_t size() noexcept {
+  enum class Gameplay : std::uint8_t {
+    Notes = 0,
+    Instruments,
+  };
 
-    constexpr auto max = []() -> std::uint8_t {
-      std::vector<std::meta::info> n =
-          std::meta::enumerators_of(^^Textures::Type);
-      std::vector<std::uint8_t> v(n.size());
+  enum class MainMenu : std::uint8_t {
+    Title = 0,
+    Backgroung,
+  };
 
-      std::ranges::transform(
-          n.begin(), n.end(), v.begin(), [](std::meta::info e) -> std::uint8_t {
-            return (std::uint8_t)std::meta::extract<Textures::Type>(e);
-          });
-      return *std::max_element(v.begin(), v.end());
-    };
+  template <auto Ty> static consteval std::uint8_t getOffset() {
 
-    return max() + 1;
+    static constexpr auto v = std::define_static_array(std::meta::members_of(
+        ^^Textures, std::meta::access_context::current()));
+
+    size_t offset{};
+
+    using Enum = decltype(Ty);
+    template for (constexpr auto e : v) {
+      if constexpr (!std::meta::is_type(e) || !std::meta::is_enum_type(e)) {
+        continue;
+      }
+
+      if constexpr (std::meta::dealias(^^Enum) == std::meta::dealias(e)) {
+        static constexpr auto enumerators =
+            std::define_static_array(std::meta::enumerators_of(e));
+
+        template for (constexpr auto enumerator : enumerators) {
+          if constexpr (std::meta::extract<Enum>(enumerator) == Ty) {
+            return offset;
+          } else {
+            ++offset;
+          }
+        }
+
+      } else {
+        offset += std::meta::enumerators_of(e).size();
+      }
+    }
+
+    return 0;
   }
+
+  static consteval std::span<const char *const> files() noexcept {
+
+    std::vector<const char *> result;
+
+    for (auto type : std::meta::members_of(
+             ^^Textures, std::meta::access_context::current())) {
+      if (!std::meta::is_type(type) || !std::meta::is_enum_type(type)) {
+        continue;
+      }
+
+      for (auto enumerator : std::meta::enumerators_of(type)) {
+        std::string path;
+
+        path += std::meta::identifier_of(type);
+        path += '/';
+        path += std::meta::identifier_of(enumerator);
+
+        result.push_back(std::define_static_string(path));
+      }
+    }
+
+    return std::define_static_array(result);
+  }
+
+  static consteval std::uint8_t size() noexcept {
+    std::size_t count{};
+
+    for (const auto &member : std::meta::members_of(
+             ^^Textures, std::meta::access_context::current())) {
+      if (std::meta::is_type(member) && std::meta::is_enum_type(member)) {
+        count += std::meta::enumerators_of(member).size();
+      }
+    }
+
+    return count;
+  };
 };
 
-struct Fonts {
+// return True if type is one of the enums inside Textures
+template <auto T>
+concept isTexture = []() consteval -> bool {
+  using Enum = decltype(T);
+
+  static constexpr auto v = std::define_static_array(std::meta::members_of(
+      ^^Textures, std::meta::access_context::unchecked()));
+
+  template for (constexpr auto member : v) {
+    if constexpr (!std::meta::is_type(member) ||
+                  !std::meta::is_enum_type(member)) {
+      continue;
+    }
+    if constexpr (std::meta::dealias(member) == std::meta::dealias(^^Enum)) {
+      return true;
+    }
+  }
+
+  return false;
+}();
+
+class Fonts {
+public:
   enum class Type : std::uint8_t {
     Default = 0,
     Buttons,
@@ -78,7 +164,6 @@ struct Fonts {
   }
 };
 
-using Textures_t = Textures::Type;
 using Fonts_t = Fonts::Type;
 
 class ResourceManager final {
@@ -105,13 +190,15 @@ public:
   }
 
   template <Fonts_t FontType>
-  // Return the unscaled layout width for positioning before drawText scales it.
+  // Return the unscaled layout width for positioning before drawText scales
+  // it.
   inline static float measureText(const std::string_view text,
                                   const std::uint32_t &fontSize = 64) noexcept {
     return get().iMeasureText<FontType>(text, fontSize);
   }
 
-  template <Textures_t TextureType>
+  template <auto TextureType>
+    requires isTexture<TextureType>
   inline static void drawImage(const Rectangle &rect, const Vector2 &pos,
                                const Color &tint = WHITE) noexcept {
     return get().iDrawImage<TextureType>(rect, pos, tint);
@@ -127,7 +214,8 @@ private:
   float iMeasureText(const std::string_view text,
                      const std::uint32_t &fontSize) const noexcept;
 
-  template <Textures_t TextureType>
+  template <auto TextureType>
+    requires isTexture<TextureType>
   void iDrawImage(const Rectangle &rect, const Vector2 &pos,
                   const Color &tint) const noexcept;
 
@@ -164,7 +252,8 @@ float ResourceManager::iMeasureText(
   return res.x;
 }
 
-template <Textures_t TextureType>
+template <auto TextureType>
+  requires isTexture<TextureType>
 void ResourceManager::iDrawImage(const Rectangle &rect, const Vector2 &pos,
                                  const Color &tint) const noexcept {
 
@@ -173,8 +262,8 @@ void ResourceManager::iDrawImage(const Rectangle &rect, const Vector2 &pos,
                  scaledSize<float, ScreenAxis::X>(rect.width),
                  scaledSize<float, ScreenAxis::Y>(rect.height)};
 
-  DrawTexturePro(m_textures[(std::uint8_t)TextureType], rect, dest, {0, 0}, 0,
-                 tint);
+  DrawTexturePro(m_textures[Textures::getOffset<TextureType>()], rect, dest,
+                 {0, 0}, 0, tint);
 }
 
 } // namespace bh

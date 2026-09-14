@@ -42,7 +42,7 @@ public:
       std::uint8_t BassBits = std::min(
           BassComposition<Dif>::FretBits * BassComposition<Dif>::Strings, 30);
 
-      ((1 << BassBits) - 1);
+      return ((1 << BassBits) - 1);
     }();
 
     if constexpr (Dif == Difficulty::Easy) {

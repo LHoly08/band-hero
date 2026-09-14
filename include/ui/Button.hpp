@@ -49,7 +49,7 @@ template <Color Tint, bool Text, int FontSize, TextAlign TextAlignement,
           Color TextColor, Fonts_t FontType>
 void Button::draw() const noexcept {
 
-  ResourceManager::drawImage<Textures_t::Buttons>(m_rect, m_position, Tint);
+  ResourceManager::drawImage<Textures::UI::Buttons>(m_rect, m_position, Tint);
 
   if constexpr (Text) {
 

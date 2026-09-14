@@ -69,7 +69,7 @@ public:
 
   inline void updateInstrumentSpeed(const float &speed) noexcept override {
     m_speed = speed;
-    m_instrument.updateSpeed(&m_speed);
+    m_instrument.updateSpeed(m_speed);
   }
 
   inline void play(std::uint32_t notePlayed) noexcept override {

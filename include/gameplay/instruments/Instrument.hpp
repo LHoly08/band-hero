@@ -67,7 +67,7 @@ protected:
     static std::uniform_int_distribution<std::uint8_t> dist(0, 1);
     const std::uint8_t noteShape = dist(el);
 
-    ResourceManager::drawImage<Textures_t::Notes>(
+    ResourceManager::drawImage<Textures::Gameplay::Notes>(
         {.x = 150.f * noteShape, .y = 0, .width = 150, .height = 150}, position,
         tint);
   }
