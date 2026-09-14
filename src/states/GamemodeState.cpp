@@ -3,14 +3,15 @@
 #include "raylib.h"
 
 #include "core/StateStack.hpp"
+
 #include "states/PlayerSelectState.hpp"
 
 namespace bh {
 
 void GamemodeState::draw() const noexcept {
-  m_localButton.draw();
-  m_lanButton.draw();
-  m_onlineButton.draw();
+  m_localButton.draw<WHITE, true>();
+  m_lanButton.draw<WHITE, true>();
+  m_onlineButton.draw<WHITE, true>();
 }
 
 void GamemodeState::update(float dt) noexcept {}

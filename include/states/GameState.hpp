@@ -1,9 +1,8 @@
 #pragma once
 
+#include <array>
 #include <bit>
 #include <cstdint>
-
-#include <array>
 #include <memory>
 #include <utility>
 
@@ -47,14 +46,20 @@ template <std::uint8_t PlayerCount>
   requires MaxPlayerAmount<PlayerCount>
 void GameState<PlayerCount>::update(float dt) noexcept {
 
-  if (std::uint32_t buffer{}; m_serial.readBytes(&buffer, sizeof(buffer), 1)) {
+  for (auto &player : m_players) {
+    player->update(dt);
+  }
+
+  if (std::uint32_t buffer{};
+      m_serial.readBytes(&buffer, sizeof(buffer), 1) == sizeof(buffer)) {
 
     if constexpr (std::endian::native == std::endian::big) {
       buffer = std::byteswap(buffer);
     }
 
-    if (std::uint8_t index = buffer & 0b11; index < PlayerCount) {
+    if (std::uint8_t index = buffer & 0b11; index < PlayerCount) [[likely]] {
       buffer >>= 2;
+
       m_players[index]->play(buffer);
     }
   }

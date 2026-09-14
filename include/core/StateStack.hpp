@@ -1,9 +1,9 @@
 #pragma once
 
-#include <cstdint>
-
 #include <concepts>
+#include <cstdint>
 #include <memory>
+#include <queue>
 #include <utility>
 #include <vector>
 
@@ -20,19 +20,20 @@ public:
   ~StateStack() = default;
 
   template <DerivedState S, typename... Args> inline void push(Args &&...args) {
-    action.type = ActionType::Push;
-    action.state = std::make_unique<S>(*this, std::forward<Args>(args)...);
+    actions.push(
+        {.state = std::make_unique<S>(*this, std::forward<Args>(args)...),
+         .type = ActionType::Push});
   }
 
   inline void pop() {
-    action.type = ActionType::Pop;
-    action.state = nullptr;
+    actions.push({.state = nullptr, .type = ActionType::Pop});
   }
 
   template <DerivedState S, typename... Args>
   inline void replace(Args &&...args) {
-    action.type = ActionType::Replace;
-    action.state = std::make_unique<S>(*this, std::forward<Args>(args)...);
+    actions.push(
+        {.state = std::make_unique<S>(*this, std::forward<Args>(args)...),
+         .type = ActionType::Replace});
   }
 
   void draw() const noexcept {
@@ -66,7 +67,8 @@ private:
   struct Action {
     std::unique_ptr<State> state{nullptr};
     ActionType type{ActionType::None};
-  } action;
+  };
+  std::queue<Action> actions;
 
 public:
   bool quit{false};

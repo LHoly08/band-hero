@@ -92,9 +92,6 @@ template <InstrumentType Type, Difficulty Dif>
   requires CustomType<Type>
 void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 
-  static std::random_device r;
-  static std::default_random_engine el(r());
-
   if constexpr (Type == InstrumentType::Custom_1) {
 
     for (const auto &note : this->m_activeBuffer) {
@@ -104,7 +101,7 @@ void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
             (note.note >> (i * m_composition.NumberBitsSection)) &
             m_composition.NumberBitsSection;
 
-        if (fretVal) {
+        if (fretVal) [[unlikely]] {
 
           this->drawNote(
               {.x = static_cast<float>(startingPositionX + fretVal * 50),
@@ -115,6 +112,18 @@ void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
     }
 
   } else if constexpr (Type == InstrumentType::Custom_2) {
+
+    for (const auto &note : this->m_activeBuffer) {
+      for (std::uint8_t i{}; i < m_composition.NumberEffectiveBitsEasy; ++i) {
+
+        if (bool playedBit = (note.note >> i) & 1; playedBit) [[unlikely]] {
+
+          this->drawNote({.x = static_cast<float>(startingPositionX + i * 50),
+                          .y = note.positionY},
+                         Settings::getNoteTint(i));
+        }
+      }
+    }
   }
 }
 

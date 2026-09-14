@@ -30,7 +30,7 @@ public:
     Backgroung,
   };
 
-  template <auto Ty> static consteval std::uint8_t getOffset() {
+  template <auto Ty> inline static consteval std::uint8_t getOffset() {
 
     static constexpr auto v = std::define_static_array(std::meta::members_of(
         ^^Textures, std::meta::access_context::current()));
@@ -60,10 +60,10 @@ public:
       }
     }
 
-    return 0;
+    std::unreachable();
   }
 
-  static consteval std::span<const char *const> files() noexcept {
+  inline static consteval std::span<const char *const> files() noexcept {
 
     std::vector<const char *> result;
 
@@ -74,11 +74,12 @@ public:
       }
 
       for (auto enumerator : std::meta::enumerators_of(type)) {
-        std::string path;
+        std::string path("assets/textures/");
 
         path += std::meta::identifier_of(type);
         path += '/';
         path += std::meta::identifier_of(enumerator);
+        path += ".png";
 
         result.push_back(std::define_static_string(path));
       }
@@ -87,7 +88,7 @@ public:
     return std::define_static_array(result);
   }
 
-  static consteval std::uint8_t size() noexcept {
+  inline static consteval std::uint8_t size() noexcept {
     std::size_t count{};
 
     for (const auto &member : std::meta::members_of(

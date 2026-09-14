@@ -81,7 +81,7 @@ void Bass<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
           (note.note >> (i * BassComposition<Dif>::FretBits)) &
           BassComposition<Dif>::FretBits;
 
-      if (fretVal) {
+      if (fretVal) [[unlikely]] {
 
         this->drawNote(
             {.x = static_cast<float>(startingPositionX + fretVal * 50),

@@ -36,7 +36,7 @@ public:
 
   inline bool getPlay(std::uint32_t playedNote) noexcept override {
 
-    playedNote &= [] consteval {
+    playedNote &= [] consteval -> std::uint32_t {
       std::uint8_t NumberBits = std::min(
           DrumsComposition<Dif>::Pedals + DrumsComposition<Dif>::DrumsCymbals,
           30);
@@ -54,7 +54,26 @@ private:
 };
 
 template <Difficulty Dif>
-void Drums<Dif>::draw(std::uint32_t startingPositionX) const noexcept {}
+void Drums<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
+
+  for (const auto &note : this->m_activeBuffer) {
+
+    constexpr std::uint8_t NumberBits = std::min(
+        DrumsComposition<Dif>::Pedals + DrumsComposition<Dif>::DrumsCymbals,
+        30);
+
+    for (std::uint8_t i{}; i < NumberBits; ++i) {
+
+      if (std::uint8_t playedBit = (note.note >> i) & 1; playedBit)
+          [[unlikely]] {
+
+        this->drawNote({.x = static_cast<float>(startingPositionX + i * 50),
+                        .y = note.positionY},
+                       Settings::getNoteTint(i));
+      }
+    }
+  }
+}
 
 template <Difficulty Dif> void Drums<Dif>::update(float dt) noexcept {
 

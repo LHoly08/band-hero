@@ -20,7 +20,8 @@ void MainMenuState::draw() const noexcept {
 void MainMenuState::update(float dt) noexcept {}
 
 void MainMenuState::events() noexcept {
-  if (IsMouseButtonPressed(0)) {
+
+  if (IsMouseButtonPressed(0)) [[unlikely]] {
     const Vector2 MousePos{GetMousePosition()};
 
     if (m_playButton.pressed(MousePos)) [[unlikely]] {

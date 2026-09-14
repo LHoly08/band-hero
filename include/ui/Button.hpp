@@ -18,7 +18,7 @@ enum class TextAlign : std::uint8_t {
   Right,
 };
 
-// size 64 | align 8
+// size 48 | align 8
 class Button final {
 public:
   inline Button(const Vector2 &position, const Rectangle &rect,
@@ -26,6 +26,8 @@ public:
       : m_text(text.data()), m_rect(rect), m_position(position) {}
 
   inline ~Button() = default;
+
+  inline void setPosition(const Vector2 &pos) noexcept { m_position = pos; }
 
   inline void changeTexture(const Rectangle &rect) noexcept { m_rect = rect; }
 
@@ -35,7 +37,7 @@ public:
 
   template <Color Tint = WHITE, bool Text = false, int FontSize = 64,
             TextAlign TextAlignement = TextAlign::Left, Color TextColor = BLACK,
-            Fonts_t FontType = Fonts_t::Buttons>
+            Fonts_t FontType = Fonts_t::Default>
   void draw() const noexcept;
   bool pressed(Vector2 mousePosition) const noexcept;
 

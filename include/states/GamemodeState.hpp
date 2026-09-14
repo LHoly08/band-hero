@@ -11,11 +11,12 @@ public:
   inline GamemodeState(StateStack &stack) noexcept
       : State(stack),
         m_localButton({.x = 100, .y = 100},
-                      {.x = 0, .y = 0, .width = 500, .height = 200}),
+                      {.x = 0, .y = 0, .width = 500, .height = 200}, "Local"),
         m_lanButton({.x = 500, .y = 500},
-                    {.x = 0, .y = 0, .width = 500, .height = 200}),
+                    {.x = 0, .y = 0, .width = 500, .height = 200}, "LAN"),
         m_onlineButton({.x = 1000, .y = 300},
-                       {.x = 0, .y = 0, .width = 500, .height = 200}) {}
+                       {.x = 0, .y = 0, .width = 500, .height = 200},
+                       "Online") {}
   ~GamemodeState() override = default;
 
   void draw() const noexcept override;

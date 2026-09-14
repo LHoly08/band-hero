@@ -82,7 +82,7 @@ void Guitar<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
           (note.note >> (i * GuitarComposition<Dif>::FretBits)) &
           GuitarComposition<Dif>::FretBits;
 
-      if (fretVal) {
+      if (fretVal) [[unlikely]] {
 
         this->drawNote(
             {.x = static_cast<float>(startingPositionX + fretVal * 50),
