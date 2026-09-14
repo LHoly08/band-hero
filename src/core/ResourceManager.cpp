@@ -2,6 +2,7 @@
 #include <cctype>
 #include <fstream>
 #include <ranges>
+#include <string_view>
 
 #include "core/ResourceManager.hpp"
 
@@ -15,23 +16,25 @@ ResourceManager::ResourceManager()
     m_fonts.front() = GetFontDefault();
     constexpr auto fontFiles = Fonts::files();
 
-    for (std::uint8_t i{1}; i < Fonts::size(); ++i) {
+    std::ranges::transform(
+        fontFiles.begin(), fontFiles.end(), m_fonts.begin() + 1,
+        [](std::string_view s) -> Font {
+          std::string path("assets/font/");
+          path.append(s).append(".TTF");
 
-      std::string path("assets/font/");
-      path.append(fontFiles[i - 1]).append(".TTF");
+          if (std::ifstream(path).is_open()) {
 
-      if (std::ifstream(path).is_open()) {
+            return LoadFont(path.data());
 
-        m_fonts[i] = LoadFont(path.data());
+          } else {
 
-      } else {
+            std::ranges::transform(
+                path.end() - 3, path.end(), path.end() - 3,
+                [](char c) -> char { return std::tolower(c); });
 
-        std::ranges::transform(path.end() - 3, path.end(), path.end() - 3,
-                               [](char c) -> char { return std::tolower(c); });
-
-        m_fonts[i] = LoadFont(path.data());
-      }
-    }
+            return LoadFont(path.data());
+          }
+        });
   }
   {
     constexpr auto textureFiles = Textures::files();

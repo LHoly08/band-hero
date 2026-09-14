@@ -40,9 +40,9 @@ void SettingsState::events() noexcept {
   if (IsMouseButtonPressed(0)) {
     const Vector2 MousePos{GetMousePosition()};
 
-    if (m_menuButton.pressed(MousePos)) {
+    if (m_menuButton.pressed(MousePos)) [[unlikely]] {
       m_stack.replace<MainMenuState>();
-    } else if (m_saveButton.pressed(MousePos)) {
+    } else if (m_saveButton.pressed(MousePos)) [[unlikely]] {
 
       switch (m_menuSection) {
 

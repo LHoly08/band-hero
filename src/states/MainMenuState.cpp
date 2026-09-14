@@ -23,13 +23,13 @@ void MainMenuState::events() noexcept {
   if (IsMouseButtonPressed(0)) {
     const Vector2 MousePos{GetMousePosition()};
 
-    if (m_playButton.pressed(MousePos)) {
+    if (m_playButton.pressed(MousePos)) [[unlikely]] {
       m_stack.replace<GamemodeState>();
-    } else if (m_quitButton.pressed(MousePos)) {
+    } else if (m_quitButton.pressed(MousePos)) [[unlikely]] {
       m_stack.quit = true;
       return;
 
-    } else if (m_settingsButton.pressed(MousePos)) {
+    } else if (m_settingsButton.pressed(MousePos)) [[unlikely]] {
       m_stack.replace<SettingsState>();
     }
   }

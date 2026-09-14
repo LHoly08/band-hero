@@ -30,7 +30,7 @@ void PlayerSelectState::events() noexcept {
   if (IsMouseButtonPressed(0)) {
     const Vector2 MousePos{GetMousePosition()};
 
-    if (m_backNextButton.pressed(MousePos)) {
+    if (m_backNextButton.pressed(MousePos)) [[unlikely]] {
 
       m_choosingCount = !m_choosingCount;
 
@@ -46,7 +46,7 @@ void PlayerSelectState::events() noexcept {
         m_playerChoices.emplace_back(1);
       }
 
-    } else if (m_increaseCountButton.pressed(MousePos)) {
+    } else if (m_increaseCountButton.pressed(MousePos)) [[unlikely]] {
 
       const bool condition{(++m_playerCount) <= '4'};
       m_playerCount = (m_playerCount * condition) + ('1' * !condition);
@@ -56,7 +56,7 @@ void PlayerSelectState::events() noexcept {
       const bool condition{(--m_playerCount) >= '1'};
       m_playerCount = (m_playerCount * condition) + ('4' * !condition);
 
-    } else if (m_startButton.pressed(MousePos)) {
+    } else if (m_startButton.pressed(MousePos)) [[unlikely]] {
 
       for (std::uint8_t i{}; i < m_playerChoices.size(); ++i) {
         const auto &playerChoice = m_playerChoices[i];

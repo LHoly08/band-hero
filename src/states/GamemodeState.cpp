@@ -19,10 +19,11 @@ void GamemodeState::events() noexcept {
   if (IsMouseButtonPressed(0)) {
     const Vector2 MousePos{GetMousePosition()};
 
-    if (m_localButton.pressed(MousePos)) {
+    if (m_localButton.pressed(MousePos)) [[unlikely]] {
       m_stack.replace<PlayerSelectState>();
-    } else if (m_lanButton.pressed(MousePos)) {
-    } else if (m_onlineButton.pressed(MousePos)) {
+    } else if (m_lanButton.pressed(MousePos)) [[unlikely]] {
+
+    } else if (m_onlineButton.pressed(MousePos)) [[unlikely]] {
     }
   }
 }
