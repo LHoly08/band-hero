@@ -92,6 +92,11 @@ void Bass<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
   }
 }
 
-template <Difficulty Dif> void Bass<Dif>::update(float dt) noexcept {}
+template <Difficulty Dif> void Bass<Dif>::update(float dt) noexcept {
+
+  for (auto &note : this->m_activeBuffer) {
+    note.positionY -= this->m_speed * dt;
+  }
+}
 
 } // namespace bh

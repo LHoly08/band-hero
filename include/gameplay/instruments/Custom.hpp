@@ -120,6 +120,11 @@ void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 
 template <InstrumentType Type, Difficulty Dif>
   requires CustomType<Type>
-void Custom<Type, Dif>::update(float dt) noexcept {}
+void Custom<Type, Dif>::update(float dt) noexcept {
+
+  for (auto &note : this->m_activeBuffer) {
+    note.positionY -= this->m_speed * dt;
+  }
+}
 
 } // namespace bh
