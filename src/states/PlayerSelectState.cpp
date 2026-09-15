@@ -63,6 +63,7 @@ void PlayerSelectState::update(float dt) noexcept {
           goto VectorAlreadyFull;
         }
 
+        m_check[index].push_back(buffer);
         {
           std::uint8_t &max = m_minMax[index].first;
           const bool cond = buffer > m_check[index][max];
@@ -73,7 +74,6 @@ void PlayerSelectState::update(float dt) noexcept {
           const bool cond = buffer < m_check[index][min];
           min = index * cond + min * !cond;
         }
-        m_check[index].push_back(buffer);
       }
     }
     for (auto &&[vals, minMax] : std::ranges::views::zip(m_check, m_minMax)) {
