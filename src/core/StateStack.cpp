@@ -1,10 +1,19 @@
 #include "core/StateStack.hpp"
 
-#include "states/MainMenuState.hpp"
-
 namespace bh {
 
 StateStack::StateStack() { m_stack.reserve(3); }
+
+void StateStack::clear() noexcept {
+  if (!m_stack.empty()) {
+    m_stack.back()->onExit();
+  }
+  m_stack.clear();
+  // Pending states have not entered and therefore own no GPU resources.
+  while (!actions.empty()) {
+    actions.pop();
+  }
+}
 
 void StateStack::act() noexcept {
 

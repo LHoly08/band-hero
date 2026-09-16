@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/ResourceManager.hpp"
 #include "states/State.hpp"
 
 #include "ui/Button.hpp"
@@ -15,7 +16,9 @@ public:
                      {.x = 0, .y = 0, .width = 500, .height = 200}, "Quit"),
         m_settingsButton({.x = 1000, .y = 300},
                          {.x = 500, .y = 0, .width = 131, .height = 131}) {}
-  ~MainMenuState() override = default;
+  ~MainMenuState() override {
+    ResourceManager::unloadTextures<Textures::UI, Textures::MainMenu>();
+  };
 
   void draw() const noexcept override;
   void update(float dt) noexcept override;

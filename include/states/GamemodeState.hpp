@@ -17,7 +17,9 @@ public:
         m_onlineButton({.x = 1000, .y = 300},
                        {.x = 0, .y = 0, .width = 500, .height = 200},
                        "Online") {}
-  ~GamemodeState() override = default;
+  ~GamemodeState() override {
+    ResourceManager::unloadTextures<Textures::UI>();
+  };
 
   void draw() const noexcept override;
   void update(float dt) noexcept override;

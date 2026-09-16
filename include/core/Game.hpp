@@ -1,6 +1,4 @@
 #pragma once
-#include <SFML/Window/WindowEnums.hpp>
-
 #include <string>
 
 #include "raylib.h"

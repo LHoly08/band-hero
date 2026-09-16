@@ -95,18 +95,22 @@ void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
   if constexpr (Type == InstrumentType::Custom_1) {
 
     for (const auto &note : this->m_activeBuffer) {
-      for (std::uint8_t i{}; i < m_composition.NumberSections; ++i) {
+      const auto bits = m_composition.NumberBitsSection;
+      if (bits == 0 || bits > 30) {
+        continue;
+      }
+      const auto sections = std::min<unsigned>(m_composition.NumberSections, 30 / bits);
+      for (std::uint8_t i{}; i < sections; ++i) {
 
-        std::uint8_t fretVal =
-            (note.note >> (i * m_composition.NumberBitsSection)) &
-            m_composition.NumberBitsSection;
+        std::uint32_t fretVal =
+            (note.note >> (i * bits)) & ((1u << bits) - 1u);
 
         if (fretVal) [[unlikely]] {
 
           this->drawNote(
               {.x = static_cast<float>(startingPositionX + fretVal * 50),
                .y = note.positionY},
-              Settings::getNoteTint(i));
+              Settings::getNoteTint(i), note.shape);
         }
       }
     }
@@ -114,13 +118,16 @@ void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
   } else if constexpr (Type == InstrumentType::Custom_2) {
 
     for (const auto &note : this->m_activeBuffer) {
-      for (std::uint8_t i{}; i < m_composition.NumberEffectiveBitsEasy; ++i) {
+      const auto bits = Dif == Difficulty::Easy
+                            ? m_composition.NumberEffectiveBitsEasy
+                            : m_composition.NumberEffectiveBitsHard;
+      for (std::uint8_t i{}; i < std::min<unsigned>(bits, 30); ++i) {
 
         if (bool playedBit = (note.note >> i) & 1; playedBit) [[unlikely]] {
 
           this->drawNote({.x = static_cast<float>(startingPositionX + i * 50),
                           .y = note.positionY},
-                         Settings::getNoteTint(i));
+                         Settings::getNoteTint(i), note.shape);
         }
       }
     }

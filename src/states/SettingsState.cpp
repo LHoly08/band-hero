@@ -16,6 +16,7 @@ namespace bh {
 void SettingsState::draw() const noexcept {
   m_saveButton.draw();
   m_menuButton.draw();
+  m_defaultButton.draw();
 
   switch (m_menuSection) {
 
@@ -65,7 +66,9 @@ void SettingsState::events() noexcept {
   }
 }
 
-void SettingsState::onEnter() noexcept {}
+void SettingsState::onEnter() noexcept {
+  ResourceManager::loadTextures<Textures::UI>();
+}
 
 void SettingsState::onExit() noexcept {}
 

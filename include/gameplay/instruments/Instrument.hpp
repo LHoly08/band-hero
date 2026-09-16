@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <random>
 #include <thread>
 #include <vector>
 
@@ -32,6 +31,7 @@ template <InstrumentType Type> struct Note {
 
   std::uint32_t note{};
   float positionY{};
+  std::uint8_t shape{static_cast<std::uint8_t>(GetRandomValue(0, 1))};
 };
 
 template <InstrumentType Type>
@@ -40,6 +40,7 @@ struct Note<Type> {
 
   std::uint32_t note{};
   float positionY{};
+  std::uint8_t shape{static_cast<std::uint8_t>(GetRandomValue(0, 1))};
 };
 
 // Size: 104 | Align: 8
@@ -59,16 +60,11 @@ protected:
   // Position uses reference layout coordinates; drawImage applies screen
   // scaling.
   inline void drawNote(const Vector2 &position,
-                       const Color &tint) const noexcept {
+                       const Color &tint, std::uint8_t shape) const noexcept {
 
-    static std::random_device r;
-    static std::default_random_engine el(r());
-
-    static std::uniform_int_distribution<std::uint8_t> dist(0, 1);
-    const std::uint8_t noteShape = dist(el);
-
+    // Shape belongs to the note; drawing must not randomize it every frame.
     ResourceManager::drawImage<Textures::Gameplay::Notes>(
-        {.x = 150.f * noteShape, .y = 0, .width = 150, .height = 150}, position,
+        {.x = 150.f * (shape % 2), .y = 0, .width = 150, .height = 150}, position,
         tint);
   }
 

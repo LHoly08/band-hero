@@ -11,10 +11,13 @@ namespace bh {
 class SettingsState final : public State {
 public:
   inline SettingsState(StateStack &stack) noexcept
-      : State(stack), m_saveButton({.x = 500, .y = 500}, {0, 0, 500, 200}),
-        m_menuButton({.x = 1000, .y = 300}, {0, 0, 500, 200}),
-        m_defaultButton({.x = 700, .y = 100}, {0, 0, 500, 200}) {}
-  ~SettingsState() override = default;
+      : State(stack),
+        m_saveButton({.x = 500, .y = 600}, {0, 0, 500, 200}, "Save"),
+        m_menuButton({.x = 1000, .y = 350}, {0, 0, 500, 200}, "Main Menu"),
+        m_defaultButton({.x = 700, .y = 100}, {0, 0, 500, 200}, "Defaults") {}
+  ~SettingsState() override {
+    ResourceManager::unloadTextures<Textures::UI>();
+  };
 
   void draw() const noexcept override;
   void update(float dt) noexcept override;

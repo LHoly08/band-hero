@@ -23,18 +23,19 @@ inline T scaledSize(T size) noexcept {
 
   if constexpr (std::is_same_v<Vector2, T>) {
 
-    return Vector2{.x = (size.x * (GetRenderWidth() / OriginalWindowSize.x)),
-                   .y = (size.y * (GetRenderHeight() / OriginalWindowSize.y))};
+    // Raylib drawing and mouse input both use logical screen coordinates.
+    return Vector2{.x = (size.x * (GetScreenWidth() / OriginalWindowSize.x)),
+                   .y = (size.y * (GetScreenHeight() / OriginalWindowSize.y))};
 
   } else if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
 
     if constexpr (Axis == ScreenAxis::X) {
 
-      return size * (GetRenderWidth() / OriginalWindowSize.x);
+      return size * (GetScreenWidth() / OriginalWindowSize.x);
 
     } else if constexpr (Axis == ScreenAxis::Y) {
 
-      return size * (GetRenderHeight() / OriginalWindowSize.y);
+      return size * (GetScreenHeight() / OriginalWindowSize.y);
     }
   }
 }

@@ -22,8 +22,8 @@ enum class TextAlign : std::uint8_t {
 class Button final {
 public:
   inline Button(const Vector2 &position, const Rectangle &rect,
-                std::string_view &&text = "")
-      : m_text(text.data()), m_rect(rect), m_position(position) {}
+                std::string_view text = "")
+      : m_text(text), m_rect(rect), m_position(position) {}
 
   inline ~Button() = default;
 
@@ -31,11 +31,11 @@ public:
 
   inline void changeTexture(const Rectangle &rect) noexcept { m_rect = rect; }
 
-  inline void changeText(std::string_view &&text = "") noexcept {
-    m_text = text.data();
+  inline void changeText(std::string_view text = "") noexcept {
+    m_text = text;
   }
 
-  template <Color Tint = WHITE, bool Text = false, int FontSize = 64,
+  template <Color Tint = WHITE, bool Text = true, int FontSize = 64,
             TextAlign TextAlignement = TextAlign::Left, Color TextColor = BLACK,
             Fonts_t FontType = Fonts_t::Default>
   void draw() const noexcept;
@@ -54,27 +54,32 @@ void Button::draw() const noexcept {
   ResourceManager::drawImage<Textures::UI::Buttons>(m_rect, m_position, Tint);
 
   if constexpr (Text) {
+    if (m_text.empty() || m_rect.width <= 0.f || m_rect.height <= 0.f) {
+      return;
+    }
 
     const Vector2 size{m_rect.width, m_rect.height};
-    const float padding = FontSize / 2.f;
-    const float textHeight = FontSize;
+    const float padding = std::min({FontSize / 2.f, size.x / 4.f, size.y / 4.f});
+    float fontSize = std::min(float(FontSize), size.y - 2.f * padding);
+    float textWidth = ResourceManager::measureText<FontType>(m_text, fontSize);
+    const float availableWidth = size.x - 2.f * padding;
+    if (textWidth > availableWidth) {
+      fontSize *= availableWidth / textWidth;
+      textWidth = ResourceManager::measureText<FontType>(m_text, fontSize);
+    }
     Vector2 textPos{m_position.x + padding,
-                    m_position.y + ((size.y - textHeight) / 2.f)};
+                    m_position.y + ((size.y - fontSize) / 2.f)};
 
     if constexpr (TextAlignement == TextAlign::Center) {
 
-      const float textWidth =
-          ResourceManager::measureText<FontType>(m_text, FontSize);
       textPos.x = m_position.x + ((size.x - textWidth) / 2.f);
 
     } else if constexpr (TextAlignement == TextAlign::Right) {
 
-      const float textWidth =
-          ResourceManager::measureText<FontType>(m_text, FontSize);
       textPos.x = m_position.x + size.x - (padding + textWidth);
     }
 
-    ResourceManager::drawText<FontType>(m_text, textPos, FontSize, TextColor);
+    ResourceManager::drawText<FontType>(m_text, textPos, fontSize, TextColor);
   }
 }
 

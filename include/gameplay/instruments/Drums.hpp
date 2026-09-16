@@ -69,7 +69,7 @@ void Drums<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 
         this->drawNote({.x = static_cast<float>(startingPositionX + i * 50),
                         .y = note.positionY},
-                       Settings::getNoteTint(i));
+                       Settings::getNoteTint(i), note.shape);
       }
     }
   }

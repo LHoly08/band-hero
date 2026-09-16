@@ -36,7 +36,9 @@ void MainMenuState::events() noexcept {
   }
 }
 
-void MainMenuState::onEnter() noexcept {}
+void MainMenuState::onEnter() noexcept {
+  ResourceManager::loadTextures<Textures::UI, Textures::MainMenu>();
+}
 
 void MainMenuState::onExit() noexcept {}
 

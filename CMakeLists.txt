@@ -51,3 +51,23 @@ add_custom_command(TARGET BandHero POST_BUILD
         "${ASSETS_DEST}"
     COMMENT "Copying assets to the build output directory..."
 )
+
+option(BAND_HERO_BUILD_TESTS "Build headless rendering regression tests" OFF)
+if(BAND_HERO_BUILD_TESTS)
+  enable_testing()
+  set(RENDERING_TEST_SOURCES ${SRC_FILES})
+  list(FILTER RENDERING_TEST_SOURCES EXCLUDE
+    REGEX "/(main|core/Game|gameplay/Settings|serial/serialib)\\.cpp$")
+  add_executable(RenderingTests tests/rendering_regression.cpp ${RENDERING_TEST_SOURCES})
+  # The tests supply fake GPU, input, settings and serial functions: no window,
+  # device connection or settings file is needed.
+  target_include_directories(RenderingTests PRIVATE include ${raylib_SOURCE_DIR}/src)
+  target_compile_definitions(RenderingTests PRIVATE
+    $<TARGET_PROPERTY:BandHero,COMPILE_DEFINITIONS>)
+  target_compile_options(RenderingTests PRIVATE
+    $<TARGET_PROPERTY:BandHero,COMPILE_OPTIONS>)
+  add_custom_command(TARGET RenderingTests POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+      "${ASSETS_SRC}" "$<TARGET_FILE_DIR:RenderingTests>/assets")
+  add_test(NAME rendering_regression COMMAND RenderingTests)
+endif()

@@ -27,7 +27,7 @@ void PlayerSelectState::draw() const noexcept {
 
     const char playerCountText[2]{m_playerCount, '\0'};
     ResourceManager::drawText<Fonts::Type::Default>(
-        playerCountText, Vector2{100.f, 200.f}, 64, BLACK);
+        playerCountText, Vector2{100.f, 350.f}, 64, BLACK);
     break;
   }
   case Stage::ChoosingInstruments: {
@@ -48,6 +48,7 @@ void PlayerSelectState::update(float dt) noexcept {
 
   switch (m_stage) {
   case Stage::TestingInstruments: {
+
     m_counter += dt;
 
     if (std::uint32_t buffer{};
@@ -59,6 +60,7 @@ void PlayerSelectState::update(float dt) noexcept {
 
       if (std::uint8_t index = buffer & 0b11; index < (m_playerCount - '0'))
           [[likely]] {
+
         if (m_check[index].size() == m_check[index].capacity()) [[likely]] {
           goto VectorAlreadyFull;
         }
@@ -77,7 +79,9 @@ void PlayerSelectState::update(float dt) noexcept {
       }
     }
     for (auto &&[vals, minMax] : std::ranges::views::zip(m_check, m_minMax)) {
+
       if (vals.size() == vals.capacity()) {
+
         const std::uint8_t max = minMax.first;
         const std::uint8_t min = minMax.second;
 
@@ -101,6 +105,7 @@ void PlayerSelectState::update(float dt) noexcept {
 
     if (m_counter >= 3 && m_checksPassed == ((1 << (m_playerCount - '0')) - 1))
         [[unlikely]] {
+
       auto move = []<std::size_t N>(auto &v) {
         std::array<std::unique_ptr<PlayerBase>, N> players;
 
@@ -143,7 +148,8 @@ void PlayerSelectState::events() noexcept {
   if (IsMouseButtonPressed(0)) [[unlikely]] {
     const Vector2 MousePos{GetMousePosition()};
 
-    if (m_backNextButton.pressed(MousePos)) [[unlikely]] {
+    if (m_stage != Stage::TestingInstruments &&
+        m_backNextButton.pressed(MousePos)) [[unlikely]] {
 
       switch (m_stage) {
 
@@ -180,7 +186,8 @@ void PlayerSelectState::events() noexcept {
       }
       }
 
-    } else if (m_increaseCountButton.pressed(MousePos)) [[unlikely]] {
+    } else if (m_stage == Stage::ChoosingPlayerCount &&
+               m_increaseCountButton.pressed(MousePos)) [[unlikely]] {
 
       switch (m_stage) {
       case Stage::ChoosingPlayerCount: {
@@ -197,7 +204,8 @@ void PlayerSelectState::events() noexcept {
       }
       }
 
-    } else if (m_decreaseCountButton.pressed(MousePos)) {
+    } else if (m_stage == Stage::ChoosingPlayerCount &&
+               m_decreaseCountButton.pressed(MousePos)) {
 
       switch (m_stage) {
       case Stage::ChoosingPlayerCount: {
@@ -214,7 +222,8 @@ void PlayerSelectState::events() noexcept {
       }
       }
 
-    } else if (m_startButton.pressed(MousePos)) [[unlikely]] {
+    } else if (m_stage != Stage::ChoosingPlayerCount &&
+               m_startButton.pressed(MousePos)) [[unlikely]] {
 
       switch (m_stage) {
       case Stage::ChoosingInstruments: {
@@ -344,7 +353,8 @@ void PlayerSelectState::events() noexcept {
         break;
       }
       }
-    } else if (m_mainMenuButton.pressed(MousePos)) {
+    } else if (m_stage != Stage::TestingInstruments &&
+               m_mainMenuButton.pressed(MousePos)) {
       switch (m_stage) {
       case Stage::TestingInstruments: {
         break;
@@ -358,7 +368,9 @@ void PlayerSelectState::events() noexcept {
   }
 }
 
-void PlayerSelectState::onEnter() noexcept {}
+void PlayerSelectState::onEnter() noexcept {
+  ResourceManager::loadTextures<Textures::UI>();
+}
 
 void PlayerSelectState::onExit() noexcept {}
 

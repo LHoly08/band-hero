@@ -29,7 +29,9 @@ void GamemodeState::events() noexcept {
   }
 }
 
-void GamemodeState::onEnter() noexcept {}
+void GamemodeState::onEnter() noexcept {
+  ResourceManager::loadTextures<Textures::UI>();
+}
 
 void GamemodeState::onExit() noexcept {}
 

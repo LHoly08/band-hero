@@ -6,6 +6,7 @@
 #include <memory>
 #include <variant>
 
+#include "core/ResourceManager.hpp"
 #include "gameplay/Player.hpp"
 
 #include "gameplay/instruments/Custom.hpp"
@@ -28,11 +29,16 @@ public:
         m_decreaseCountButton({.x = 1000, .y = 300}, {0, 0, 500, 200}, "<"),
         m_startButton({.x = 800, .y = 600}, {0, 0, 500, 200}, "Start"),
         m_mainMenuButton({.x = 1420, .y = 0}, {0, 0, 500, 200}, "Main Menu") {
+
     m_serial.openDevice(Settings::getSerialPort().c_str(),
                         Settings::getSerialBaudRate());
   }
 
-  ~PlayerSelectState() override { m_serial.closeDevice(); }
+  ~PlayerSelectState() override {
+    ResourceManager::unloadTextures<Textures::UI>();
+
+    m_serial.closeDevice();
+  }
 
   void draw() const noexcept override;
   void update(float dt) noexcept override;

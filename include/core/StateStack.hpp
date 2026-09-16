@@ -17,7 +17,7 @@ concept DerivedState = std::derived_from<T, State>;
 class StateStack {
 public:
   StateStack();
-  ~StateStack() = default;
+  ~StateStack() { clear(); }
 
   template <DerivedState S, typename... Args> inline void push(Args &&...args) {
     actions.push(
@@ -37,8 +37,9 @@ public:
   }
 
   void draw() const noexcept {
-    for (auto &state : m_stack) {
-      state->draw();
+    // These states are full screens; suspended screens have released textures.
+    if (!m_stack.empty()) {
+      m_stack.back()->draw();
     }
   }
   void update(float dt) noexcept {
@@ -52,7 +53,7 @@ public:
     }
   }
   void act() noexcept;
-  inline void clear() noexcept { m_stack.clear(); }
+  void clear() noexcept;
 
 private:
   enum class ActionType : std::uint8_t {
