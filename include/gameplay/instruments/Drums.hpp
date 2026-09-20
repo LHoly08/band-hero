@@ -31,7 +31,8 @@ class Drums final : public Instrument<InstrumentType::Drums, Dif> {
 public:
   using Base = Instrument<InstrumentType::Drums, Dif>;
 
-  inline explicit Drums(std::uint32_t &noteCount) : Base(noteCount) {}
+  inline explicit Drums(std::uint32_t &noteCount, std::string filename = {})
+      : Base(noteCount, std::move(filename)) {}
   ~Drums() override = default;
 
   inline bool getPlay(std::uint32_t playedNote) noexcept override {
@@ -48,7 +49,6 @@ public:
   }
 
   void draw(std::uint32_t startingPositionX) const noexcept override;
-  void update(float dt) noexcept override;
 
 private:
 };
@@ -57,6 +57,9 @@ template <Difficulty Dif>
 void Drums<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 
   for (const auto &note : this->m_activeBuffer) {
+    if (note.timeStamp - time > 2.f) {
+      break;
+    }
 
     constexpr std::uint8_t NumberBits = std::min(
         DrumsComposition<Dif>::Pedals + DrumsComposition<Dif>::DrumsCymbals,
@@ -68,17 +71,11 @@ void Drums<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
           [[unlikely]] {
 
         this->drawNote({.x = static_cast<float>(startingPositionX + i * 50),
-                        .y = note.positionY},
+                        .y = static_cast<float>((note.timeStamp - time) * 5 +
+                                                (OriginalWindowSize.y - 30))},
                        Settings::getNoteTint(i), note.shape);
       }
     }
-  }
-}
-
-template <Difficulty Dif> void Drums<Dif>::update(float dt) noexcept {
-
-  for (auto &note : this->m_activeBuffer) {
-    note.positionY -= this->m_speed * dt;
   }
 }
 

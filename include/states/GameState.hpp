@@ -7,6 +7,7 @@
 #include <utility>
 
 #include "core/ResourceManager.hpp"
+
 #include "gameplay/Player.hpp"
 
 #include "serial/serialib.h"
@@ -80,10 +81,19 @@ template <std::uint8_t PlayerCount>
   requires MaxPlayerAmount<PlayerCount>
 void GameState<PlayerCount>::onEnter() noexcept {
   ResourceManager::loadTexture<Textures::Gameplay::Notes>();
+
+  for (auto &player : m_players) {
+    player->pause(false);
+  }
 }
 
 template <std::uint8_t PlayerCount>
   requires MaxPlayerAmount<PlayerCount>
-void GameState<PlayerCount>::onExit() noexcept {}
+void GameState<PlayerCount>::onExit() noexcept {
+
+  for (auto &player : m_players) {
+    player->pause(true);
+  }
+}
 
 } // namespace bh

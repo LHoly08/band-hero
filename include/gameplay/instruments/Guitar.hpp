@@ -33,7 +33,8 @@ class Guitar final : public Instrument<InstrumentType::Guitar, Dif> {
 public:
   using Base = Instrument<InstrumentType::Guitar, Dif>;
 
-  inline explicit Guitar(std::uint32_t &noteCount) : Base(noteCount) {}
+  inline explicit Guitar(std::uint32_t &noteCount, std::string filename = {})
+      : Base(noteCount, std::move(filename)) {}
   ~Guitar() override = default;
 
   inline bool getPlay(std::uint32_t playedNote) noexcept override {
@@ -67,7 +68,6 @@ public:
   }
 
   void draw(std::uint32_t startingPositionX) const noexcept override;
-  void update(float dt) noexcept override;
 
 private:
 };
@@ -76,6 +76,10 @@ template <Difficulty Dif>
 void Guitar<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 
   for (const auto &note : this->m_activeBuffer) {
+    if (note.timeStamp - this->m_time > 2.f) {
+      continue;
+    }
+
     for (std::uint8_t i{}; i < GuitarComposition<Dif>::Strings; ++i) {
 
       std::uint8_t fretVal =
@@ -83,20 +87,15 @@ void Guitar<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
           ((1u << GuitarComposition<Dif>::FretBits) - 1u);
 
       if (fretVal) [[unlikely]] {
+        const float posY =
+            (note.timeStamp - this->m_time) * 5 + (OriginalWindowSize.y - 30);
 
         this->drawNote(
             {.x = static_cast<float>(startingPositionX + fretVal * 50),
-             .y = note.positionY},
+             .y = posY},
             Settings::getNoteTint(i), note.shape);
       }
     }
-  }
-}
-
-template <Difficulty Dif> void Guitar<Dif>::update(float dt) noexcept {
-
-  for (auto &note : this->m_activeBuffer) {
-    note.positionY -= this->m_speed * dt;
   }
 }
 

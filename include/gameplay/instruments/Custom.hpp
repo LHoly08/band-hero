@@ -49,7 +49,8 @@ public:
   using Base = Instrument<Type, Dif>;
 
   explicit Custom(std::uint32_t &noteCount, std::string_view instrumentName,
-                  InstrumentComposition<Type> instrumentComposition);
+                  InstrumentComposition<Type> instrumentComposition,
+                  std::string filename = {});
   ~Custom() override = default;
 
   bool getPlay(std::uint32_t playedNote) noexcept override {
@@ -57,7 +58,6 @@ public:
   }
 
   void draw(std::uint32_t startingPositionX) const noexcept override;
-  void update(float dt) noexcept override;
 
 private:
   std::string m_name;
@@ -84,8 +84,9 @@ template <InstrumentType Type, Difficulty Dif>
   requires CustomType<Type>
 Custom<Type, Dif>::Custom(std::uint32_t &noteCount,
                           std::string_view instrumentName,
-                          InstrumentComposition<Type> instrumentComposition)
-    : Base(noteCount), m_name(instrumentName),
+                          InstrumentComposition<Type> instrumentComposition,
+                          std::string filename)
+    : Base(noteCount, std::move(filename)), m_name(instrumentName),
       m_composition(instrumentComposition) {}
 
 template <InstrumentType Type, Difficulty Dif>
@@ -95,21 +96,25 @@ void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
   if constexpr (Type == InstrumentType::Custom_1) {
 
     for (const auto &note : this->m_activeBuffer) {
+      if (note.timeStamp - time > 2.f) {
+        break;
+      }
       const auto bits = m_composition.NumberBitsSection;
       if (bits == 0 || bits > 30) {
         continue;
       }
-      const auto sections = std::min<unsigned>(m_composition.NumberSections, 30 / bits);
+      const auto sections =
+          std::min<unsigned>(m_composition.NumberSections, 30 / bits);
       for (std::uint8_t i{}; i < sections; ++i) {
 
-        std::uint32_t fretVal =
-            (note.note >> (i * bits)) & ((1u << bits) - 1u);
+        std::uint32_t fretVal = (note.note >> (i * bits)) & ((1u << bits) - 1u);
 
         if (fretVal) [[unlikely]] {
 
           this->drawNote(
               {.x = static_cast<float>(startingPositionX + fretVal * 50),
-               .y = note.positionY},
+               .y = static_cast<float>((note.timeStamp - time) * 5 +
+                                       (OriginalWindowSize.y - 30))},
               Settings::getNoteTint(i), note.shape);
         }
       }
@@ -118,6 +123,9 @@ void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
   } else if constexpr (Type == InstrumentType::Custom_2) {
 
     for (const auto &note : this->m_activeBuffer) {
+      if (note.timeStamp - time > 2.f) {
+        break;
+      }
       const auto bits = Dif == Difficulty::Easy
                             ? m_composition.NumberEffectiveBitsEasy
                             : m_composition.NumberEffectiveBitsHard;
@@ -126,20 +134,12 @@ void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
         if (bool playedBit = (note.note >> i) & 1; playedBit) [[unlikely]] {
 
           this->drawNote({.x = static_cast<float>(startingPositionX + i * 50),
-                          .y = note.positionY},
+                          .y = static_cast<float>((note.timeStamp - time) * 5 +
+                                                  (OriginalWindowSize.y - 30))},
                          Settings::getNoteTint(i), note.shape);
         }
       }
     }
-  }
-}
-
-template <InstrumentType Type, Difficulty Dif>
-  requires CustomType<Type>
-void Custom<Type, Dif>::update(float dt) noexcept {
-
-  for (auto &note : this->m_activeBuffer) {
-    note.positionY -= this->m_speed * dt;
   }
 }
 

@@ -19,11 +19,11 @@ class PlayerBase {
 public:
   virtual ~PlayerBase() = default;
 
-  virtual void draw() const noexcept = 0;
-  virtual void update(float dt) noexcept = 0;
+  virtual void draw(double time) const noexcept = 0;
+  virtual void update(float dt) = 0;
 
   virtual void play(std::uint32_t notePlayed) noexcept = 0;
-  virtual void updateInstrumentSpeed(const float &speed) noexcept = 0;
+  virtual void pauseInstrument(bool p) noexcept = 0;
 
   inline static void setPlayerCount(std::uint8_t count) noexcept {
     assert(count != 0 && count <= 4);
@@ -67,27 +67,25 @@ public:
   Player(Player &&) = delete;
   Player &operator=(Player &&) = delete;
 
-  inline void updateInstrumentSpeed(const float &speed) noexcept override {
-    m_speed = speed;
-    m_instrument.updateSpeed(m_speed);
+  inline void pauseInstrument(bool p) noexcept override {
+    m_instrument.pause(p);
   }
 
   inline void play(std::uint32_t notePlayed) noexcept override {
     m_score += m_instrument.getPlay(notePlayed);
   }
 
-  inline void draw() const noexcept override {
-    m_instrument.draw((OriginalWindowSize.x / PlayerCount) * id);
+  inline void draw(double time) const noexcept override {
+    m_instrument.draw((OriginalWindowSize.x / PlayerCount) * id, time);
   }
 
-  inline void update(float dt) noexcept override { m_instrument.update(dt); }
+  inline void update(float dt) override { m_instrument.update(dt); }
 
 private:
   const std::uint32_t id;
 
   std::uint32_t m_score{};
   std::uint32_t m_passedNotes{};
-  float m_speed{};
   InstrumentFor_t<Type, Dif> m_instrument;
 };
 
