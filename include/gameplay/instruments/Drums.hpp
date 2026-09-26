@@ -57,7 +57,7 @@ template <Difficulty Dif>
 void Drums<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 
   for (const auto &note : this->m_activeBuffer) {
-    if (note.timeStamp - time > 2.f) {
+    if (note.timeStamp - this->m_time > 2.f) {
       break;
     }
 
@@ -71,7 +71,7 @@ void Drums<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
           [[unlikely]] {
 
         this->drawNote({.x = static_cast<float>(startingPositionX + i * 50),
-                        .y = static_cast<float>((note.timeStamp - time) * 5 +
+                        .y = static_cast<float>((note.timeStamp - this->m_time) * 5 +
                                                 (OriginalWindowSize.y - 30))},
                        Settings::getNoteTint(i), note.shape);
       }

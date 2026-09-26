@@ -83,7 +83,7 @@ Custom<Type, Dif>::Custom(std::uint32_t &noteCount, std::string filename,
                           InstrumentComposition<Type> instrumentComposition)
     : Base(
           noteCount,
-          std::move(filename.append([this, instrumentName]() consteval -> auto {
+          std::move(filename.append([this]() consteval -> auto {
   constexpr auto self = std::meta::remove_cvref(^^decltype(*this));
 
   std::string path{};
@@ -112,7 +112,7 @@ Custom<Type, Dif>::Custom(std::uint32_t &noteCount, std::string filename,
   path.append("/");
 
   return std::define_static_string(path);
-          }()).append(instrumentName).append(".file")),
+          }()).append(instrumentName).append(".file"))),
       m_name(instrumentName), m_composition(instrumentComposition) {}
 
 template <InstrumentType Type, Difficulty Dif>
@@ -121,7 +121,7 @@ void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
   if constexpr (Type == InstrumentType::Custom_1) {
 
     for (const auto &note : this->m_activeBuffer) {
-      if (note.timeStamp - time > 2.f) {
+      if (note.timeStamp - this->m_time > 2.f) {
         break;
       }
       const auto bits = m_composition.NumberBitsSection;
@@ -138,7 +138,7 @@ void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 
           this->drawNote(
               {.x = static_cast<float>(startingPositionX + fretVal * 50),
-               .y = static_cast<float>((note.timeStamp - time) * 5 +
+               .y = static_cast<float>((note.timeStamp - this->m_time) * 5 +
                                        (OriginalWindowSize.y - 30))},
               Settings::getNoteTint(i), note.shape);
         }
@@ -148,7 +148,7 @@ void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
   } else if constexpr (Type == InstrumentType::Custom_2) {
 
     for (const auto &note : this->m_activeBuffer) {
-      if (note.timeStamp - time > 2.f) {
+      if (note.timeStamp - this->m_time > 2.f) {
         break;
       }
       const auto bits = Dif == Difficulty::Easy
@@ -159,7 +159,7 @@ void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
         if (bool playedBit = (note.note >> i) & 1; playedBit) [[unlikely]] {
 
           this->drawNote({.x = static_cast<float>(startingPositionX + i * 50),
-                          .y = static_cast<float>((note.timeStamp - time) * 5 +
+                          .y = static_cast<float>((note.timeStamp - this->m_time) * 5 +
                                                   (OriginalWindowSize.y - 30))},
                          Settings::getNoteTint(i), note.shape);
         }

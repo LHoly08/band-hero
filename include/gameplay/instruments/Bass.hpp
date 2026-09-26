@@ -75,7 +75,7 @@ template <Difficulty Dif>
 void Bass<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 
   for (const auto &note : this->m_activeBuffer) {
-    if (note.timeStamp - time > 2.f) {
+    if (note.timeStamp - this->m_time > 2.f) {
       break;
     }
     for (std::uint8_t i{}; i < BassComposition<Dif>::Strings; ++i) {

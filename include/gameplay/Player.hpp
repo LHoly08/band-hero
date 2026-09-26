@@ -19,7 +19,7 @@ class PlayerBase {
 public:
   virtual ~PlayerBase() = default;
 
-  virtual void draw(double time) const noexcept = 0;
+  virtual void draw() const noexcept = 0;
   virtual void update(float dt) = 0;
 
   virtual void play(std::uint32_t notePlayed) noexcept = 0;
@@ -75,8 +75,8 @@ public:
     m_score += m_instrument.getPlay(notePlayed);
   }
 
-  inline void draw(double time) const noexcept override {
-    m_instrument.draw((OriginalWindowSize.x / PlayerCount) * id, time);
+  inline void draw() const noexcept override {
+    m_instrument.draw((OriginalWindowSize.x / PlayerCount) * id);
   }
 
   inline void update(float dt) override { m_instrument.update(dt); }

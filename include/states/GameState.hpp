@@ -83,7 +83,7 @@ void GameState<PlayerCount>::onEnter() noexcept {
   ResourceManager::loadTexture<Textures::Gameplay::Notes>();
 
   for (auto &player : m_players) {
-    player->pause(false);
+    player->pauseInstrument(false);
   }
 }
 
@@ -92,7 +92,7 @@ template <std::uint8_t PlayerCount>
 void GameState<PlayerCount>::onExit() noexcept {
 
   for (auto &player : m_players) {
-    player->pause(true);
+    player->pauseInstrument(true);
   }
 }
 

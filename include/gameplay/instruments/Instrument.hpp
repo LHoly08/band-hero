@@ -127,46 +127,55 @@ protected:
 
 template <InstrumentType Type, Difficulty Dif>
 Instrument<Type, Dif>::Instrument(std::uint32_t &noteCount,
-                                  std::string &&filename) requires (!CustomType<Type>)
+                                  std::string &&filename)
+  requires CustomType<Type>
     : m_noteCount(noteCount),
       m_loadingThread(std::bind_front(&Instrument<Type, Dif>::loadFile, this),
-                      std::move(filename.append(
-                          [this]() consteval -> auto {
-  constexpr auto self = std::meta::remove_cvref(^^decltype(*this));
+                      std::move(filename)) {}
 
-  std::string path{};
+template <InstrumentType Type, Difficulty Dif>
+Instrument<Type, Dif>::Instrument(std::uint32_t &noteCount,
+                                  std::string &&filename)
+  requires(!CustomType<Type>)
+    : m_noteCount(noteCount),
+      m_loadingThread(
+          std::bind_front(&Instrument<Type, Dif>::loadFile, this),
+          std::move(filename.append([this] consteval -> auto {
+            constexpr auto self = std::meta::remove_cvref(^^decltype(*this));
 
-  static constexpr auto templateArgs = [self]() consteval -> auto {
-    auto templateArgs = std::meta::template_arguments_of(self);
+            std::string path{};
 
-    std::reverse(templateArgs.begin(), templateArgs.end());
+            static constexpr auto templateArgs = [self]() consteval -> auto {
+              auto templateArgs = std::meta::template_arguments_of(self);
 
-    return std::define_static_array(templateArgs);
-  }();
+              std::reverse(templateArgs.begin(), templateArgs.end());
 
-  template for (constexpr auto arg : templateArgs) {
-    using T = [:std::meta::type_of(arg):];
+              return std::define_static_array(templateArgs);
+            }();
 
-    if constexpr (std::meta::is_enum_type(std::meta::dealias(^^T))) {
+            template for (constexpr auto arg : templateArgs) {
+              using T = [:std::meta::type_of(arg):];
 
-      static constexpr auto enumerators = std::define_static_array(
-          std::meta::enumerators_of(std::meta::dealias(^^T)));
+              if constexpr (std::meta::is_enum_type(std::meta::dealias(^^T))) {
 
-      template for (constexpr auto enumerator : enumerators) {
-        if constexpr (std::meta::extract<T>(enumerator) ==
-                      std::meta::extract<T>(arg)) {
+                static constexpr auto enumerators = std::define_static_array(
+                    std::meta::enumerators_of(std::meta::dealias(^^T)));
 
-          path.append("/");
-          path.append(std::meta::identifier_of(enumerator));
-        }
-      }
-    }
-  }
-  }
-  path.append(".file");
+                template for (constexpr auto enumerator : enumerators) {
+                  if constexpr (std::meta::extract<T>(enumerator) ==
+                                std::meta::extract<T>(arg)) {
 
-  return std::define_static_string(path);
-}())) {}
+                    path.append("/");
+                    path.append(std::meta::identifier_of(enumerator));
+                  }
+                }
+              }
+            }
+
+            path.append(".file");
+
+            return std::define_static_string(path);
+          }()))) {}
 
 template <InstrumentType Type, Difficulty Dif>
 void Instrument<Type, Dif>::update(float dt) {
