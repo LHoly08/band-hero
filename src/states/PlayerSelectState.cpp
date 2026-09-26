@@ -237,10 +237,12 @@ void PlayerSelectState::events() noexcept {
 
             if (playerChoice & 1) {
               m_players[i] = std::make_unique<
-                  Player<InstrumentType::Guitar, Difficulty::Easy>>(i);
+                  Player<InstrumentType::Guitar, Difficulty::Easy>>(i,
+                                                                    m_songName);
             } else {
               m_players[i] = std::make_unique<
-                  Player<InstrumentType::Guitar, Difficulty::Hard>>(i);
+                  Player<InstrumentType::Guitar, Difficulty::Hard>>(i,
+                                                                    m_songName);
             }
             break;
           }
@@ -249,10 +251,12 @@ void PlayerSelectState::events() noexcept {
 
             if (playerChoice & 1) {
               m_players[i] = std::make_unique<
-                  Player<InstrumentType::Bass, Difficulty::Easy>>(i);
+                  Player<InstrumentType::Bass, Difficulty::Easy>>(i,
+                                                                  m_songName);
             } else {
               m_players[i] = std::make_unique<
-                  Player<InstrumentType::Bass, Difficulty::Hard>>(i);
+                  Player<InstrumentType::Bass, Difficulty::Hard>>(i,
+                                                                  m_songName);
             }
             break;
           }
@@ -261,10 +265,12 @@ void PlayerSelectState::events() noexcept {
 
             if (playerChoice & 1) {
               m_players[i] = std::make_unique<
-                  Player<InstrumentType::Drums, Difficulty::Easy>>(i);
+                  Player<InstrumentType::Drums, Difficulty::Easy>>(i,
+                                                                   m_songName);
             } else {
               m_players[i] = std::make_unique<
-                  Player<InstrumentType::Drums, Difficulty::Hard>>(i);
+                  Player<InstrumentType::Drums, Difficulty::Hard>>(i,
+                                                                   m_songName);
             }
             break;
           }
@@ -283,14 +289,14 @@ void PlayerSelectState::events() noexcept {
 
                 m_players[i] = std::make_unique<
                     Player<InstrumentType::Custom_1, Difficulty::Easy>>(
-                    i, customInstrument.name,
+                    i, m_songName, customInstrument.name,
                     std::get<InstrumentComposition<InstrumentType::Custom_1>>(
                         customComposition));
               } else {
 
                 m_players[i] = std::make_unique<
                     Player<InstrumentType::Custom_2, Difficulty::Easy>>(
-                    i, customInstrument.name,
+                    i, m_songName, customInstrument.name,
                     std::get<InstrumentComposition<InstrumentType::Custom_2>>(
                         customComposition));
               }
@@ -303,7 +309,7 @@ void PlayerSelectState::events() noexcept {
 
                 m_players[i] = std::make_unique<
                     Player<InstrumentType::Custom_1, Difficulty::Hard>>(
-                    i, customInstrument.name,
+                    i, m_songName, customInstrument.name,
                     std::get<InstrumentComposition<InstrumentType::Custom_1>>(
                         customComposition));
 
@@ -311,7 +317,7 @@ void PlayerSelectState::events() noexcept {
 
                 m_players[i] = std::make_unique<
                     Player<InstrumentType::Custom_2, Difficulty::Hard>>(
-                    i, customInstrument.name,
+                    i, m_songName, customInstrument.name,
                     std::get<InstrumentComposition<InstrumentType::Custom_2>>(
                         customComposition));
               }

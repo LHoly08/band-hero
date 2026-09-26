@@ -17,10 +17,6 @@
 namespace bh {
 
 template <InstrumentType Type>
-concept CustomType =
-    Type == InstrumentType::Custom_1 || Type == InstrumentType::Custom_2;
-
-template <InstrumentType Type>
   requires CustomType<Type>
 struct InstrumentComposition;
 
@@ -48,9 +44,9 @@ class Custom final : public Instrument<Type, Dif> {
 public:
   using Base = Instrument<Type, Dif>;
 
-  explicit Custom(std::uint32_t &noteCount, std::string_view instrumentName,
-                  InstrumentComposition<Type> instrumentComposition,
-                  std::string filename = {});
+  explicit Custom(std::uint32_t &noteCount, std::string filename,
+                  std::string_view instrumentName,
+                  InstrumentComposition<Type> instrumentComposition);
   ~Custom() override = default;
 
   bool getPlay(std::uint32_t playedNote) noexcept override {
@@ -82,17 +78,46 @@ bool Custom<InstrumentType::Custom_2, Difficulty::Hard>::getPlay(
 
 template <InstrumentType Type, Difficulty Dif>
   requires CustomType<Type>
-Custom<Type, Dif>::Custom(std::uint32_t &noteCount,
+Custom<Type, Dif>::Custom(std::uint32_t &noteCount, std::string filename,
                           std::string_view instrumentName,
-                          InstrumentComposition<Type> instrumentComposition,
-                          std::string filename)
-    : Base(noteCount, std::move(filename)), m_name(instrumentName),
-      m_composition(instrumentComposition) {}
+                          InstrumentComposition<Type> instrumentComposition)
+    : Base(
+          noteCount,
+          std::move(filename.append([this, instrumentName]() consteval -> auto {
+  constexpr auto self = std::meta::remove_cvref(^^decltype(*this));
+
+  std::string path{};
+
+  static constexpr auto templateArgs =
+      std::define_static_array(std::meta::template_arguments_of(self));
+
+  template for (constexpr auto arg : templateArgs) {
+    using T = [:std::meta::type_of(arg):];
+
+    if constexpr (std::meta::is_enum_type(^^T)) {
+
+      static constexpr auto enumerators = std::define_static_array(
+          std::meta::enumerators_of(std::meta::dealias(^^T)));
+
+      template for (constexpr auto enumerator : enumerators) {
+        if constexpr (std::meta::extract<T>(enumerator) ==
+                      std::meta::extract<T>(arg)) {
+
+          path.append("/");
+          path.append(std::meta::identifier_of(enumerator));
+        }
+      }
+    }
+  }
+  path.append("/");
+
+  return std::define_static_string(path);
+          }()).append(instrumentName).append(".file")),
+      m_name(instrumentName), m_composition(instrumentComposition) {}
 
 template <InstrumentType Type, Difficulty Dif>
   requires CustomType<Type>
 void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
-
   if constexpr (Type == InstrumentType::Custom_1) {
 
     for (const auto &note : this->m_activeBuffer) {

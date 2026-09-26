@@ -33,7 +33,7 @@ class Guitar final : public Instrument<InstrumentType::Guitar, Dif> {
 public:
   using Base = Instrument<InstrumentType::Guitar, Dif>;
 
-  inline explicit Guitar(std::uint32_t &noteCount, std::string filename = {})
+  inline explicit Guitar(std::uint32_t &noteCount, std::string filename)
       : Base(noteCount, std::move(filename)) {}
   ~Guitar() override = default;
 

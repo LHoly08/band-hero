@@ -7,6 +7,7 @@
 #include <variant>
 
 #include "core/ResourceManager.hpp"
+
 #include "gameplay/Player.hpp"
 
 #include "gameplay/instruments/Custom.hpp"
@@ -22,13 +23,14 @@ namespace bh {
 
 class PlayerSelectState final : public State {
 public:
-  inline PlayerSelectState(StateStack &stack) noexcept
+  inline PlayerSelectState(StateStack &stack, std::string &&songName) noexcept
       : State(stack), m_backNextButton({.x = 100, .y = 100}, {0, 0, 500, 200},
                                        "Choose Instruments"),
         m_increaseCountButton({.x = 500, .y = 500}, {0, 0, 500, 200}, ">"),
         m_decreaseCountButton({.x = 1000, .y = 300}, {0, 0, 500, 200}, "<"),
         m_startButton({.x = 800, .y = 600}, {0, 0, 500, 200}, "Start"),
-        m_mainMenuButton({.x = 1420, .y = 0}, {0, 0, 500, 200}, "Main Menu") {
+        m_mainMenuButton({.x = 1420, .y = 0}, {0, 0, 500, 200}, "Main Menu"),
+        m_songName(std::move(songName)) {
 
     m_serial.openDevice(Settings::getSerialPort().c_str(),
                         Settings::getSerialBaudRate());
@@ -61,6 +63,8 @@ private:
   std::inplace_vector<std::unique_ptr<PlayerBase>, 4> m_players;
   std::inplace_vector<std::inplace_vector<std::uint32_t, 3>, 4> m_check;
   std::inplace_vector<std::pair<std::uint8_t, std::uint8_t>, 4> m_minMax;
+
+  const std::string m_songName;
 
   float m_counter{};
 

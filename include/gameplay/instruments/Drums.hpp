@@ -31,7 +31,7 @@ class Drums final : public Instrument<InstrumentType::Drums, Dif> {
 public:
   using Base = Instrument<InstrumentType::Drums, Dif>;
 
-  inline explicit Drums(std::uint32_t &noteCount, std::string filename = {})
+  inline explicit Drums(std::uint32_t &noteCount, std::string filename)
       : Base(noteCount, std::move(filename)) {}
   ~Drums() override = default;
 

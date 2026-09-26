@@ -13,6 +13,10 @@ CMakeUserPresets.json
 build/
 sdkconfig
 .clangd
-
 .vscode/
 .cache/
+
+# BandHero generated files
+settings.bin
+Instruments/
+Songs/

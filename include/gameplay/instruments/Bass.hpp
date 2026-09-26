@@ -33,7 +33,7 @@ class Bass final : public Instrument<InstrumentType::Bass, Dif> {
 public:
   using Base = Instrument<InstrumentType::Bass, Dif>;
 
-  inline explicit Bass(std::uint32_t &noteCount, std::string filename = {})
+  inline explicit Bass(std::uint32_t &noteCount, std::string filename)
       : Base(noteCount, std::move(filename)) {}
   ~Bass() override = default;
 

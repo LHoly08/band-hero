@@ -7,6 +7,7 @@
 #include <fstream>
 #include <functional>
 #include <limits>
+#include <meta>
 #include <mutex>
 #include <stop_token>
 #include <string>
@@ -37,6 +38,10 @@ template <InstrumentType Type>
 concept SectionInstrumentType =
     Type != InstrumentType::Drums && Type != InstrumentType::Custom_2;
 
+template <InstrumentType Type>
+concept CustomType =
+    Type == InstrumentType::Custom_1 || Type == InstrumentType::Custom_2;
+
 template <InstrumentType Type> struct Note {
 
   std::uint32_t note{};
@@ -58,7 +63,10 @@ struct Note<Type> {
 // Size: ? | Align: 8
 template <InstrumentType Type, Difficulty Dif> class Instrument {
 public:
-  explicit Instrument(std::uint32_t &noteCount, std::string filename = {});
+  explicit Instrument(std::uint32_t &noteCount, std::string &&filename)
+    requires CustomType<Type>;
+  explicit Instrument(std::uint32_t &noteCount, std::string &&filename)
+    requires(!CustomType<Type>);
   virtual ~Instrument() = default;
 
   virtual bool getPlay(std::uint32_t playedNote) noexcept;
@@ -110,7 +118,7 @@ protected:
   std::uint32_t &m_noteCount;
 
   bool m_bufferReady{false};
-  bool m_paused{false};
+  bool m_paused{true};
 
   std::size_t m_selectedNote{NoNote};
   double m_time{};
@@ -119,10 +127,46 @@ protected:
 
 template <InstrumentType Type, Difficulty Dif>
 Instrument<Type, Dif>::Instrument(std::uint32_t &noteCount,
-                                  std::string filename)
+                                  std::string &&filename) requires (!CustomType<Type>)
     : m_noteCount(noteCount),
       m_loadingThread(std::bind_front(&Instrument<Type, Dif>::loadFile, this),
-                      std::move(filename)) {}
+                      std::move(filename.append(
+                          [this]() consteval -> auto {
+  constexpr auto self = std::meta::remove_cvref(^^decltype(*this));
+
+  std::string path{};
+
+  static constexpr auto templateArgs = [self]() consteval -> auto {
+    auto templateArgs = std::meta::template_arguments_of(self);
+
+    std::reverse(templateArgs.begin(), templateArgs.end());
+
+    return std::define_static_array(templateArgs);
+  }();
+
+  template for (constexpr auto arg : templateArgs) {
+    using T = [:std::meta::type_of(arg):];
+
+    if constexpr (std::meta::is_enum_type(std::meta::dealias(^^T))) {
+
+      static constexpr auto enumerators = std::define_static_array(
+          std::meta::enumerators_of(std::meta::dealias(^^T)));
+
+      template for (constexpr auto enumerator : enumerators) {
+        if constexpr (std::meta::extract<T>(enumerator) ==
+                      std::meta::extract<T>(arg)) {
+
+          path.append("/");
+          path.append(std::meta::identifier_of(enumerator));
+        }
+      }
+    }
+  }
+  }
+  path.append(".file");
+
+  return std::define_static_string(path);
+}())) {}
 
 template <InstrumentType Type, Difficulty Dif>
 void Instrument<Type, Dif>::update(float dt) {
@@ -162,7 +206,6 @@ void Instrument<Type, Dif>::update(float dt) {
 
 template <InstrumentType Type, Difficulty Dif>
 void Instrument<Type, Dif>::selectPlayable() noexcept {
-
   m_selectedNote = NoNote;
   m_originalNote = m_playingNote = 0;
 
@@ -194,6 +237,7 @@ void Instrument<Type, Dif>::loadFile(std::stop_token stopToken,
   if (filename.empty()) {
     return; // Instrument selection can construct an instrument without a chart.
   }
+
   std::ifstream file(filename, std::ios::binary);
   if (!file) {
     TraceLog(LOG_WARNING, "Could not open chart: %s", filename.c_str());
@@ -236,7 +280,6 @@ void Instrument<Type, Dif>::loadFile(std::stop_token stopToken,
 
 template <InstrumentType Type, Difficulty Dif>
 bool Instrument<Type, Dif>::getPlay(std::uint32_t playedNote) noexcept {
-
   if (m_selectedNote == NoNote || !playedNote ||
       (playedNote & ~m_playingNote) || !m_playingNote) {
     return false;
