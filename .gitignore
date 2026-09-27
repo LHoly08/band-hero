@@ -20,3 +20,18 @@ sdkconfig
 settings.bin
 Instruments/
 Songs/
+
+# Python caches and virtual environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Python packaging output
+*.egg-info/
+dist/
+
+# Local song inputs and generated stems
+/tools/song_processor/**/*.mp3
+/tools/song_processor/**/*.wav
+/tools/song_processor/**/*.flac

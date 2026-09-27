@@ -83,12 +83,9 @@ public:
   }
 
 protected:
-  // Position uses reference layout coordinates; drawImage applies screen
-  // scaling.
   inline void drawNote(const Vector2 &position, const Color &tint,
                        std::uint8_t shape) const noexcept {
 
-    // Shape belongs to the note; drawing must not randomize it every frame.
     ResourceManager::drawImage<Textures::Gameplay::Notes>(
         {.x = 150.f * (shape % 2), .y = 0, .width = 150, .height = 150},
         position, tint);
@@ -187,8 +184,6 @@ void Instrument<Type, Dif>::update(float dt) {
   }
   m_time += dt;
 
-  // The worker owns loadingBuffer; downloadingBuffer is the shared mailbox.
-  // Chart records must be in nondecreasing timestamp order.
   if (m_activeBuffer.empty() ||
       m_activeBuffer.back().timeStamp - m_time < RefillAhead) {
     {
@@ -244,7 +239,7 @@ template <InstrumentType Type, Difficulty Dif>
 void Instrument<Type, Dif>::loadFile(std::stop_token stopToken,
                                      std::string &&filename) {
   if (filename.empty()) {
-    return; // Instrument selection can construct an instrument without a chart.
+    return;
   }
 
   std::ifstream file(filename, std::ios::binary);
@@ -302,7 +297,6 @@ bool Instrument<Type, Dif>::getPlay(std::uint32_t playedNote) noexcept {
     return false;
   }
 
-  // The nearest note may be after an earlier, still-unexpired note.
   m_activeBuffer.erase(m_activeBuffer.begin() + m_selectedNote);
   ++m_noteCount;
   selectPlayable();
