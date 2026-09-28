@@ -32,6 +32,7 @@ enum class InstrumentType : std::uint8_t {
   Guitar,
   Custom_1,
   Custom_2,
+  Custom_3,
 };
 
 template <InstrumentType Type>
@@ -40,7 +41,7 @@ concept SectionInstrumentType =
 
 template <InstrumentType Type>
 concept CustomType =
-    Type == InstrumentType::Custom_1 || Type == InstrumentType::Custom_2;
+    Type == InstrumentType::Custom_1 || Type == InstrumentType::Custom_2 || Type == InstrumentType::Custom_3;
 
 template <InstrumentType Type> struct Note {
 
@@ -58,6 +59,24 @@ struct Note<Type> {
   std::uint32_t playedBits{};
   float timeStamp{};
   std::uint8_t shape{};
+};
+
+template <InstrumentType Type>
+  requires CustomType<Type>
+struct InstrumentComposition;
+
+template <> struct InstrumentComposition<InstrumentType::Custom_1> {
+  std::uint8_t NumberSections{};
+  std::uint8_t NumberBitsSection{};
+};
+
+template <> struct InstrumentComposition<InstrumentType::Custom_2> {
+  std::uint8_t NumberEffectiveBitsEasy{};
+  std::uint8_t NumberEffectiveBitsHard{};
+};
+
+template <> struct InstrumentComposition<InstrumentType::Custom_3> {
+  std::uint8_t fileNumber{};
 };
 
 // Size: ? | Align: 8

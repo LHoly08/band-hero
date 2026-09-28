@@ -10,30 +10,17 @@
 
 #include "core/Scale.hpp"
 
-#include "gameplay/Settings.hpp"
+#include "config/Settings.hpp"
 
 #include "gameplay/instruments/Instrument.hpp"
+#include <lua.hpp>
 
 namespace bh {
-
-template <InstrumentType Type>
-  requires CustomType<Type>
-struct InstrumentComposition;
-
-template <> struct InstrumentComposition<InstrumentType::Custom_1> {
-  std::uint8_t NumberSections{};
-  std::uint8_t NumberBitsSection{};
-};
-
-template <> struct InstrumentComposition<InstrumentType::Custom_2> {
-  std::uint8_t NumberEffectiveBitsEasy{};
-  std::uint8_t NumberEffectiveBitsHard{};
-};
 
 struct CustomInstrumentComposition {
   std::string name;
   std::variant<InstrumentComposition<InstrumentType::Custom_1>,
-               InstrumentComposition<InstrumentType::Custom_2>>
+               InstrumentComposition<InstrumentType::Custom_2>, InstrumentComposition<InstrumentType::Custom_3>>
       composition;
 };
 
@@ -59,22 +46,6 @@ private:
   std::string m_name;
   InstrumentComposition<Type> m_composition;
 };
-
-template <>
-bool Custom<InstrumentType::Custom_1, Difficulty::Easy>::getPlay(
-    std::uint32_t playedNote) noexcept;
-
-template <>
-bool Custom<InstrumentType::Custom_1, Difficulty::Hard>::getPlay(
-    std::uint32_t playedNote) noexcept;
-
-template <>
-bool Custom<InstrumentType::Custom_2, Difficulty::Easy>::getPlay(
-    std::uint32_t playedNote) noexcept;
-
-template <>
-bool Custom<InstrumentType::Custom_2, Difficulty::Hard>::getPlay(
-    std::uint32_t playedNote) noexcept;
 
 template <InstrumentType Type, Difficulty Dif>
   requires CustomType<Type>
@@ -167,5 +138,31 @@ void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
     }
   }
 }
+
+
+template <>
+bool Custom<InstrumentType::Custom_1, Difficulty::Easy>::getPlay(
+    std::uint32_t playedNote) noexcept;
+
+template <>
+bool Custom<InstrumentType::Custom_1, Difficulty::Hard>::getPlay(
+    std::uint32_t playedNote) noexcept;
+
+template <>
+bool Custom<InstrumentType::Custom_2, Difficulty::Easy>::getPlay(
+    std::uint32_t playedNote) noexcept;
+
+template <>
+bool Custom<InstrumentType::Custom_2, Difficulty::Hard>::getPlay(
+    std::uint32_t playedNote) noexcept;
+
+    template <>
+bool Custom<InstrumentType::Custom_3, Difficulty::Easy>::getPlay(
+    std::uint32_t playedNote) noexcept;
+
+template <>
+bool Custom<InstrumentType::Custom_3, Difficulty::Hard>::getPlay(
+    std::uint32_t playedNote) noexcept;
+
 
 } // namespace bh

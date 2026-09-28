@@ -286,18 +286,32 @@ void PlayerSelectState::events() noexcept {
               if (std::holds_alternative<
                       InstrumentComposition<InstrumentType::Custom_1>>(
                       customComposition)) {
+                // Holds Custom_1
 
                 m_players[i] = std::make_unique<
                     Player<InstrumentType::Custom_1, Difficulty::Easy>>(
                     i, m_songName, customInstrument.name,
                     std::get<InstrumentComposition<InstrumentType::Custom_1>>(
                         customComposition));
-              } else {
+
+              } else if (std::holds_alternative<
+                      InstrumentComposition<InstrumentType::Custom_2>>(
+                      customComposition)){
+                // Holds Custom_2
 
                 m_players[i] = std::make_unique<
                     Player<InstrumentType::Custom_2, Difficulty::Easy>>(
                     i, m_songName, customInstrument.name,
                     std::get<InstrumentComposition<InstrumentType::Custom_2>>(
+                        customComposition));
+                
+              } else {
+                // Holds Custom_3
+
+                m_players[i] = std::make_unique<
+                    Player<InstrumentType::Custom_3, Difficulty::Easy>>(
+                    i, m_songName, customInstrument.name,
+                    std::get<InstrumentComposition<InstrumentType::Custom_3>>(
                         customComposition));
               }
 
@@ -306,6 +320,7 @@ void PlayerSelectState::events() noexcept {
               if (std::holds_alternative<
                       InstrumentComposition<InstrumentType::Custom_1>>(
                       customComposition)) {
+                  // Holds Custom 1
 
                 m_players[i] = std::make_unique<
                     Player<InstrumentType::Custom_1, Difficulty::Hard>>(
@@ -313,13 +328,26 @@ void PlayerSelectState::events() noexcept {
                     std::get<InstrumentComposition<InstrumentType::Custom_1>>(
                         customComposition));
 
-              } else {
+              } else if (std::holds_alternative<
+                      InstrumentComposition<InstrumentType::Custom_1>>(
+                      customComposition)) {
+                  // Holds Custom 2
 
                 m_players[i] = std::make_unique<
                     Player<InstrumentType::Custom_2, Difficulty::Hard>>(
                     i, m_songName, customInstrument.name,
                     std::get<InstrumentComposition<InstrumentType::Custom_2>>(
                         customComposition));
+
+              } else {
+                // Holds Custom 3
+
+                m_players[i] = std::make_unique<
+                    Player<InstrumentType::Custom_3, Difficulty::Hard>>(
+                    i, m_songName, customInstrument.name,
+                    std::get<InstrumentComposition<InstrumentType::Custom_3>>(
+                        customComposition));
+                
               }
             }
             break;

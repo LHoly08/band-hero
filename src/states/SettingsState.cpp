@@ -7,7 +7,7 @@
 
 #include "core/StateStack.hpp"
 
-#include "gameplay/Settings.hpp"
+#include "config/Settings.hpp"
 
 #include "states/MainMenuState.hpp"
 

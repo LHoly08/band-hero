@@ -5,7 +5,7 @@
 #include <string_view>
 #include <vector>
 
-#include "gameplay/Settings.hpp"
+#include "config/Settings.hpp"
 
 #include "serial/serialib.h"
 

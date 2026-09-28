@@ -186,7 +186,6 @@ public:
   ResourceManager(ResourceManager &&) = delete;
   void operator=(ResourceManager &&) = delete;
 
-  // Like drawImage, pos and fontSize use the OriginalWindowSize layout.
   template <Fonts_t FontType>
   inline static void drawText(const std::string_view text, const Vector2 &pos,
                               float fontSize = 64.f,
@@ -195,8 +194,6 @@ public:
   }
 
   template <Fonts_t FontType>
-  // Return the unscaled layout width for positioning before drawText scales
-  // it.
   inline static float measureText(const std::string_view text,
                                   float fontSize = 64.f) noexcept {
     return get().iMeasureText<FontType>(text, fontSize);
