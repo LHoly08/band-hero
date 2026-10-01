@@ -1,19 +1,19 @@
 #pragma once
-#include <cstdint>
 
 #include <array>
+#include <cstdint>
+#include <filesystem>
 #include <fstream>
 #include <ios>
+#include <meta>
 #include <string>
 #include <string_view>
 #include <utility>
 #include <vector>
-#include <filesystem>
-#include <meta>
+
+#include "raylib.h"
 
 #include "gameplay/instruments/Instrument.hpp"
-#include "raylib.h"
-#include <lua.hpp>
 
 namespace bh {
 
@@ -66,7 +66,9 @@ public:
 
   template <InstrumentType Type>
     requires CustomType<Type>
-  inline static void createCustomInstrument(std::string name, std::uint8_t n1 = 0, std::uint8_t n2 = 0) {
+  inline static void createCustomInstrument(std::string name,
+                                            std::uint8_t n1 = 0,
+                                            std::uint8_t n2 = 0) {
     return get().iCreateCustomInstrument<Type>(std::move(name), n1, n2);
   }
 
@@ -100,7 +102,8 @@ private:
 
   template <InstrumentType Type>
     requires CustomType<Type>
-  void iCreateCustomInstrument(std::string &&name, std::uint8_t n1, std::uint8_t n2);
+  void iCreateCustomInstrument(std::string &&name, std::uint8_t n1,
+                               std::uint8_t n2);
 
   static constexpr std::string fileName{"settings.bin"};
 
@@ -112,7 +115,8 @@ private:
 
 template <InstrumentType Type>
   requires CustomType<Type>
-void Settings::iCreateCustomInstrument(std::string &&name, std::uint8_t n1, std::uint8_t n2) {
+void Settings::iCreateCustomInstrument(std::string &&name, std::uint8_t n1,
+                                       std::uint8_t n2) {
   if constexpr (Type != InstrumentType::Custom_3) {
     if (!n1 || !n2) {
       return;
@@ -121,74 +125,80 @@ void Settings::iCreateCustomInstrument(std::string &&name, std::uint8_t n1, std:
 
   std::filesystem::path instruments("Instruments/");
 
-    std::uint8_t count{1};
-    for (auto const& _ : std::filesystem::directory_iterator{instruments}) {
-      ++count;
+  std::uint16_t count{1};
+  for (auto const &_ : std::filesystem::directory_iterator{instruments}) {
+    ++count;
+  }
+
+  std::ofstream file(instruments.string().append("/").append(
+                         std::to_string(count).append(".lua")),
+                     std::ios_base::trunc);
+
+  file << "---@type string\n";
+  file << "name = \"" << name << "\"\n\n";
+
+  constexpr std::string_view TypeText = []<InstrumentType T> consteval -> auto {
+    static constexpr auto enumerators =
+        std::define_static_array(std::meta::enumerators_of(^^InstrumentType));
+
+    template for (constexpr auto enumerator : enumerators) {
+      if (std::meta::extract<InstrumentType>(enumerator) == T) {
+        return std::meta::identifier_of(enumerator);
+      }
+    }
+    std::unreachable();
+  }.template operator()<Type>();
+
+  file << "-- Custom_1 / Custom_2 / Custom_3\n";
+
+  file << "Type = " << TypeText << "\n\n";
+
+  file << "-- For " << TypeText << " Only!\n";
+
+  if constexpr (Type != InstrumentType::Custom_3) {
+
+    const InstrumentComposition<Type> composition{n1, n2};
+
+    static constexpr auto members =
+        std::define_static_array(std::meta::nonstatic_data_members_of(
+            ^^InstrumentComposition<Type>,
+            std::meta::access_context::current()));
+
+    file << "Composition = {\n";
+
+    template for (constexpr auto member : members) {
+      file << '\t' << std::meta::identifier_of(member) << " = "
+           << static_cast<std::uint32_t>(composition.[:member:]) << ",\n";
     }
 
-    std::ofstream file(instruments.string().append("/").append(std::to_string(count).append(".lua")), std::ios_base::trunc);
+    file << "}\n";
 
-    file << "---@type string\n";
-    file << "name = \"" << name << "\"\n\n";
+  } else {
 
-    constexpr std::string_view TypeText = []<InstrumentType T> consteval -> auto {
-      static constexpr auto enumerators = std::define_static_array(std::meta::enumerators_of(^^InstrumentType));
+    file << '\n';
 
-      template for (constexpr auto enumerator : enumerators) {
-        if (std::meta::extract<InstrumentType>(enumerator) == T) {
-          return std::meta::identifier_of(enumerator);
-        }
-      }
-      std::unreachable();
+    static constexpr auto Difficulties =
+        std::define_static_array(std::meta::enumerators_of(^^Difficulty));
 
-    }.template operator()<Type>();
+    template for (constexpr auto Dif : Difficulties) {
+      constexpr auto DifIdentifier = std::meta::identifier_of(Dif);
 
-    file << "-- Custom_1 / Custom_2 / Custom_3\n";
-
-    file << "Type = " << TypeText << "\n\n";
-
-    file << "-- For " << TypeText << " Only!\n";
-
-    if constexpr (Type != InstrumentType::Custom_3) {
-
-      const InstrumentComposition<Type> composition{n1, n2};
-
-      static constexpr auto members = std::define_static_array(
-        std::meta::nonstatic_data_members_of(
-          ^^InstrumentComposition<Type>,
-          std::meta::access_context::current()
-        )
-      );
-
-      file << "Composition = {\n";
-
-      template for (constexpr auto member : members) {
-        file << '\t'
-        << std::meta::identifier_of(member)
-        << " = "
-        << static_cast<std::uint32_t>(composition.[: member :])
-        << ",\n";
-      }
-
-      file << "}\n";
-
-    } else {
-
-      file << '\n';
-
+      file << "-- For " << DifIdentifier << " Difficulty\n";
       file << "---@param note integer\n";
       file << "---@return integer\n";
-      file << "function play(note)\n\treturn note\nend\n";
-      
+      file << "function Play" << DifIdentifier
+           << "(note)\n\treturn note\nend\n";
       file << '\n';
-
-      file << "-- drawNote(position) to draw a note\n";
-
-      file << "---@param incomingNote integer\n";
-      file << "---@return nil\n";
-      file << "function draw(incomingNote)\n\t\nend\n";
-
     }
+
+    file << '\n';
+
+    file << "-- drawNote(position, color) to draw a note\n";
+
+    file << "---@param incomingNote integer\n";
+    file << "---@return nil\n";
+    file << "function Draw(incomingNote)\n\t\nend\n";
+  }
 }
 
 } // namespace bh

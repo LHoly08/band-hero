@@ -1,7 +1,6 @@
 #pragma once
 
 #include <algorithm>
-#include <array>
 #include <cstdint>
 #include <meta>
 #include <ranges>
@@ -32,6 +31,10 @@ public:
   enum class MainMenu : std::uint8_t {
     Title = 0,
     Background,
+  };
+
+  enum class Building : std::uint8_t {
+    Background = 0,
   };
 
   template <auto Ty> inline static consteval std::uint8_t getOffset() {

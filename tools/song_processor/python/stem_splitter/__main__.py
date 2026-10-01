@@ -1,5 +1,4 @@
 import argparse
-from .splitter import Splitter
 
 def main():
     parser: argparse.ArgumentParser = argparse.ArgumentParser()
@@ -12,6 +11,11 @@ def main():
     songname: str | None = args.songname
 
     if args.songname is not None:
+        if __package__:
+            from .splitter import Splitter
+        else:
+            from splitter import Splitter
+
         splitter: Splitter = Splitter(args.songname, '.' + args.extension, args.path)
         try:
             splitter.split()

@@ -63,18 +63,4 @@ bool Custom<InstrumentType::Custom_2, Difficulty::Hard>::getPlay(
   return Base::getPlay(playedNote);
 }
 
-template <>
-bool Custom<InstrumentType::Custom_3, Difficulty::Easy>::getPlay(
-    std::uint32_t playedNote) noexcept {
-
-  return Base::getPlay(playedNote);
-}
-
-template <>
-bool Custom<InstrumentType::Custom_3, Difficulty::Hard>::getPlay(
-    std::uint32_t playedNote) noexcept {
-
-  return Base::getPlay(playedNote);
-}
-
 } // namespace bh

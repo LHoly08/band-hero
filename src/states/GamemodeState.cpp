@@ -4,7 +4,8 @@
 
 #include "core/StateStack.hpp"
 
-#include "states/PlayerSelectState.hpp"
+#include "states/BuildingState.hpp"
+#include "states/SongSelectState.hpp"
 
 namespace bh {
 
@@ -12,20 +13,30 @@ void GamemodeState::draw() const noexcept {
   m_localButton.draw<WHITE, true>();
   m_lanButton.draw<WHITE, true>();
   m_onlineButton.draw<WHITE, true>();
+  m_backButton.draw<WHITE, true>();
 }
 
-void GamemodeState::update(float dt) noexcept {}
+void GamemodeState::update(float dt) noexcept { auto _ = dt; }
 
 void GamemodeState::events() noexcept {
-  if (IsMouseButtonPressed(0)) {
-    const Vector2 MousePos{GetMousePosition()};
+  const Vector2 mousePos = GetMousePosition();
+  const bool localClicked = m_localButton.updateInput(mousePos);
+  const bool lanClicked = m_lanButton.updateInput(mousePos);
+  const bool onlineClicked = m_onlineButton.updateInput(mousePos);
+  const bool backClicked = m_backButton.updateInput(mousePos);
 
-    if (m_localButton.pressed(MousePos)) [[unlikely]] {
-      m_stack.replace<PlayerSelectState>("Hello");
-    } else if (m_lanButton.pressed(MousePos)) [[unlikely]] {
+  if (localClicked) [[unlikely]] {
+    m_stack.pop();
+    m_stack.replace<SongSelectState>();
 
-    } else if (m_onlineButton.pressed(MousePos)) [[unlikely]] {
-    }
+  } else if (lanClicked) [[unlikely]] {
+    m_stack.push<BuildingState>();
+
+  } else if (onlineClicked) [[unlikely]] {
+    m_stack.push<BuildingState>();
+
+  } else if (backClicked) [[unlikely]] {
+    m_stack.pop();
   }
 }
 
@@ -33,6 +44,11 @@ void GamemodeState::onEnter() noexcept {
   ResourceManager::loadTextures<Textures::UI>();
 }
 
-void GamemodeState::onExit() noexcept {}
+void GamemodeState::onExit() noexcept {
+  m_localButton.resetInteraction();
+  m_lanButton.resetInteraction();
+  m_onlineButton.resetInteraction();
+  m_backButton.resetInteraction();
+}
 
 } // namespace bh

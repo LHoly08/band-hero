@@ -1,0 +1,87 @@
+{
+  "image": "Buttons.png",
+  "size": {
+    "width": 1024,
+    "height": 768
+  },
+  "referenceScreen": {
+    "width": 1920,
+    "height": 1080
+  },
+  "scale": 1,
+  "transparent": true,
+  "frames": {
+    "menu_normal": {
+      "x": 0,
+      "y": 0,
+      "width": 360,
+      "height": 100
+    },
+    "settings_normal": {
+      "x": 500,
+      "y": 0,
+      "width": 96,
+      "height": 96
+    },
+    "construction_normal": {
+      "x": 520,
+      "y": 208,
+      "width": 480,
+      "height": 120
+    },
+    "back_normal": {
+      "x": 0,
+      "y": 640,
+      "width": 320,
+      "height": 96
+    },
+    "menu_hover": {
+      "x": 0,
+      "y": 208,
+      "width": 360,
+      "height": 100
+    },
+    "settings_hover": {
+      "x": 648,
+      "y": 0,
+      "width": 96,
+      "height": 96
+    },
+    "construction_hover": {
+      "x": 520,
+      "y": 344,
+      "width": 480,
+      "height": 120
+    },
+    "back_hover": {
+      "x": 336,
+      "y": 640,
+      "width": 320,
+      "height": 96
+    },
+    "menu_pressed": {
+      "x": 0,
+      "y": 416,
+      "width": 360,
+      "height": 100
+    },
+    "settings_pressed": {
+      "x": 796,
+      "y": 0,
+      "width": 96,
+      "height": 96
+    },
+    "construction_pressed": {
+      "x": 520,
+      "y": 480,
+      "width": 480,
+      "height": 120
+    },
+    "back_pressed": {
+      "x": 672,
+      "y": 640,
+      "width": 320,
+      "height": 96
+    }
+  }
+}

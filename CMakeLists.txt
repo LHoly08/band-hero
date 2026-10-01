@@ -51,6 +51,21 @@ target_include_directories(BandHero PRIVATE
 
 target_link_libraries(BandHero PRIVATE raylib lua)
 
+# A non-system GCC may need a newer libstdc++ than the system loader finds.
+# Keep the matching runtime discoverable when running from the build tree.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND UNIX AND NOT APPLE)
+  execute_process(
+    COMMAND "${CMAKE_CXX_COMPILER}" -print-file-name=libstdc++.so.6
+    OUTPUT_VARIABLE GCC_LIBSTDCXX
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  if(IS_ABSOLUTE "${GCC_LIBSTDCXX}" AND EXISTS "${GCC_LIBSTDCXX}")
+    get_filename_component(GCC_LIBSTDCXX_REAL "${GCC_LIBSTDCXX}" REALPATH)
+    get_filename_component(GCC_RUNTIME_DIR "${GCC_LIBSTDCXX_REAL}" DIRECTORY)
+    set_property(TARGET BandHero APPEND PROPERTY BUILD_RPATH "${GCC_RUNTIME_DIR}")
+  endif()
+endif()
+
 if(WIN32)
   target_compile_definitions(BandHero PRIVATE
     WIN32_LEAN_AND_MEAN

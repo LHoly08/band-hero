@@ -5,6 +5,8 @@
 
 #include "core/StateStack.hpp"
 
+#include "ui/Theme.hpp"
+
 namespace bh {
 
 class Game {
@@ -31,7 +33,7 @@ private:
   inline void draw() const noexcept {
     BeginDrawing();
 
-    ClearBackground(WHITE);
+    ClearBackground(theme::Background);
 
     m_stack.draw();
 

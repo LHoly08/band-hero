@@ -11,12 +11,14 @@ public:
   inline GamemodeState(StateStack &stack) noexcept
       : State(stack),
         m_localButton({.x = 100, .y = 100},
-                      {.x = 0, .y = 0, .width = 500, .height = 200}, "Local"),
+                      {.x = 0, .y = 0, .width = 360, .height = 100}, "Local"),
         m_lanButton({.x = 500, .y = 500},
-                    {.x = 0, .y = 0, .width = 500, .height = 200}, "LAN"),
+                    {.x = 0, .y = 0, .width = 360, .height = 100}, "LAN"),
         m_onlineButton({.x = 1000, .y = 300},
-                       {.x = 0, .y = 0, .width = 500, .height = 200},
-                       "Online") {}
+                       {.x = 0, .y = 0, .width = 360, .height = 100}, "Online"),
+        m_backButton({.x = 1231, .y = 214},
+                     {.x = 0, .y = 0, .width = 360, .height = 100},
+                     "Main Menu") {}
   ~GamemodeState() override {
     ResourceManager::unloadTextures<Textures::UI>();
   };
@@ -31,6 +33,7 @@ private:
   Button m_localButton;
   Button m_lanButton;
   Button m_onlineButton;
+  Button m_backButton;
 };
 
 } // namespace bh

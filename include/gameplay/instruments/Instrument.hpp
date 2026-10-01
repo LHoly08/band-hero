@@ -41,7 +41,8 @@ concept SectionInstrumentType =
 
 template <InstrumentType Type>
 concept CustomType =
-    Type == InstrumentType::Custom_1 || Type == InstrumentType::Custom_2 || Type == InstrumentType::Custom_3;
+    Type == InstrumentType::Custom_1 || Type == InstrumentType::Custom_2 ||
+    Type == InstrumentType::Custom_3;
 
 template <InstrumentType Type> struct Note {
 
@@ -76,7 +77,7 @@ template <> struct InstrumentComposition<InstrumentType::Custom_2> {
 };
 
 template <> struct InstrumentComposition<InstrumentType::Custom_3> {
-  std::uint8_t fileNumber{};
+  std::uint16_t fileNumber{};
 };
 
 // Size: ? | Align: 8

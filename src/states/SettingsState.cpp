@@ -5,9 +5,9 @@
 
 #include "raylib.h"
 
-#include "core/StateStack.hpp"
-
 #include "config/Settings.hpp"
+
+#include "core/StateStack.hpp"
 
 #include "states/MainMenuState.hpp"
 
@@ -35,15 +35,18 @@ void SettingsState::draw() const noexcept {
   }
 }
 
-void SettingsState::update(float dt) noexcept {}
+void SettingsState::update(float dt) noexcept { auto _ = dt; }
 
 void SettingsState::events() noexcept {
-  if (IsMouseButtonPressed(0)) {
-    const Vector2 MousePos{GetMousePosition()};
+  const Vector2 mousePos = GetMousePosition();
+  const bool menuClicked = m_menuButton.updateInput(mousePos);
+  const bool saveClicked = m_saveButton.updateInput(mousePos);
+  m_defaultButton.updateInput(mousePos);
+  if (menuClicked || saveClicked) {
 
-    if (m_menuButton.pressed(MousePos)) [[unlikely]] {
+    if (menuClicked) [[unlikely]] {
       m_stack.replace<MainMenuState>();
-    } else if (m_saveButton.pressed(MousePos)) [[unlikely]] {
+    } else if (saveClicked) [[unlikely]] {
 
       switch (m_menuSection) {
 
@@ -70,6 +73,10 @@ void SettingsState::onEnter() noexcept {
   ResourceManager::loadTextures<Textures::UI>();
 }
 
-void SettingsState::onExit() noexcept {}
+void SettingsState::onExit() noexcept {
+  m_menuButton.resetInteraction();
+  m_saveButton.resetInteraction();
+  m_defaultButton.resetInteraction();
+}
 
 } // namespace bh

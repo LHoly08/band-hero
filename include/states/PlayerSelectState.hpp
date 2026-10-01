@@ -24,12 +24,11 @@ namespace bh {
 class PlayerSelectState final : public State {
 public:
   inline PlayerSelectState(StateStack &stack, std::string &&songName) noexcept
-      : State(stack), m_backNextButton({.x = 100, .y = 100}, {0, 0, 500, 200},
-                                       "Choose Instruments"),
-        m_increaseCountButton({.x = 500, .y = 500}, {0, 0, 500, 200}, ">"),
-        m_decreaseCountButton({.x = 1000, .y = 300}, {0, 0, 500, 200}, "<"),
-        m_startButton({.x = 800, .y = 600}, {0, 0, 500, 200}, "Start"),
-        m_mainMenuButton({.x = 1420, .y = 0}, {0, 0, 500, 200}, "Main Menu"),
+      : State(stack), m_nextButton({.x = 100, .y = 100}, {0, 0, 360, 100},
+                                   "Choose Instruments"),
+        m_backButton({.x = 1420, .y = 0}, {0, 640, 320, 96}, "Back"),
+        m_increaseCountButton({.x = 500, .y = 500}, {0, 0, 360, 100}, ">"),
+        m_decreaseCountButton({.x = 1000, .y = 300}, {0, 0, 360, 100}, "<"),
         m_songName(std::move(songName)) {
 
     m_serial.openDevice(Settings::getSerialPort().c_str(),
@@ -51,11 +50,10 @@ public:
 private:
   serialib m_serial;
 
-  Button m_backNextButton;
+  Button m_nextButton;
+  Button m_backButton;
   Button m_increaseCountButton;
   Button m_decreaseCountButton;
-  Button m_startButton;
-  Button m_mainMenuButton;
 
   std::vector<CustomInstrumentComposition> m_customInstruments;
 

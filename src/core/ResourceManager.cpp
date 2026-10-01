@@ -33,18 +33,17 @@ ResourceManager::ResourceManager()
           std::string path("assets/font/");
           path.append(s).append(".TTF");
 
-          if (std::ifstream(assetPath(path)).is_open()) {
-
-            return LoadFont(assetPath(path).c_str());
-
-          } else {
-
+          if (!std::ifstream(assetPath(path)).is_open()) {
             std::ranges::transform(
                 path.end() - 3, path.end(), path.end() - 3,
                 [](char c) -> char { return std::tolower(c); });
-
-            return LoadFont(assetPath(path).c_str());
           }
+          // Rasterize above the normal button label size, then filter when scaled.
+          Font font = LoadFontEx(assetPath(path).c_str(), 96, nullptr, 224);
+          if (font.texture.id != 0) {
+            SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
+          }
+          return font;
         });
   }
 }

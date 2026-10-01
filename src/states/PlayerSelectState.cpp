@@ -14,26 +14,26 @@
 #include "states/GameState.hpp"
 #include "states/MainMenuState.hpp"
 
+#include "ui/Button.hpp"
+
 namespace bh {
 
 void PlayerSelectState::draw() const noexcept {
+  m_backButton.draw<WHITE, true, 40, TextAlign::Center>();
 
   switch (m_stage) {
   case Stage::ChoosingPlayerCount: {
-    m_backNextButton.draw<WHITE, true>();
+    m_nextButton.draw<WHITE, true>();
     m_increaseCountButton.draw<WHITE, true>();
     m_decreaseCountButton.draw<WHITE, true>();
-    m_mainMenuButton.draw<WHITE, true>();
 
     const char playerCountText[2]{m_playerCount, '\0'};
     ResourceManager::drawText<Fonts::Type::Default>(
-        playerCountText, Vector2{100.f, 350.f}, 64, BLACK);
+        playerCountText, Vector2{100.f, 350.f}, 64, theme::Text);
     break;
   }
   case Stage::ChoosingInstruments: {
-    m_backNextButton.draw<WHITE, true>();
     m_startButton.draw<WHITE, true>();
-    m_mainMenuButton.draw<WHITE, true>();
 
     break;
   }
@@ -65,16 +65,19 @@ void PlayerSelectState::update(float dt) noexcept {
           goto VectorAlreadyFull;
         }
 
-        m_check[index].push_back(buffer);
-        {
-          std::uint8_t &max = m_minMax[index].first;
-          const bool cond = buffer > m_check[index][max];
-          max = index * cond + max * !cond;
-        }
-        {
-          std::uint8_t &min = m_minMax[index].second;
-          const bool cond = buffer < m_check[index][min];
-          min = index * cond + min * !cond;
+        if (buffer) {
+
+          m_check[index].push_back(buffer);
+          {
+            std::uint8_t &max = m_minMax[index].first;
+            const bool cond = buffer > m_check[index][max];
+            max = index * cond + max * !cond;
+          }
+          {
+            std::uint8_t &min = m_minMax[index].second;
+            const bool cond = buffer < m_check[index][min];
+            min = index * cond + min * !cond;
+          }
         }
       }
     }
@@ -145,267 +148,273 @@ void PlayerSelectState::update(float dt) noexcept {
 
 void PlayerSelectState::events() noexcept {
 
-  if (IsMouseButtonPressed(0)) [[unlikely]] {
-    const Vector2 MousePos{GetMousePosition()};
+  const Vector2 mousePos = GetMousePosition();
+  const bool choosingCount = m_stage == Stage::ChoosingPlayerCount;
+  const bool testing = m_stage == Stage::TestingInstruments;
+  const bool nextClicked = m_nextButton.updateInput(mousePos, !testing);
+  const bool increaseClicked =
+      m_increaseCountButton.updateInput(mousePos, choosingCount);
+  const bool decreaseClicked =
+      m_decreaseCountButton.updateInput(mousePos, choosingCount);
+  const bool backClicked = m_backButton.updateInput(mousePos, !testing);
 
-    if (m_stage != Stage::TestingInstruments &&
-        m_backNextButton.pressed(MousePos)) [[unlikely]] {
+  if (backClicked) [[unlikely]] {
 
-      switch (m_stage) {
+    switch (m_stage) {
 
-      case Stage::ChoosingPlayerCount: {
+    case Stage::ChoosingPlayerCount: {
 
-        m_stage = Stage::ChoosingInstruments;
+      m_stage = Stage::ChoosingInstruments;
 
-        m_backNextButton.changeText("Go Back");
+      m_backButton.changeText("Go Back");
 
-        const std::uint8_t loopTimes = (m_playerCount - '0');
+      const std::uint8_t loopTimes = (m_playerCount - '0');
 
-        // Every player initialized to nullptr
-        m_players.clear();
-        for (std::uint8_t i{}; i < loopTimes; ++i) {
-          m_players.emplace_back(nullptr);
-        }
-
-        // Every player starts with Easy selected
-        m_playerChoices.clear();
-        for (std::uint8_t i{}; i < loopTimes; ++i) {
-          m_playerChoices.emplace_back(1);
-        }
-        break;
-      }
-      case Stage::ChoosingInstruments: {
-        m_stage = Stage::ChoosingPlayerCount;
-
-        m_backNextButton.changeText("Choose Instruments");
-
-        break;
-      }
-      default: {
-        break;
-      }
+      // Every player initialized to nullptr
+      m_players.clear();
+      for (std::uint8_t i{}; i < loopTimes; ++i) {
+        m_players.emplace_back(nullptr);
       }
 
-    } else if (m_stage == Stage::ChoosingPlayerCount &&
-               m_increaseCountButton.pressed(MousePos)) [[unlikely]] {
-
-      switch (m_stage) {
-      case Stage::ChoosingPlayerCount: {
-
-        const bool condition{(++m_playerCount) <= '4'};
-        m_playerCount = (m_playerCount * condition) + ('1' * !condition);
-        break;
+      // Every player starts with Easy selected
+      m_playerChoices.clear();
+      for (std::uint8_t i{}; i < loopTimes; ++i) {
+        m_playerChoices.emplace_back(1);
       }
-      case Stage::ChoosingInstruments: {
-        break;
-      }
-      default: {
-        break;
-      }
-      }
+      break;
+    }
+    case Stage::ChoosingInstruments: {
+      m_stage = Stage::ChoosingPlayerCount;
 
-    } else if (m_stage == Stage::ChoosingPlayerCount &&
-               m_decreaseCountButton.pressed(MousePos)) {
+      break;
+    }
+    case Stage::TestingInstruments: {
+      m_stage = Stage::ChoosingInstruments;
 
-      switch (m_stage) {
-      case Stage::ChoosingPlayerCount: {
+      break;
+    }
+    default: {
+      break;
+    }
+    }
 
-        const bool condition{(--m_playerCount) >= '1'};
-        m_playerCount = (m_playerCount * condition) + ('4' * !condition);
-        break;
-      }
-      case Stage::ChoosingInstruments: {
-        break;
-      }
-      default: {
-        break;
-      }
-      }
+  } else if (m_stage == Stage::ChoosingPlayerCount && increaseClicked)
+      [[unlikely]] {
 
-    } else if (m_stage != Stage::ChoosingPlayerCount &&
-               m_startButton.pressed(MousePos)) [[unlikely]] {
+    switch (m_stage) {
+    case Stage::ChoosingPlayerCount: {
 
-      switch (m_stage) {
-      case Stage::ChoosingInstruments: {
+      const bool condition{(++m_playerCount) <= '4'};
+      m_playerCount = (m_playerCount * condition) + ('1' * !condition);
+      break;
+    }
+    case Stage::ChoosingInstruments: {
+      break;
+    }
+    default: {
+      break;
+    }
+    }
 
-        for (std::uint8_t i{}; i < m_playerChoices.size(); ++i) {
-          const auto &playerChoice = m_playerChoices[i];
+  } else if (m_stage == Stage::ChoosingPlayerCount && decreaseClicked) {
 
-          switch (playerChoice >> 1) {
+    switch (m_stage) {
+    case Stage::ChoosingPlayerCount: {
 
-          case 0: {
+      const bool condition{(--m_playerCount) >= '1'};
+      m_playerCount = (m_playerCount * condition) + ('4' * !condition);
+      break;
+    }
+    case Stage::ChoosingInstruments: {
+      break;
+    }
+    default: {
+      break;
+    }
+    }
 
-            if (playerChoice & 1) {
-              m_players[i] = std::make_unique<
-                  Player<InstrumentType::Guitar, Difficulty::Easy>>(i,
-                                                                    m_songName);
-            } else {
-              m_players[i] = std::make_unique<
-                  Player<InstrumentType::Guitar, Difficulty::Hard>>(i,
-                                                                    m_songName);
-            }
-            break;
-          }
+  } else if (m_stage != Stage::ChoosingPlayerCount && nextClicked)
+      [[unlikely]] {
 
-          case 1: {
+    switch (m_stage) {
+    case Stage::ChoosingInstruments: {
 
-            if (playerChoice & 1) {
-              m_players[i] = std::make_unique<
-                  Player<InstrumentType::Bass, Difficulty::Easy>>(i,
+      for (std::uint8_t i{}; i < m_playerChoices.size(); ++i) {
+        const auto &playerChoice = m_playerChoices[i];
+
+        switch (playerChoice >> 1) {
+
+        case 0: {
+
+          if (playerChoice & 1) {
+            m_players[i] = std::make_unique<
+                Player<InstrumentType::Guitar, Difficulty::Easy>>(i,
                                                                   m_songName);
-            } else {
-              m_players[i] = std::make_unique<
-                  Player<InstrumentType::Bass, Difficulty::Hard>>(i,
+          } else {
+            m_players[i] = std::make_unique<
+                Player<InstrumentType::Guitar, Difficulty::Hard>>(i,
                                                                   m_songName);
-            }
-            break;
           }
+          break;
+        }
 
-          case 2: {
+        case 1: {
 
-            if (playerChoice & 1) {
+          if (playerChoice & 1) {
+            m_players[i] = std::make_unique<
+                Player<InstrumentType::Bass, Difficulty::Easy>>(i, m_songName);
+          } else {
+            m_players[i] = std::make_unique<
+                Player<InstrumentType::Bass, Difficulty::Hard>>(i, m_songName);
+          }
+          break;
+        }
+
+        case 2: {
+
+          if (playerChoice & 1) {
+            m_players[i] = std::make_unique<
+                Player<InstrumentType::Drums, Difficulty::Easy>>(i, m_songName);
+          } else {
+            m_players[i] = std::make_unique<
+                Player<InstrumentType::Drums, Difficulty::Hard>>(i, m_songName);
+          }
+          break;
+        }
+
+        default: {
+
+          const auto &customInstrument =
+              m_customInstruments.at((playerChoice >> 1) - 3);
+          const auto &customComposition = customInstrument.composition;
+
+          if (playerChoice & 1) {
+
+            if (std::holds_alternative<
+                    InstrumentComposition<InstrumentType::Custom_1>>(
+                    customComposition)) {
+              // Holds Custom_1
+
               m_players[i] = std::make_unique<
-                  Player<InstrumentType::Drums, Difficulty::Easy>>(i,
-                                                                   m_songName);
-            } else {
+                  Player<InstrumentType::Custom_1, Difficulty::Easy>>(
+                  i, m_songName, customInstrument.name,
+                  std::get<InstrumentComposition<InstrumentType::Custom_1>>(
+                      customComposition));
+
+            } else if (std::holds_alternative<
+                           InstrumentComposition<InstrumentType::Custom_2>>(
+                           customComposition)) {
+              // Holds Custom_2
+
               m_players[i] = std::make_unique<
-                  Player<InstrumentType::Drums, Difficulty::Hard>>(i,
-                                                                   m_songName);
-            }
-            break;
-          }
-
-          default: {
-
-            const auto &customInstrument =
-                m_customInstruments.at((playerChoice >> 1) - 3);
-            const auto &customComposition = customInstrument.composition;
-
-            if (playerChoice & 1) {
-
-              if (std::holds_alternative<
-                      InstrumentComposition<InstrumentType::Custom_1>>(
-                      customComposition)) {
-                // Holds Custom_1
-
-                m_players[i] = std::make_unique<
-                    Player<InstrumentType::Custom_1, Difficulty::Easy>>(
-                    i, m_songName, customInstrument.name,
-                    std::get<InstrumentComposition<InstrumentType::Custom_1>>(
-                        customComposition));
-
-              } else if (std::holds_alternative<
-                      InstrumentComposition<InstrumentType::Custom_2>>(
-                      customComposition)){
-                // Holds Custom_2
-
-                m_players[i] = std::make_unique<
-                    Player<InstrumentType::Custom_2, Difficulty::Easy>>(
-                    i, m_songName, customInstrument.name,
-                    std::get<InstrumentComposition<InstrumentType::Custom_2>>(
-                        customComposition));
-                
-              } else {
-                // Holds Custom_3
-
-                m_players[i] = std::make_unique<
-                    Player<InstrumentType::Custom_3, Difficulty::Easy>>(
-                    i, m_songName, customInstrument.name,
-                    std::get<InstrumentComposition<InstrumentType::Custom_3>>(
-                        customComposition));
-              }
+                  Player<InstrumentType::Custom_2, Difficulty::Easy>>(
+                  i, m_songName, customInstrument.name,
+                  std::get<InstrumentComposition<InstrumentType::Custom_2>>(
+                      customComposition));
 
             } else {
+              // Holds Custom_3
 
-              if (std::holds_alternative<
-                      InstrumentComposition<InstrumentType::Custom_1>>(
-                      customComposition)) {
-                  // Holds Custom 1
-
-                m_players[i] = std::make_unique<
-                    Player<InstrumentType::Custom_1, Difficulty::Hard>>(
-                    i, m_songName, customInstrument.name,
-                    std::get<InstrumentComposition<InstrumentType::Custom_1>>(
-                        customComposition));
-
-              } else if (std::holds_alternative<
-                      InstrumentComposition<InstrumentType::Custom_1>>(
-                      customComposition)) {
-                  // Holds Custom 2
-
-                m_players[i] = std::make_unique<
-                    Player<InstrumentType::Custom_2, Difficulty::Hard>>(
-                    i, m_songName, customInstrument.name,
-                    std::get<InstrumentComposition<InstrumentType::Custom_2>>(
-                        customComposition));
-
-              } else {
-                // Holds Custom 3
-
-                m_players[i] = std::make_unique<
-                    Player<InstrumentType::Custom_3, Difficulty::Hard>>(
-                    i, m_songName, customInstrument.name,
-                    std::get<InstrumentComposition<InstrumentType::Custom_3>>(
-                        customComposition));
-                
-              }
+              m_players[i] = std::make_unique<
+                  Player<InstrumentType::Custom_3, Difficulty::Easy>>(
+                  i, m_songName, customInstrument.name,
+                  std::get<InstrumentComposition<InstrumentType::Custom_3>>(
+                      customComposition));
             }
-            break;
+
+          } else {
+
+            if (std::holds_alternative<
+                    InstrumentComposition<InstrumentType::Custom_1>>(
+                    customComposition)) {
+              // Holds Custom 1
+
+              m_players[i] = std::make_unique<
+                  Player<InstrumentType::Custom_1, Difficulty::Hard>>(
+                  i, m_songName, customInstrument.name,
+                  std::get<InstrumentComposition<InstrumentType::Custom_1>>(
+                      customComposition));
+
+            } else if (std::holds_alternative<
+                           InstrumentComposition<InstrumentType::Custom_1>>(
+                           customComposition)) {
+              // Holds Custom 2
+
+              m_players[i] = std::make_unique<
+                  Player<InstrumentType::Custom_2, Difficulty::Hard>>(
+                  i, m_songName, customInstrument.name,
+                  std::get<InstrumentComposition<InstrumentType::Custom_2>>(
+                      customComposition));
+
+            } else {
+              // Holds Custom 3
+
+              m_players[i] = std::make_unique<
+                  Player<InstrumentType::Custom_3, Difficulty::Hard>>(
+                  i, m_songName, customInstrument.name,
+                  std::get<InstrumentComposition<InstrumentType::Custom_3>>(
+                      customComposition));
+            }
           }
-          }
+          break;
         }
-
-        for (auto &player : m_players) {
-          player->setPlayerCount(m_playerCount - '0');
         }
-
-        m_stage = Stage::TestingInstruments;
-
-        m_checksPassed = 0;
-
-        m_check.clear();
-        m_minMax.clear();
-
-        for (std::uint8_t i{}; i < (m_playerCount - '0'); ++i) {
-          m_check.emplace_back();
-          m_minMax.emplace_back();
-        }
-
-        m_startButton.changeText("Cancel");
-
-        break;
       }
-      case Stage::TestingInstruments: {
 
-        m_stage = Stage::ChoosingInstruments;
+      for (auto &player : m_players) {
+        player->setPlayerCount(m_playerCount - '0');
+      }
 
-        m_startButton.changeText("Start");
+      m_stage = Stage::TestingInstruments;
 
-        break;
+      m_checksPassed = 0;
+
+      m_check.clear();
+      m_minMax.clear();
+
+      for (std::uint8_t i{}; i < (m_playerCount - '0'); ++i) {
+        m_check.emplace_back();
+        m_minMax.emplace_back();
       }
-      default: {
-        break;
-      }
-      }
-    } else if (m_stage != Stage::TestingInstruments &&
-               m_mainMenuButton.pressed(MousePos)) {
-      switch (m_stage) {
-      case Stage::TestingInstruments: {
-        break;
-      }
-      default: {
-        m_stack.replace<MainMenuState>();
-        break;
-      }
-      }
+
+      break;
+    }
+    case Stage::TestingInstruments: {
+
+      m_stage = Stage::ChoosingInstruments;
+
+      m_startButton.changeText("Start");
+
+      break;
+    }
+    default: {
+      break;
+    }
+    }
+  } else if (m_stage != Stage::TestingInstruments && menuClicked) {
+    switch (m_stage) {
+    case Stage::TestingInstruments: {
+      break;
+    }
+    default: {
+      m_stack.replace<MainMenuState>();
+      break;
+    }
     }
   }
+}
 }
 
 void PlayerSelectState::onEnter() noexcept {
   ResourceManager::loadTextures<Textures::UI>();
 }
 
-void PlayerSelectState::onExit() noexcept {}
+void PlayerSelectState::onExit() noexcept {
+  m_backNextButton.resetInteraction();
+  m_increaseCountButton.resetInteraction();
+  m_decreaseCountButton.resetInteraction();
+  m_startButton.resetInteraction();
+  m_mainMenuButton.resetInteraction();
+}
 
 } // namespace bh

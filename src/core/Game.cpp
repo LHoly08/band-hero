@@ -4,12 +4,13 @@
 
 #include "core/Game.hpp"
 
-#include "gameplay/instruments/Instrument.hpp"
 #include "raylib.h"
+
+#include "config/Settings.hpp"
 
 #include "core/ResourceManager.hpp"
 
-#include "config/Settings.hpp"
+#include "gameplay/instruments/Instrument.hpp"
 
 #include "states/MainMenuState.hpp"
 

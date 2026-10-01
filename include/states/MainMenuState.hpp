@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/ResourceManager.hpp"
+
 #include "states/State.hpp"
 
 #include "ui/Button.hpp"
@@ -11,11 +12,11 @@ class MainMenuState final : public State {
 public:
   inline MainMenuState(StateStack &stack) noexcept
       : State(stack),
-        m_playButton({.x = 100, .y = 100}, {0, 0, 500, 200}, "Play"),
-        m_quitButton({.x = 500, .y = 500},
-                     {.x = 0, .y = 0, .width = 500, .height = 200}, "Quit"),
-        m_settingsButton({.x = 1000, .y = 300},
-                         {.x = 500, .y = 0, .width = 131, .height = 131}) {}
+        m_playButton({.x = 240, .y = 440}, {0, 0, 360, 100}, "Play"),
+        m_quitButton({.x = 240, .y = 560},
+                     {.x = 0, .y = 0, .width = 360, .height = 100}, "Quit"),
+        m_settingsButton({.x = 240, .y = 680},
+                         {.x = 500, .y = 0, .width = 96, .height = 96}) {}
   ~MainMenuState() override {
     ResourceManager::unloadTextures<Textures::UI, Textures::MainMenu>();
   };

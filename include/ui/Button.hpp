@@ -9,6 +9,7 @@
 
 #include "core/ResourceManager.hpp"
 #include "core/Scale.hpp"
+#include "ui/Theme.hpp"
 
 namespace bh {
 
@@ -18,7 +19,6 @@ enum class TextAlign : std::uint8_t {
   Right,
 };
 
-// size 48 | align 8
 class Button final {
 public:
   inline Button(const Vector2 &position, const Rectangle &rect,
@@ -29,29 +29,37 @@ public:
 
   inline void setPosition(const Vector2 &pos) noexcept { m_position = pos; }
 
-  inline void changeTexture(const Rectangle &rect) noexcept { m_rect = rect; }
-
-  inline void changeText(std::string_view text = "") noexcept {
-    m_text = text;
+  inline void changeTexture(const Rectangle &rect) noexcept {
+    m_rect = rect;
+    resetInteraction();
   }
 
-  template <Color Tint = WHITE, bool Text = true, int FontSize = 64,
-            TextAlign TextAlignement = TextAlign::Left, Color TextColor = BLACK,
-            Fonts_t FontType = Fonts_t::Default>
+  inline void changeText(std::string_view text = "") noexcept { m_text = text; }
+
+  template <Color Tint = WHITE, bool Text = true, int FontSize = 40,
+            TextAlign TextAlignement = TextAlign::Left, Color TextColor = theme::Text,
+            Fonts_t FontType = Fonts_t::Buttons>
   void draw() const noexcept;
+  bool updateInput(Vector2 mousePosition, bool enabled = true) noexcept;
+  void resetInteraction() noexcept;
+  Rectangle sourceRectangle() const noexcept;
   bool pressed(Vector2 mousePosition) const noexcept;
 
 private:
   std::string m_text;
   Rectangle m_rect;
   Vector2 m_position;
+  enum class VisualState : std::uint8_t { Normal, Hover, Pressed };
+  VisualState m_visualState{VisualState::Normal};
+  bool m_armed{false};
 };
 
 template <Color Tint, bool Text, int FontSize, TextAlign TextAlignement,
           Color TextColor, Fonts_t FontType>
 void Button::draw() const noexcept {
 
-  ResourceManager::drawImage<Textures::UI::Buttons>(m_rect, m_position, Tint);
+  ResourceManager::drawImage<Textures::UI::Buttons>(sourceRectangle(),
+                                                    m_position, Tint);
 
   if constexpr (Text) {
     if (m_text.empty() || m_rect.width <= 0.f || m_rect.height <= 0.f) {
@@ -59,7 +67,8 @@ void Button::draw() const noexcept {
     }
 
     const Vector2 size{m_rect.width, m_rect.height};
-    const float padding = std::min({FontSize / 2.f, size.x / 4.f, size.y / 4.f});
+    const float padding =
+        std::min({FontSize / 2.f, size.x / 4.f, size.y / 4.f});
     float fontSize = std::min(float(FontSize), size.y - 2.f * padding);
     float textWidth = ResourceManager::measureText<FontType>(m_text, fontSize);
     const float availableWidth = size.x - 2.f * padding;
@@ -69,6 +78,9 @@ void Button::draw() const noexcept {
     }
     Vector2 textPos{m_position.x + padding,
                     m_position.y + ((size.y - fontSize) / 2.f)};
+    if (m_visualState == VisualState::Pressed) {
+      textPos.y += 4.f;
+    }
 
     if constexpr (TextAlignement == TextAlign::Center) {
 
