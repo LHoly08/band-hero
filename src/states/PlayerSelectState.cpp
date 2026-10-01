@@ -23,9 +23,11 @@ void PlayerSelectState::draw() const noexcept {
 
   switch (m_stage) {
   case Stage::ChoosingPlayerCount: {
+
     m_nextButton.draw<WHITE, true>();
-    m_increaseCountButton.draw<WHITE, true>();
-    m_decreaseCountButton.draw<WHITE, true>();
+
+    m_increaseCountButton.draw<WHITE, true, 40, TextAlign::Center>();
+    m_decreaseCountButton.draw<WHITE, true, 40, TextAlign::Center>();
 
     const char playerCountText[2]{m_playerCount, '\0'};
     ResourceManager::drawText<Fonts::Type::Default>(
@@ -33,12 +35,11 @@ void PlayerSelectState::draw() const noexcept {
     break;
   }
   case Stage::ChoosingInstruments: {
-    m_startButton.draw<WHITE, true>();
+    m_nextButton.draw<WHITE, true>();
 
     break;
   }
   case Stage::TestingInstruments: {
-    m_startButton.draw<WHITE, true>();
     break;
   }
   }
@@ -118,21 +119,22 @@ void PlayerSelectState::update(float dt) noexcept {
         return players;
       };
 
+      m_stack.pop();
       switch (m_playerCount) {
       case '1': {
-        m_stack.push<GameState<1>>(move.operator()<1>(m_players));
+        m_stack.replace<GameState<1>>(move.operator()<1>(m_players));
         break;
       }
       case '2': {
-        m_stack.push<GameState<2>>(move.operator()<2>(m_players));
+        m_stack.replace<GameState<2>>(move.operator()<2>(m_players));
         break;
       }
       case '3': {
-        m_stack.push<GameState<3>>(move.operator()<3>(m_players));
+        m_stack.replace<GameState<3>>(move.operator()<3>(m_players));
         break;
       }
       case '4': {
-        m_stack.push<GameState<4>>(move.operator()<4>(m_players));
+        m_stack.replace<GameState<4>>(move.operator()<4>(m_players));
         break;
       }
       }
@@ -149,47 +151,34 @@ void PlayerSelectState::update(float dt) noexcept {
 void PlayerSelectState::events() noexcept {
 
   const Vector2 mousePos = GetMousePosition();
+
   const bool choosingCount = m_stage == Stage::ChoosingPlayerCount;
   const bool testing = m_stage == Stage::TestingInstruments;
+
   const bool nextClicked = m_nextButton.updateInput(mousePos, !testing);
   const bool increaseClicked =
       m_increaseCountButton.updateInput(mousePos, choosingCount);
   const bool decreaseClicked =
       m_decreaseCountButton.updateInput(mousePos, choosingCount);
-  const bool backClicked = m_backButton.updateInput(mousePos, !testing);
+  const bool backClicked = m_backButton.updateInput(mousePos);
 
   if (backClicked) [[unlikely]] {
 
     switch (m_stage) {
 
     case Stage::ChoosingPlayerCount: {
-
-      m_stage = Stage::ChoosingInstruments;
-
-      m_backButton.changeText("Go Back");
-
-      const std::uint8_t loopTimes = (m_playerCount - '0');
-
-      // Every player initialized to nullptr
-      m_players.clear();
-      for (std::uint8_t i{}; i < loopTimes; ++i) {
-        m_players.emplace_back(nullptr);
-      }
-
-      // Every player starts with Easy selected
-      m_playerChoices.clear();
-      for (std::uint8_t i{}; i < loopTimes; ++i) {
-        m_playerChoices.emplace_back(1);
-      }
+      m_stack.pop();
       break;
     }
     case Stage::ChoosingInstruments: {
       m_stage = Stage::ChoosingPlayerCount;
+      m_nextButton.changeText("Choose Instruments");
 
       break;
     }
     case Stage::TestingInstruments: {
       m_stage = Stage::ChoosingInstruments;
+      m_nextButton.changeText("Start");
 
       break;
     }
@@ -208,9 +197,6 @@ void PlayerSelectState::events() noexcept {
       m_playerCount = (m_playerCount * condition) + ('1' * !condition);
       break;
     }
-    case Stage::ChoosingInstruments: {
-      break;
-    }
     default: {
       break;
     }
@@ -225,15 +211,12 @@ void PlayerSelectState::events() noexcept {
       m_playerCount = (m_playerCount * condition) + ('4' * !condition);
       break;
     }
-    case Stage::ChoosingInstruments: {
-      break;
-    }
     default: {
       break;
     }
     }
 
-  } else if (m_stage != Stage::ChoosingPlayerCount && nextClicked)
+  } else if (m_stage != Stage::TestingInstruments && nextClicked)
       [[unlikely]] {
 
     switch (m_stage) {
@@ -368,6 +351,7 @@ void PlayerSelectState::events() noexcept {
       m_stage = Stage::TestingInstruments;
 
       m_checksPassed = 0;
+      m_counter = 0;
 
       m_check.clear();
       m_minMax.clear();
@@ -379,42 +363,45 @@ void PlayerSelectState::events() noexcept {
 
       break;
     }
-    case Stage::TestingInstruments: {
+    case Stage::ChoosingPlayerCount: {
+
+      const std::uint8_t loopTimes = (m_playerCount - '0');
+
+      // Every player initialized to nullptr
+      m_players.clear();
+      for (std::uint8_t i{}; i < loopTimes; ++i) {
+        m_players.emplace_back(nullptr);
+      }
+
+      // Every player starts with Easy selected
+      m_playerChoices.clear();
+      for (std::uint8_t i{}; i < loopTimes; ++i) {
+        m_playerChoices.emplace_back(1);
+      }
 
       m_stage = Stage::ChoosingInstruments;
 
-      m_startButton.changeText("Start");
+      m_nextButton.changeText("Start");
 
       break;
     }
     default: {
-      break;
-    }
-    }
-  } else if (m_stage != Stage::TestingInstruments && menuClicked) {
-    switch (m_stage) {
-    case Stage::TestingInstruments: {
-      break;
-    }
-    default: {
-      m_stack.replace<MainMenuState>();
       break;
     }
     }
   }
 }
-}
+
 
 void PlayerSelectState::onEnter() noexcept {
   ResourceManager::loadTextures<Textures::UI>();
 }
 
 void PlayerSelectState::onExit() noexcept {
-  m_backNextButton.resetInteraction();
+  m_backButton.resetInteraction();
   m_increaseCountButton.resetInteraction();
   m_decreaseCountButton.resetInteraction();
-  m_startButton.resetInteraction();
-  m_mainMenuButton.resetInteraction();
+  m_nextButton.resetInteraction();
 }
 
 } // namespace bh

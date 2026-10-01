@@ -30,7 +30,7 @@ void SongSelectState::events() noexcept {
     m_stack.replace<MainMenuState>();
 
   } else if (addSongClicked) [[unlikely]] {
-    m_stack.replace<PlayerSelectState>(s_SongsDir + "Bored");
+    m_stack.push<PlayerSelectState>(s_SongsDir + "Bored");
   }
 }
 
