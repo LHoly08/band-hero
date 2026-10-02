@@ -44,8 +44,7 @@ void PauseMenuState::events() noexcept {
     return;
 
   } else if (mainMenuClicked) [[unlikely]] {
-    m_stack.pop();
-    m_stack.replace<MainMenuState>();
+    m_stack.reset<MainMenuState>();
   }
 }
 

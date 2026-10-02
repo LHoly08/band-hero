@@ -36,6 +36,13 @@ public:
          .type = ActionType::Replace});
   }
 
+  // Replace the entire stack without resuming suspended states.
+  template <DerivedState S, typename... Args> inline void reset(Args &&...args) {
+    actions.push(
+        {.state = std::make_unique<S>(*this, std::forward<Args>(args)...),
+         .type = ActionType::Reset});
+  }
+
   void draw() const noexcept {
     // These states are full screens; suspended screens have released textures.
     if (!m_stack.empty()) {
@@ -60,6 +67,7 @@ private:
     Push = 0,
     Pop,
     Replace,
+    Reset,
     None,
   };
 

@@ -135,6 +135,7 @@ void PlayerSelectState::update(float dt) noexcept {
       }
       case '4': {
         m_stack.replace<GameState<4>>(move.operator()<4>(m_players));
+        m_stack.reset<GameState<4>>(move.operator()<4>(m_players));
         break;
       }
       }

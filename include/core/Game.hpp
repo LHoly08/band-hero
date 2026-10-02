@@ -37,8 +37,6 @@ private:
 
     m_stack.draw();
 
-    DrawFPS(200, 200);
-
     EndDrawing();
   }
   inline void update(float dt) noexcept { m_stack.update(dt); }

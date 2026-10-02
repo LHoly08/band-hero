@@ -37,8 +37,10 @@ void GuidesState::events() noexcept {
 
   if (firstClicked) [[unlikely]] {
     changeGuide(m_buttonGuides[0]);
+
   } else if (secondClicked) [[unlikely]] {
     changeGuide(m_buttonGuides[1]);
+
   } else if (thirdClicked) [[unlikely]] {
     changeGuide(m_buttonGuides[2]);
   }
@@ -47,6 +49,7 @@ void GuidesState::events() noexcept {
 void GuidesState::changeGuide(Guide newGuide) noexcept {
   constexpr std::array guides{Guide::Bass, Guide::Drums, Guide::Guitar,
                               Guide::Hub};
+                              
   constexpr std::array<std::string_view, 4> names{
       "Bass Guide", "Drums Guide", "Guitar Guide", "Hub Guide"};
   const std::array buttons{&m_firstGuideButton, &m_secondGuideButton,
