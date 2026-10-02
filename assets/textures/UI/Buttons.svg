@@ -1,116 +1,149 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="768" viewBox="0 0 1024 768">
   <g id="menu_normal" transform="translate(0 0)">
-    <rect x="2" y="6" width="356.0" height="92.0" rx="18" fill="#0D0D12" />
-    <rect x="2" y="2" width="356.0" height="88.0" rx="18" fill="#352349" />
-    <rect x="4" y="4" width="352.0" height="80.0" rx="15" fill="#9B5DE5" />
-    <rect x="7" y="7" width="346.0" height="74.0" rx="12" fill="#181820" />
-    <path d="M 24,11 H 336" stroke="#9B5DE5" stroke-width="2" stroke-linecap="round" />
+    <rect x="2" y="6" width="356.0" height="92.0" rx="18" fill="#0C0914" />
+    <rect x="2" y="2" width="356.0" height="88.0" rx="18" fill="#4C376B" />
+    <rect x="4" y="4" width="352.0" height="80.0" rx="15" fill="#A970FF" />
+    <rect x="7" y="7" width="346.0" height="74.0" rx="12" fill="#20182F" />
+    <path d="M 24,11 H 336" stroke="#A970FF" stroke-width="2" stroke-linecap="round" />
   </g>
   <g id="settings_normal" transform="translate(500 0)">
-    <rect x="2" y="6" width="92.0" height="88.0" rx="18" fill="#0D0D12" />
-    <rect x="2" y="2" width="92.0" height="84.0" rx="18" fill="#352349" />
-    <rect x="4" y="4" width="88.0" height="76.0" rx="15" fill="#9B5DE5" />
-    <rect x="7" y="7" width="82.0" height="70.0" rx="12" fill="#181820" />
-    <path d="M 24,11 H 72" stroke="#9B5DE5" stroke-width="2" stroke-linecap="round" />
-    <polygon points="92.293,49.402 93.589,53.288 103.626,52.292 103.626,68.708 93.589,67.712 92.293,71.598 90.462,75.262 98.264,81.655 86.655,93.264 80.262,85.462 76.598,87.293 72.712,88.589 73.708,98.626 57.292,98.626 58.288,88.589 54.402,87.293 50.738,85.462 44.345,93.264 32.736,81.655 40.538,75.262 38.707,71.598 37.411,67.712 27.374,68.708 27.374,52.292 37.411,53.288 38.707,49.402 40.538,45.738 32.736,39.345 44.345,27.736 50.738,35.538 54.402,33.707 58.288,32.411 57.292,22.374 73.708,22.374 72.712,32.411 76.598,33.707 80.262,35.538 86.655,27.736 98.264,39.345 90.462,45.738" fill="#F5F5F7" transform="translate(48 43) scale(0.70) translate(-65.5 -60.5)" />
-    <circle cx="65.5" cy="60.5" r="17" fill="#181820" transform="translate(48 43) scale(0.70) translate(-65.5 -60.5)" />
-    <circle cx="65.5" cy="60.5" r="10" fill="#F5F5F7" transform="translate(48 43) scale(0.70) translate(-65.5 -60.5)" />
+    <rect x="2" y="6" width="92.0" height="88.0" rx="18" fill="#0C0914" />
+    <rect x="2" y="2" width="92.0" height="84.0" rx="18" fill="#4C376B" />
+    <rect x="4" y="4" width="88.0" height="76.0" rx="15" fill="#A970FF" />
+    <rect x="7" y="7" width="82.0" height="70.0" rx="12" fill="#20182F" />
+    <path d="M 24,11 H 72" stroke="#A970FF" stroke-width="2" stroke-linecap="round" />
+    <polygon points="92.293,49.402 93.589,53.288 103.626,52.292 103.626,68.708 93.589,67.712 92.293,71.598 90.462,75.262 98.264,81.655 86.655,93.264 80.262,85.462 76.598,87.293 72.712,88.589 73.708,98.626 57.292,98.626 58.288,88.589 54.402,87.293 50.738,85.462 44.345,93.264 32.736,81.655 40.538,75.262 38.707,71.598 37.411,67.712 27.374,68.708 27.374,52.292 37.411,53.288 38.707,49.402 40.538,45.738 32.736,39.345 44.345,27.736 50.738,35.538 54.402,33.707 58.288,32.411 57.292,22.374 73.708,22.374 72.712,32.411 76.598,33.707 80.262,35.538 86.655,27.736 98.264,39.345 90.462,45.738" fill="#F5F0FF" transform="translate(48 43) scale(0.70) translate(-65.5 -60.5)" />
+    <circle cx="65.5" cy="60.5" r="17" fill="#20182F" transform="translate(48 43) scale(0.70) translate(-65.5 -60.5)" />
+    <circle cx="65.5" cy="60.5" r="10" fill="#F5F0FF" transform="translate(48 43) scale(0.70) translate(-65.5 -60.5)" />
   </g>
   <g id="construction_normal" transform="translate(520 208)">
-    <rect x="2" y="6" width="476" height="112" rx="18" fill="#0D0D12" />
-    <rect x="2" y="2" width="476" height="108" rx="18" fill="#352349" />
-    <rect x="4" y="4" width="472" height="100" rx="15" fill="#9B5DE5" />
-    <rect x="7" y="7" width="466" height="94" rx="12" fill="#181820" />
-    <path d="M 24,11 H 456" stroke="#9B5DE5" stroke-width="2" stroke-linecap="round" />
-    <path d="M 20,27 l 12,-8 h 12 l -12,8 Z" fill="#9B5DE5" />
-    <path d="M 20,47 l 12,-8 h 12 l -12,8 Z" fill="#9B5DE5" />
-    <path d="M 20,67 l 12,-8 h 12 l -12,8 Z" fill="#9B5DE5" />
-    <path d="M 432,27 l 12,-8 h 12 l -12,8 Z" fill="#9B5DE5" />
-    <path d="M 432,47 l 12,-8 h 12 l -12,8 Z" fill="#9B5DE5" />
-    <path d="M 432,67 l 12,-8 h 12 l -12,8 Z" fill="#9B5DE5" />
+    <rect x="2" y="6" width="476" height="112" rx="18" fill="#0C0914" />
+    <rect x="2" y="2" width="476" height="108" rx="18" fill="#4C376B" />
+    <rect x="4" y="4" width="472" height="100" rx="15" fill="#A970FF" />
+    <rect x="7" y="7" width="466" height="94" rx="12" fill="#20182F" />
+    <path d="M 24,11 H 456" stroke="#A970FF" stroke-width="2" stroke-linecap="round" />
+    <path d="M 20,27 l 12,-8 h 12 l -12,8 Z" fill="#A970FF" />
+    <path d="M 20,47 l 12,-8 h 12 l -12,8 Z" fill="#A970FF" />
+    <path d="M 20,67 l 12,-8 h 12 l -12,8 Z" fill="#A970FF" />
+    <path d="M 432,27 l 12,-8 h 12 l -12,8 Z" fill="#A970FF" />
+    <path d="M 432,47 l 12,-8 h 12 l -12,8 Z" fill="#A970FF" />
+    <path d="M 432,67 l 12,-8 h 12 l -12,8 Z" fill="#A970FF" />
   </g>
   <g id="back_normal" transform="translate(0 640)">
-    <rect x="2" y="6" width="316" height="88" rx="18" fill="#0D0D12" />
-    <rect x="2" y="2" width="316" height="84" rx="18" fill="#352349" />
-    <rect x="4" y="4" width="312" height="76" rx="15" fill="#9B5DE5" />
-    <rect x="7" y="7" width="306" height="70" rx="12" fill="#181820" />
-    <path d="M 24,11 H 296" stroke="#9B5DE5" stroke-width="2" stroke-linecap="round" />
-    <path d="M 53,31 L 35,46 L 53,61 M 36,46 H 75" fill="none" stroke="#F5F5F7" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    <rect x="2" y="6" width="316" height="88" rx="18" fill="#0C0914" />
+    <rect x="2" y="2" width="316" height="84" rx="18" fill="#4C376B" />
+    <rect x="4" y="4" width="312" height="76" rx="15" fill="#A970FF" />
+    <rect x="7" y="7" width="306" height="70" rx="12" fill="#20182F" />
+    <path d="M 24,11 H 296" stroke="#A970FF" stroke-width="2" stroke-linecap="round" />
+    <path d="M 53,31 L 35,46 L 53,61 M 36,46 H 75" fill="none" stroke="#F5F0FF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
   </g>
   <g id="menu_hover" transform="translate(0 208)">
-    <rect x="2" y="6" width="356.0" height="92.0" rx="18" fill="#0D0D12" />
-    <rect x="2" y="2" width="356.0" height="88.0" rx="18" fill="#075C70" />
-    <rect x="4" y="4" width="352.0" height="80.0" rx="15" fill="#00D9FF" />
-    <rect x="7" y="7" width="346.0" height="74.0" rx="12" fill="#17232D" />
-    <path d="M 24,11 H 336" stroke="#00D9FF" stroke-width="2" stroke-linecap="round" />
+    <rect x="2" y="6" width="356.0" height="92.0" rx="18" fill="#0C0914" />
+    <rect x="2" y="2" width="356.0" height="88.0" rx="18" fill="#7459E8" />
+    <rect x="4" y="4" width="352.0" height="80.0" rx="15" fill="#36E2FF" />
+    <rect x="7" y="7" width="346.0" height="74.0" rx="12" fill="#20182F" />
+    <path d="M 24,11 H 336" stroke="#36E2FF" stroke-width="2" stroke-linecap="round" />
   </g>
   <g id="settings_hover" transform="translate(648 0)">
-    <rect x="2" y="6" width="92.0" height="88.0" rx="18" fill="#0D0D12" />
-    <rect x="2" y="2" width="92.0" height="84.0" rx="18" fill="#075C70" />
-    <rect x="4" y="4" width="88.0" height="76.0" rx="15" fill="#00D9FF" />
-    <rect x="7" y="7" width="82.0" height="70.0" rx="12" fill="#17232D" />
-    <path d="M 24,11 H 72" stroke="#00D9FF" stroke-width="2" stroke-linecap="round" />
-    <polygon points="92.293,49.402 93.589,53.288 103.626,52.292 103.626,68.708 93.589,67.712 92.293,71.598 90.462,75.262 98.264,81.655 86.655,93.264 80.262,85.462 76.598,87.293 72.712,88.589 73.708,98.626 57.292,98.626 58.288,88.589 54.402,87.293 50.738,85.462 44.345,93.264 32.736,81.655 40.538,75.262 38.707,71.598 37.411,67.712 27.374,68.708 27.374,52.292 37.411,53.288 38.707,49.402 40.538,45.738 32.736,39.345 44.345,27.736 50.738,35.538 54.402,33.707 58.288,32.411 57.292,22.374 73.708,22.374 72.712,32.411 76.598,33.707 80.262,35.538 86.655,27.736 98.264,39.345 90.462,45.738" fill="#F5F5F7" transform="translate(48 43) scale(0.70) translate(-65.5 -60.5)" />
-    <circle cx="65.5" cy="60.5" r="17" fill="#17232D" transform="translate(48 43) scale(0.70) translate(-65.5 -60.5)" />
-    <circle cx="65.5" cy="60.5" r="10" fill="#F5F5F7" transform="translate(48 43) scale(0.70) translate(-65.5 -60.5)" />
+    <rect x="2" y="6" width="92.0" height="88.0" rx="18" fill="#0C0914" />
+    <rect x="2" y="2" width="92.0" height="84.0" rx="18" fill="#7459E8" />
+    <rect x="4" y="4" width="88.0" height="76.0" rx="15" fill="#36E2FF" />
+    <rect x="7" y="7" width="82.0" height="70.0" rx="12" fill="#20182F" />
+    <path d="M 24,11 H 72" stroke="#36E2FF" stroke-width="2" stroke-linecap="round" />
+    <polygon points="92.293,49.402 93.589,53.288 103.626,52.292 103.626,68.708 93.589,67.712 92.293,71.598 90.462,75.262 98.264,81.655 86.655,93.264 80.262,85.462 76.598,87.293 72.712,88.589 73.708,98.626 57.292,98.626 58.288,88.589 54.402,87.293 50.738,85.462 44.345,93.264 32.736,81.655 40.538,75.262 38.707,71.598 37.411,67.712 27.374,68.708 27.374,52.292 37.411,53.288 38.707,49.402 40.538,45.738 32.736,39.345 44.345,27.736 50.738,35.538 54.402,33.707 58.288,32.411 57.292,22.374 73.708,22.374 72.712,32.411 76.598,33.707 80.262,35.538 86.655,27.736 98.264,39.345 90.462,45.738" fill="#F5F0FF" transform="translate(48 43) scale(0.70) translate(-65.5 -60.5)" />
+    <circle cx="65.5" cy="60.5" r="17" fill="#20182F" transform="translate(48 43) scale(0.70) translate(-65.5 -60.5)" />
+    <circle cx="65.5" cy="60.5" r="10" fill="#F5F0FF" transform="translate(48 43) scale(0.70) translate(-65.5 -60.5)" />
   </g>
   <g id="construction_hover" transform="translate(520 344)">
-    <rect x="2" y="6" width="476" height="112" rx="18" fill="#0D0D12" />
-    <rect x="2" y="2" width="476" height="108" rx="18" fill="#075C70" />
-    <rect x="4" y="4" width="472" height="100" rx="15" fill="#00D9FF" />
-    <rect x="7" y="7" width="466" height="94" rx="12" fill="#17232D" />
-    <path d="M 24,11 H 456" stroke="#00D9FF" stroke-width="2" stroke-linecap="round" />
-    <path d="M 20,27 l 12,-8 h 12 l -12,8 Z" fill="#00D9FF" />
-    <path d="M 20,47 l 12,-8 h 12 l -12,8 Z" fill="#00D9FF" />
-    <path d="M 20,67 l 12,-8 h 12 l -12,8 Z" fill="#00D9FF" />
-    <path d="M 432,27 l 12,-8 h 12 l -12,8 Z" fill="#00D9FF" />
-    <path d="M 432,47 l 12,-8 h 12 l -12,8 Z" fill="#00D9FF" />
-    <path d="M 432,67 l 12,-8 h 12 l -12,8 Z" fill="#00D9FF" />
+    <rect x="2" y="6" width="476" height="112" rx="18" fill="#0C0914" />
+    <rect x="2" y="2" width="476" height="108" rx="18" fill="#7459E8" />
+    <rect x="4" y="4" width="472" height="100" rx="15" fill="#36E2FF" />
+    <rect x="7" y="7" width="466" height="94" rx="12" fill="#20182F" />
+    <path d="M 24,11 H 456" stroke="#36E2FF" stroke-width="2" stroke-linecap="round" />
+    <path d="M 20,27 l 12,-8 h 12 l -12,8 Z" fill="#36E2FF" />
+    <path d="M 20,47 l 12,-8 h 12 l -12,8 Z" fill="#36E2FF" />
+    <path d="M 20,67 l 12,-8 h 12 l -12,8 Z" fill="#36E2FF" />
+    <path d="M 432,27 l 12,-8 h 12 l -12,8 Z" fill="#36E2FF" />
+    <path d="M 432,47 l 12,-8 h 12 l -12,8 Z" fill="#36E2FF" />
+    <path d="M 432,67 l 12,-8 h 12 l -12,8 Z" fill="#36E2FF" />
   </g>
   <g id="back_hover" transform="translate(336 640)">
-    <rect x="2" y="6" width="316" height="88" rx="18" fill="#0D0D12" />
-    <rect x="2" y="2" width="316" height="84" rx="18" fill="#075C70" />
-    <rect x="4" y="4" width="312" height="76" rx="15" fill="#00D9FF" />
-    <rect x="7" y="7" width="306" height="70" rx="12" fill="#17232D" />
-    <path d="M 24,11 H 296" stroke="#00D9FF" stroke-width="2" stroke-linecap="round" />
-    <path d="M 53,31 L 35,46 L 53,61 M 36,46 H 75" fill="none" stroke="#F5F5F7" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    <rect x="2" y="6" width="316" height="88" rx="18" fill="#0C0914" />
+    <rect x="2" y="2" width="316" height="84" rx="18" fill="#7459E8" />
+    <rect x="4" y="4" width="312" height="76" rx="15" fill="#36E2FF" />
+    <rect x="7" y="7" width="306" height="70" rx="12" fill="#20182F" />
+    <path d="M 24,11 H 296" stroke="#36E2FF" stroke-width="2" stroke-linecap="round" />
+    <path d="M 53,31 L 35,46 L 53,61 M 36,46 H 75" fill="none" stroke="#F5F0FF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
   </g>
   <g id="menu_pressed" transform="translate(0 416)">
-    <rect x="2" y="6" width="356.0" height="92.0" rx="18" fill="#0D0D12" />
-    <rect x="2" y="6" width="356.0" height="88.0" rx="18" fill="#731F4C" />
-    <rect x="4" y="8" width="352.0" height="80.0" rx="15" fill="#FF2E88" />
-    <rect x="7" y="11" width="346.0" height="74.0" rx="12" fill="#2D1829" />
-    <path d="M 24,15 H 336" stroke="#FF2E88" stroke-width="2" stroke-linecap="round" />
+    <rect x="2" y="6" width="356.0" height="92.0" rx="18" fill="#0C0914" />
+    <rect x="2" y="6" width="356.0" height="88.0" rx="18" fill="#4C376B" />
+    <rect x="4" y="8" width="352.0" height="80.0" rx="15" fill="#7459E8" />
+    <rect x="7" y="11" width="346.0" height="74.0" rx="12" fill="#141020" />
+    <path d="M 24,15 H 336" stroke="#7459E8" stroke-width="2" stroke-linecap="round" />
   </g>
   <g id="settings_pressed" transform="translate(796 0)">
-    <rect x="2" y="6" width="92.0" height="88.0" rx="18" fill="#0D0D12" />
-    <rect x="2" y="6" width="92.0" height="84.0" rx="18" fill="#731F4C" />
-    <rect x="4" y="8" width="88.0" height="76.0" rx="15" fill="#FF2E88" />
-    <rect x="7" y="11" width="82.0" height="70.0" rx="12" fill="#2D1829" />
-    <path d="M 24,15 H 72" stroke="#FF2E88" stroke-width="2" stroke-linecap="round" />
-    <polygon points="92.293,53.402 93.589,57.288 103.626,56.292 103.626,72.708 93.589,71.712 92.293,75.598 90.462,79.262 98.264,85.655 86.655,97.264 80.262,89.462 76.598,91.293 72.712,92.589 73.708,102.626 57.292,102.626 58.288,92.589 54.402,91.293 50.738,89.462 44.345,97.264 32.736,85.655 40.538,79.262 38.707,75.598 37.411,71.712 27.374,72.708 27.374,56.292 37.411,57.288 38.707,53.402 40.538,49.738 32.736,43.345 44.345,31.736 50.738,39.538 54.402,37.707 58.288,36.411 57.292,26.374 73.708,26.374 72.712,36.411 76.598,37.707 80.262,39.538 86.655,31.736 98.264,43.345 90.462,49.738" fill="#F5F5F7" transform="translate(48 47) scale(0.70) translate(-65.5 -64.5)" />
-    <circle cx="65.5" cy="64.5" r="17" fill="#2D1829" transform="translate(48 47) scale(0.70) translate(-65.5 -64.5)" />
-    <circle cx="65.5" cy="64.5" r="10" fill="#F5F5F7" transform="translate(48 47) scale(0.70) translate(-65.5 -64.5)" />
+    <rect x="2" y="6" width="92.0" height="88.0" rx="18" fill="#0C0914" />
+    <rect x="2" y="6" width="92.0" height="84.0" rx="18" fill="#4C376B" />
+    <rect x="4" y="8" width="88.0" height="76.0" rx="15" fill="#7459E8" />
+    <rect x="7" y="11" width="82.0" height="70.0" rx="12" fill="#141020" />
+    <path d="M 24,15 H 72" stroke="#7459E8" stroke-width="2" stroke-linecap="round" />
+    <polygon points="92.293,53.402 93.589,57.288 103.626,56.292 103.626,72.708 93.589,71.712 92.293,75.598 90.462,79.262 98.264,85.655 86.655,97.264 80.262,89.462 76.598,91.293 72.712,92.589 73.708,102.626 57.292,102.626 58.288,92.589 54.402,91.293 50.738,89.462 44.345,97.264 32.736,85.655 40.538,79.262 38.707,75.598 37.411,71.712 27.374,72.708 27.374,56.292 37.411,57.288 38.707,53.402 40.538,49.738 32.736,43.345 44.345,31.736 50.738,39.538 54.402,37.707 58.288,36.411 57.292,26.374 73.708,26.374 72.712,36.411 76.598,37.707 80.262,39.538 86.655,31.736 98.264,43.345 90.462,49.738" fill="#F5F0FF" transform="translate(48 47) scale(0.70) translate(-65.5 -64.5)" />
+    <circle cx="65.5" cy="64.5" r="17" fill="#141020" transform="translate(48 47) scale(0.70) translate(-65.5 -64.5)" />
+    <circle cx="65.5" cy="64.5" r="10" fill="#F5F0FF" transform="translate(48 47) scale(0.70) translate(-65.5 -64.5)" />
   </g>
   <g id="construction_pressed" transform="translate(520 480)">
-    <rect x="2" y="6" width="476" height="112" rx="18" fill="#0D0D12" />
-    <rect x="2" y="6" width="476" height="108" rx="18" fill="#731F4C" />
-    <rect x="4" y="8" width="472" height="100" rx="15" fill="#FF2E88" />
-    <rect x="7" y="11" width="466" height="94" rx="12" fill="#2D1829" />
-    <path d="M 24,15 H 456" stroke="#FF2E88" stroke-width="2" stroke-linecap="round" />
-    <path d="M 20,31 l 12,-8 h 12 l -12,8 Z" fill="#FF2E88" />
-    <path d="M 20,51 l 12,-8 h 12 l -12,8 Z" fill="#FF2E88" />
-    <path d="M 20,71 l 12,-8 h 12 l -12,8 Z" fill="#FF2E88" />
-    <path d="M 432,31 l 12,-8 h 12 l -12,8 Z" fill="#FF2E88" />
-    <path d="M 432,51 l 12,-8 h 12 l -12,8 Z" fill="#FF2E88" />
-    <path d="M 432,71 l 12,-8 h 12 l -12,8 Z" fill="#FF2E88" />
+    <rect x="2" y="6" width="476" height="112" rx="18" fill="#0C0914" />
+    <rect x="2" y="6" width="476" height="108" rx="18" fill="#4C376B" />
+    <rect x="4" y="8" width="472" height="100" rx="15" fill="#7459E8" />
+    <rect x="7" y="11" width="466" height="94" rx="12" fill="#141020" />
+    <path d="M 24,15 H 456" stroke="#7459E8" stroke-width="2" stroke-linecap="round" />
+    <path d="M 20,31 l 12,-8 h 12 l -12,8 Z" fill="#7459E8" />
+    <path d="M 20,51 l 12,-8 h 12 l -12,8 Z" fill="#7459E8" />
+    <path d="M 20,71 l 12,-8 h 12 l -12,8 Z" fill="#7459E8" />
+    <path d="M 432,31 l 12,-8 h 12 l -12,8 Z" fill="#7459E8" />
+    <path d="M 432,51 l 12,-8 h 12 l -12,8 Z" fill="#7459E8" />
+    <path d="M 432,71 l 12,-8 h 12 l -12,8 Z" fill="#7459E8" />
   </g>
   <g id="back_pressed" transform="translate(672 640)">
-    <rect x="2" y="6" width="316" height="88" rx="18" fill="#0D0D12" />
-    <rect x="2" y="6" width="316" height="84" rx="18" fill="#731F4C" />
-    <rect x="4" y="8" width="312" height="76" rx="15" fill="#FF2E88" />
-    <rect x="7" y="11" width="306" height="70" rx="12" fill="#2D1829" />
-    <path d="M 24,15 H 296" stroke="#FF2E88" stroke-width="2" stroke-linecap="round" />
-    <path d="M 53,35 L 35,50 L 53,65 M 36,50 H 75" fill="none" stroke="#F5F5F7" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    <rect x="2" y="6" width="316" height="88" rx="18" fill="#0C0914" />
+    <rect x="2" y="6" width="316" height="84" rx="18" fill="#4C376B" />
+    <rect x="4" y="8" width="312" height="76" rx="15" fill="#7459E8" />
+    <rect x="7" y="11" width="306" height="70" rx="12" fill="#141020" />
+    <path d="M 24,15 H 296" stroke="#7459E8" stroke-width="2" stroke-linecap="round" />
+    <path d="M 53,35 L 35,50 L 53,65 M 36,50 H 75" fill="none" stroke="#F5F0FF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+<g id="guides_normal" transform="translate(500 100)">
+    <rect x="2" y="6" width="92.0" height="88.0" rx="18" fill="#0C0914" />
+    <rect x="2" y="2" width="92.0" height="84.0" rx="18" fill="#4C376B" />
+    <rect x="4" y="4" width="88.0" height="76.0" rx="15" fill="#A970FF" />
+    <rect x="7" y="7" width="82.0" height="70.0" rx="12" fill="#20182F" />
+    <path d="M 24,11 H 72" stroke="#A970FF" stroke-width="2" stroke-linecap="round" />
+    <g transform="translate(0 0)" fill="none" stroke="#F5F0FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="28" y="23" width="40" height="47" rx="6" />
+      <path d="M 44,40 L 52,32 M 49,29 L 55,35 M 34,48 H 42 M 47,48 H 59 M 34,54 H 49 M 54,54 H 61 M 34,60 H 41 M 46,60 H 61 M 34,65 H 49 M 54,65 H 61" />
+    </g>
+  </g>
+<g id="guides_hover" transform="translate(648 100)">
+    <rect x="2" y="6" width="92.0" height="88.0" rx="18" fill="#0C0914" />
+    <rect x="2" y="2" width="92.0" height="84.0" rx="18" fill="#7459E8" />
+    <rect x="4" y="4" width="88.0" height="76.0" rx="15" fill="#36E2FF" />
+    <rect x="7" y="7" width="82.0" height="70.0" rx="12" fill="#20182F" />
+    <path d="M 24,11 H 72" stroke="#36E2FF" stroke-width="2" stroke-linecap="round" />
+    <g transform="translate(0 0)" fill="none" stroke="#F5F0FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="28" y="23" width="40" height="47" rx="6" />
+      <path d="M 44,40 L 52,32 M 49,29 L 55,35 M 34,48 H 42 M 47,48 H 59 M 34,54 H 49 M 54,54 H 61 M 34,60 H 41 M 46,60 H 61 M 34,65 H 49 M 54,65 H 61" />
+    </g>
+  </g>
+<g id="guides_pressed" transform="translate(796 100)">
+    <rect x="2" y="6" width="92.0" height="88.0" rx="18" fill="#0C0914" />
+    <rect x="2" y="6" width="92.0" height="84.0" rx="18" fill="#4C376B" />
+    <rect x="4" y="8" width="88.0" height="76.0" rx="15" fill="#7459E8" />
+    <rect x="7" y="11" width="82.0" height="70.0" rx="12" fill="#141020" />
+    <path d="M 24,15 H 72" stroke="#7459E8" stroke-width="2" stroke-linecap="round" />
+    <g transform="translate(0 4)" fill="none" stroke="#F5F0FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="28" y="23" width="40" height="47" rx="6" />
+      <path d="M 44,40 L 52,32 M 49,29 L 55,35 M 34,48 H 42 M 47,48 H 59 M 34,54 H 49 M 54,54 H 61 M 34,60 H 41 M 46,60 H 61 M 34,65 H 49 M 54,65 H 61" />
+    </g>
   </g>
 </svg>

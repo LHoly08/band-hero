@@ -48,6 +48,16 @@ void StateStack::act() noexcept {
       m_stack.back()->onEnter();
       break;
     }
+    case ActionType::Reset: {
+      if (!m_stack.empty()) {
+        m_stack.back()->onExit();
+      }
+      // Suspended states already exited when covered by a Push.
+      m_stack.clear();
+      m_stack.push_back(std::move(action.state));
+      m_stack.back()->onEnter();
+      break;
+    }
     case ActionType::None: {
       break;
     }

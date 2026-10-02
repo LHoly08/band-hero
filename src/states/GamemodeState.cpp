@@ -26,8 +26,7 @@ void GamemodeState::events() noexcept {
   const bool backClicked = m_backButton.updateInput(mousePos);
 
   if (localClicked) [[unlikely]] {
-    m_stack.pop();
-    m_stack.replace<SongSelectState>();
+    m_stack.reset<SongSelectState>();
 
   } else if (lanClicked) [[unlikely]] {
     m_stack.push<BuildingState>();
