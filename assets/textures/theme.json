@@ -1,0 +1,26 @@
+{
+  "name": "Neon Ultraviolet",
+  "branch": "codex/neon-ultraviolet",
+  "palette": {
+    "Background": "#0C0914",
+    "SecondaryBackground": "#141020",
+    "Panel": "#20182F",
+    "Border": "#4C376B",
+    "Primary": "#A970FF",
+    "Secondary": "#7459E8",
+    "Highlight": "#36E2FF",
+    "Text": "#F5F0FF",
+    "MutedText": "#A79ABF",
+    "Disabled": "#5B526B",
+    "Error": "#FF526F"
+  },
+  "artwork": {
+    "generator": "Built-in imagegen",
+    "prompts": {
+      "stage": "Use case: style-transfer. Edit target is the attached original BandHero game texture. Theme: Neon Ultraviolet: vivid ultraviolet spotlights, icy cyan edge lighting, energetic neon arcade atmosphere. Color palette: background #0C0914, dark surface #141020, primary #A970FF, secondary #7459E8, highlight #36E2FF, off-white text #F5F0FF. Change only the color treatment; preserve all original objects, layout and typography. No new words, objects, logos or watermarks. Preserve original 16:9 composition: dark empty left area for menu, four overhead spotlights and truss, stage instruments on right and floor reflections. Recolor all purple/pink/cyan lighting to theme palette. Cinematic subtle haze, keep the left half very dark. Output 1920x1080.",
+      "title": "Use case: style-transfer. Edit target is the attached original BandHero game texture. Theme: Neon Ultraviolet: vivid ultraviolet spotlights, icy cyan edge lighting, energetic neon arcade atmosphere. Color palette: background #0C0914, dark surface #141020, primary #A970FF, secondary #7459E8, highlight #36E2FF, off-white text #F5F0FF. Change only the color treatment; preserve all original objects, layout and typography. No new words, objects, logos or watermarks. Preserve exact BAND HERO lettering and jagged rock logo silhouette. Primary colored letter faces, highlight gradient accents, secondary edge and near-black outlines. Transparent background. Full centered logo with generous transparent margins, wide 600x160 design; no clipped strokes.",
+      "building": "Use case: style-transfer. Edit target is the attached original BandHero game texture. Theme: Neon Ultraviolet: vivid ultraviolet spotlights, icy cyan edge lighting, energetic neon arcade atmosphere. Color palette: background #0C0914, dark surface #141020, primary #A970FF, secondary #7459E8, highlight #36E2FF, off-white text #F5F0FF. Change only the color treatment; preserve all original objects, layout and typography. No new words, objects, logos or watermarks. Preserve exact centered barricade icon and exact UNDER CONSTRUCTION text. Barricade uses primary with small highlight accents, text off-white. Dark subtle textured backdrop in theme background color. Match original positions and scale in 16:9, output 1920x1080."
+    }
+  },
+  "buttons": "Buttons.svg is the editable source for Buttons.png; frame rectangles are defined in UI/Buttons.json."
+}
