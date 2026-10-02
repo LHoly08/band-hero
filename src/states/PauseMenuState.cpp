@@ -65,7 +65,3 @@ void PauseMenuState::onExit() noexcept {
 }
 
 } // namespace bh
-
-#include "states/PauseMenuState.hpp"
-
-namespace bh {}

@@ -10,15 +10,15 @@ namespace bh {
 
 class PauseMenuState final : public State {
 public:
-  inline explicit PauseMenuState(StateStack &stack)
+  inline PauseMenuState(StateStack &stack) noexcept
       : State(stack),
-        m_continueButton({.x = 360, .y = 100},
+        m_continueButton({.x = 780, .y = 370},
                          {.x = 0, .y = 0, .width = 360, .height = 100},
                          "Continue"),
-        m_mainMenuButton({.x = 360, .y = 250},
+        m_mainMenuButton({.x = 780, .y = 490},
                          {.x = 0, .y = 0, .width = 360, .height = 100},
                          "Main Menu"),
-        m_quitButton({.x = 360, .y = 400},
+        m_quitButton({.x = 780, .y = 610},
                      {.x = 0, .y = 0, .width = 360, .height = 100}, "Quit") {}
   ~PauseMenuState() override = default;
 

@@ -5,8 +5,8 @@
 #include "core/ResourceManager.hpp"
 #include "core/StateStack.hpp"
 
-#include "states/BuildingState.hpp"
 #include "states/GamemodeState.hpp"
+#include "states/GuidesState.hpp"
 #include "states/SettingsState.hpp"
 
 #include "ui/Button.hpp"
@@ -46,7 +46,7 @@ void MainMenuState::events() noexcept {
     m_stack.replace<SettingsState>();
 
   } else if (guidesClicked) [[unlikely]] {
-    m_stack.push<BuildingState>();
+    m_stack.replace<GuidesState>();
   }
 }
 
