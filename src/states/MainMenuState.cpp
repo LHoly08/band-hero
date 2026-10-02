@@ -48,6 +48,8 @@ void MainMenuState::onEnter() noexcept {
 }
 
 void MainMenuState::onExit() noexcept {
+  ResourceManager::unloadTextures<Textures::UI, Textures::MainMenu>();
+
   m_playButton.resetInteraction();
   m_quitButton.resetInteraction();
   m_settingsButton.resetInteraction();

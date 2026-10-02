@@ -31,13 +31,22 @@ Game::Game(const Vector2 &windowSize,
   }
 
   // TODO: make loading of config file
-  if (std::ifstream file(Settings::startupFile); file.is_open()) {
+  std::ifstream file(Settings::startupFile);
 
-  } else {
+  if (!file.is_open()) [[unlikely]] {
+    file.close();
     Settings::defaultStartupSettings();
+  } else [[likely]] {
+    file.close();
   }
+  file.open(Settings::startupFile, std::ios::binary);
 
-  SetTargetFPS(60);
+  {
+    std::uint16_t fps{};
+    file.read(reinterpret_cast<char *>(&fps), sizeof(fps));
+
+    SetTargetFPS(fps);
+  }
 
   m_stack.push<MainMenuState>();
   m_stack.act();

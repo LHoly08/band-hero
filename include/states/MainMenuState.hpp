@@ -17,9 +17,7 @@ public:
                      {.x = 0, .y = 0, .width = 360, .height = 100}, "Quit"),
         m_settingsButton({.x = 240, .y = 680},
                          {.x = 500, .y = 0, .width = 96, .height = 96}) {}
-  ~MainMenuState() override {
-    ResourceManager::unloadTextures<Textures::UI, Textures::MainMenu>();
-  };
+  ~MainMenuState() override = default;
 
   void draw() const noexcept override;
   void update(float dt) noexcept override;

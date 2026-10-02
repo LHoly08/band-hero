@@ -29,17 +29,9 @@ public:
         m_backButton({.x = 1420, .y = 0}, {0, 640, 320, 96}, "Back"),
         m_increaseCountButton({.x = 500, .y = 500}, {0, 0, 360, 100}, ">"),
         m_decreaseCountButton({.x = 1000, .y = 300}, {0, 0, 360, 100}, "<"),
-        m_songName(std::move(songName)) {
+        m_songName(std::move(songName)) {}
 
-    m_serial.openDevice(Settings::getSerialPort().c_str(),
-                        Settings::getSerialBaudRate());
-  }
-
-  ~PlayerSelectState() override {
-    ResourceManager::unloadTextures<Textures::UI>();
-
-    m_serial.closeDevice();
-  }
+  ~PlayerSelectState() override = default;
 
   void draw() const noexcept override;
   void update(float dt) noexcept override;

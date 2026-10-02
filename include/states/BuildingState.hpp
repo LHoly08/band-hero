@@ -13,9 +13,7 @@ public:
       : State(stack),
         m_backButton({.x = 800, .y = 850},
                      {.x = 0, .y = 640, .width = 320, .height = 96}, "Back") {}
-  ~BuildingState() override {
-    ResourceManager::unloadTextures<Textures::UI, Textures::Building>();
-  };
+  ~BuildingState() override = default;
 
   void draw() const noexcept override;
   void update(float dt) noexcept override;

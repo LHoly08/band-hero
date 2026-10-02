@@ -19,9 +19,7 @@ public:
         m_backButton({.x = 1231, .y = 214},
                      {.x = 0, .y = 0, .width = 360, .height = 100},
                      "Main Menu") {}
-  ~GamemodeState() override {
-    ResourceManager::unloadTextures<Textures::UI>();
-  };
+  ~GamemodeState() override = default;
 
   void draw() const noexcept override;
   void update(float dt) noexcept override;

@@ -10,7 +10,7 @@ def main():
     args: argparse.Namespace = parser.parse_args()
     songname: str | None = args.songname
 
-    if args.songname is not None:
+    if songname is not None:
         if __package__:
             from .splitter import Splitter
         else:

@@ -45,6 +45,8 @@ void GamemodeState::onEnter() noexcept {
 }
 
 void GamemodeState::onExit() noexcept {
+  ResourceManager::unloadTextures<Textures::UI>();
+
   m_localButton.resetInteraction();
   m_lanButton.resetInteraction();
   m_onlineButton.resetInteraction();

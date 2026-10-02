@@ -9,6 +9,7 @@
 
 #include "core/ResourceManager.hpp"
 #include "core/Scale.hpp"
+
 #include "ui/Theme.hpp"
 
 namespace bh {
@@ -37,13 +38,15 @@ public:
   inline void changeText(std::string_view text = "") noexcept { m_text = text; }
 
   template <Color Tint = WHITE, bool Text = true, int FontSize = 40,
-            TextAlign TextAlignement = TextAlign::Left, Color TextColor = theme::Text,
-            Fonts_t FontType = Fonts_t::Buttons>
+            TextAlign TextAlignement = TextAlign::Left,
+            Color TextColor = theme::Text, Fonts_t FontType = Fonts_t::Buttons>
   void draw() const noexcept;
   bool updateInput(Vector2 mousePosition, bool enabled = true) noexcept;
   void resetInteraction() noexcept;
   Rectangle sourceRectangle() const noexcept;
   bool pressed(Vector2 mousePosition) const noexcept;
+
+  std::string getText() const noexcept { return m_text; }
 
 private:
   std::string m_text;

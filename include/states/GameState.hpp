@@ -6,6 +6,8 @@
 #include <memory>
 #include <utility>
 
+#include "config/Settings.hpp"
+
 #include "core/ResourceManager.hpp"
 
 #include "gameplay/Player.hpp"
@@ -27,9 +29,7 @@ public:
       StateStack &stack,
       std::array<std::unique_ptr<PlayerBase>, PlayerCount> &&players) noexcept
       : State(stack), m_players(std::move(players)) {}
-  ~GameState() override {
-    ResourceManager::unloadTexture<Textures::Gameplay::Notes>();
-  };
+  ~GameState() override = default;
 
   void draw() const noexcept override;
   void update(float dt) noexcept override;
@@ -82,6 +82,9 @@ template <std::uint8_t PlayerCount>
 void GameState<PlayerCount>::onEnter() noexcept {
   ResourceManager::loadTexture<Textures::Gameplay::Notes>();
 
+  m_serial.openDevice(Settings::getSerialPort().c_str(),
+                      Settings::getSerialBaudRate());
+
   for (auto &player : m_players) {
     player->pauseInstrument(false);
   }
@@ -90,6 +93,9 @@ void GameState<PlayerCount>::onEnter() noexcept {
 template <std::uint8_t PlayerCount>
   requires MaxPlayerAmount<PlayerCount>
 void GameState<PlayerCount>::onExit() noexcept {
+  ResourceManager::unloadTexture<Textures::Gameplay::Notes>();
+
+  m_serial.closeDevice();
 
   for (auto &player : m_players) {
     player->pauseInstrument(true);

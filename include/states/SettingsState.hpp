@@ -15,9 +15,7 @@ public:
         m_saveButton({.x = 500, .y = 600}, {0, 0, 360, 100}, "Save"),
         m_menuButton({.x = 1000, .y = 350}, {0, 0, 360, 100}, "Main Menu"),
         m_defaultButton({.x = 700, .y = 100}, {0, 0, 360, 100}, "Defaults") {}
-  ~SettingsState() override {
-    ResourceManager::unloadTextures<Textures::UI>();
-  };
+  ~SettingsState() override = default;
 
   void draw() const noexcept override;
   void update(float dt) noexcept override;

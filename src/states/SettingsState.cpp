@@ -74,6 +74,8 @@ void SettingsState::onEnter() noexcept {
 }
 
 void SettingsState::onExit() noexcept {
+  ResourceManager::unloadTextures<Textures::UI>();
+
   m_menuButton.resetInteraction();
   m_saveButton.resetInteraction();
   m_defaultButton.resetInteraction();

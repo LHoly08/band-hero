@@ -2,6 +2,7 @@
 #include <array>
 #include <filesystem>
 #include <fstream>
+#include <ostream>
 #include <string_view>
 #include <vector>
 
@@ -69,6 +70,7 @@ void Settings::iDefaultSettings() noexcept {
 
 void Settings::iLoadSettings() noexcept {
   std::ifstream file{fileName, std::ios::binary};
+
   if (!file) {
     iDefaultSettings();
     iDetectSerialPort();
@@ -163,6 +165,13 @@ bool Settings::iSetSerialBaudRate(std::uint32_t baudRate) noexcept {
   return true;
 }
 
-void Settings::iDefaultStartupSettings() noexcept {}
+void Settings::iDefaultStartupSettings() noexcept {
+  std::ofstream file(startupFile, std::ios::binary | std::ios::trunc);
+
+  constexpr std::uint16_t defaultFPS = 60;
+  file.write(reinterpret_cast<const char *>(&defaultFPS), sizeof(defaultFPS));
+
+  file.close();
+}
 
 } // namespace bh

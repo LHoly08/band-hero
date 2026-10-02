@@ -80,7 +80,6 @@ template <> struct InstrumentComposition<InstrumentType::Custom_3> {
   std::uint16_t fileNumber{};
 };
 
-// Size: ? | Align: 8
 template <InstrumentType Type, Difficulty Dif> class Instrument {
 public:
   explicit Instrument(std::uint32_t &noteCount, std::string &&filename)

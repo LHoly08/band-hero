@@ -1,6 +1,8 @@
 #pragma once
-#include <filesystem>
+#include <cstddef>
 #include <inplace_vector>
+#include <string>
+#include <vector>
 
 #include "core/ResourceManager.hpp"
 
@@ -12,18 +14,9 @@ namespace bh {
 
 class SongSelectState : public State {
 public:
-  inline SongSelectState(StateStack &stack) noexcept
-      : State(stack),
-        m_mainMenuButton({.x = 0, .y = 0},
-                         {.x = 0, .y = 0, .width = 360, .height = 100},
-                         "Main Menu"),
-        m_addSongButton({.x = 300, .y = 300},
-                        {.x = 0, .y = 0, .width = 360, .height = 100},
-                        "Add Song") {}
+  explicit SongSelectState(StateStack &stack) noexcept;
 
-  ~SongSelectState() override {
-    ResourceManager::unloadTextures<Textures::UI>();
-  };
+  ~SongSelectState() override = default;
 
   void draw() const noexcept override;
   void update(float dt) noexcept override;
@@ -34,10 +27,17 @@ public:
 private:
   static constexpr std::string s_SongsDir{"Songs/"};
 
-  std::inplace_vector<Button, 10> m_songOptions;
+  std::inplace_vector<Button, 5> m_songOptions;
   Button m_mainMenuButton;
   Button m_addSongButton;
-  std::uint8_t m_selectedButton{};
+  Music m_song{};
+
+  std::vector<std::string> m_songNames;
+  std::size_t m_firstVisibleSong{};
+
+  void refreshSongButtons() noexcept;
+
+  std::uint8_t m_selectedOption{};
 };
 
 } // namespace bh

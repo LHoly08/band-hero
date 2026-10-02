@@ -216,8 +216,7 @@ void PlayerSelectState::events() noexcept {
     }
     }
 
-  } else if (m_stage != Stage::TestingInstruments && nextClicked)
-      [[unlikely]] {
+  } else if (m_stage != Stage::TestingInstruments && nextClicked) [[unlikely]] {
 
     switch (m_stage) {
     case Stage::ChoosingInstruments: {
@@ -392,12 +391,18 @@ void PlayerSelectState::events() noexcept {
   }
 }
 
-
 void PlayerSelectState::onEnter() noexcept {
   ResourceManager::loadTextures<Textures::UI>();
+
+  m_serial.openDevice(Settings::getSerialPort().c_str(),
+                      Settings::getSerialBaudRate());
 }
 
 void PlayerSelectState::onExit() noexcept {
+  ResourceManager::unloadTextures<Textures::UI>();
+
+  m_serial.closeDevice();
+
   m_backButton.resetInteraction();
   m_increaseCountButton.resetInteraction();
   m_decreaseCountButton.resetInteraction();

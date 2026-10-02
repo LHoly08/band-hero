@@ -27,6 +27,10 @@ void BuildingState::onEnter() noexcept {
   ResourceManager::loadTextures<Textures::UI, Textures::Building>();
 }
 
-void BuildingState::onExit() noexcept { m_backButton.resetInteraction(); }
+void BuildingState::onExit() noexcept {
+  ResourceManager::unloadTextures<Textures::UI, Textures::Building>();
+
+  m_backButton.resetInteraction();
+}
 
 } // namespace bh
