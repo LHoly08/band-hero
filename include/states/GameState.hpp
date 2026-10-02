@@ -6,6 +6,8 @@
 #include <memory>
 #include <utility>
 
+#include "raylib.h"
+
 #include "config/Settings.hpp"
 
 #include "core/ResourceManager.hpp"
@@ -14,6 +16,7 @@
 
 #include "serial/serialib.h"
 
+#include "states/PauseMenuState.hpp"
 #include "states/State.hpp"
 
 namespace bh {
@@ -75,7 +78,12 @@ void GameState<PlayerCount>::update(float dt) noexcept {
 
 template <std::uint8_t PlayerCount>
   requires MaxPlayerAmount<PlayerCount>
-void GameState<PlayerCount>::events() noexcept {}
+void GameState<PlayerCount>::events() noexcept {
+
+  if (IsKeyPressed(KEY_ESCAPE)) [[unlikely]] {
+    m_stack.push<PauseMenuState>();
+  }
+}
 
 template <std::uint8_t PlayerCount>
   requires MaxPlayerAmount<PlayerCount>
