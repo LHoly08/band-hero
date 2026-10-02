@@ -119,22 +119,20 @@ void PlayerSelectState::update(float dt) noexcept {
         return players;
       };
 
-      m_stack.pop();
       switch (m_playerCount) {
       case '1': {
-        m_stack.replace<GameState<1>>(move.operator()<1>(m_players));
+        m_stack.reset<GameState<1>>(move.operator()<1>(m_players));
         break;
       }
       case '2': {
-        m_stack.replace<GameState<2>>(move.operator()<2>(m_players));
+        m_stack.reset<GameState<2>>(move.operator()<2>(m_players));
         break;
       }
       case '3': {
-        m_stack.replace<GameState<3>>(move.operator()<3>(m_players));
+        m_stack.reset<GameState<3>>(move.operator()<3>(m_players));
         break;
       }
       case '4': {
-        m_stack.replace<GameState<4>>(move.operator()<4>(m_players));
         m_stack.reset<GameState<4>>(move.operator()<4>(m_players));
         break;
       }
