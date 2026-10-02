@@ -28,6 +28,7 @@ SongSelectState::SongSelectState(StateStack &stack) noexcept
   std::error_code error;
   std::filesystem::directory_iterator songs(s_SongsDir, error);
   const std::filesystem::directory_iterator end;
+
   while (!error && songs != end) {
     if (songs->is_directory(error)) {
       m_songNames.push_back(songs->path().filename().string());

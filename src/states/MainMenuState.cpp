@@ -5,6 +5,7 @@
 #include "core/ResourceManager.hpp"
 #include "core/StateStack.hpp"
 
+#include "states/BuildingState.hpp"
 #include "states/GamemodeState.hpp"
 #include "states/SettingsState.hpp"
 
@@ -20,16 +21,19 @@ void MainMenuState::draw() const noexcept {
   m_playButton.draw<WHITE, true, 40, TextAlign::Center>();
   m_quitButton.draw<WHITE, true, 40, TextAlign::Center>();
   m_settingsButton.draw<WHITE, false>();
+  m_guidesButton.draw<WHITE, false>();
 }
 
 void MainMenuState::update(float dt) noexcept { auto _ = dt; }
 
 void MainMenuState::events() noexcept {
 
-  const Vector2 mousePos = GetMousePosition();
-  const bool playClicked = m_playButton.updateInput(mousePos);
-  const bool quitClicked = m_quitButton.updateInput(mousePos);
-  const bool settingsClicked = m_settingsButton.updateInput(mousePos);
+  const Vector2 MousePos = GetMousePosition();
+
+  const bool playClicked = m_playButton.updateInput(MousePos);
+  const bool quitClicked = m_quitButton.updateInput(MousePos);
+  const bool settingsClicked = m_settingsButton.updateInput(MousePos);
+  const bool guidesClicked = m_guidesButton.updateInput(MousePos);
 
   if (playClicked) [[unlikely]] {
     m_stack.push<GamemodeState>();
@@ -40,6 +44,9 @@ void MainMenuState::events() noexcept {
 
   } else if (settingsClicked) [[unlikely]] {
     m_stack.replace<SettingsState>();
+
+  } else if (guidesClicked) [[unlikely]] {
+    m_stack.push<BuildingState>();
   }
 }
 
@@ -53,6 +60,7 @@ void MainMenuState::onExit() noexcept {
   m_playButton.resetInteraction();
   m_quitButton.resetInteraction();
   m_settingsButton.resetInteraction();
+  m_guidesButton.resetInteraction();
 }
 
 } // namespace bh

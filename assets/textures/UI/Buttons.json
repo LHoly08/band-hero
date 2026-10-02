@@ -23,6 +23,12 @@
       "width": 96,
       "height": 96
     },
+    "guides_normal": {
+      "x": 500,
+      "y": 100,
+      "width": 96,
+      "height": 96
+    },
     "construction_normal": {
       "x": 520,
       "y": 208,
@@ -47,6 +53,12 @@
       "width": 96,
       "height": 96
     },
+    "guides_hover": {
+      "x": 648,
+      "y": 100,
+      "width": 96,
+      "height": 96
+    },
     "construction_hover": {
       "x": 520,
       "y": 344,
@@ -68,6 +80,12 @@
     "settings_pressed": {
       "x": 796,
       "y": 0,
+      "width": 96,
+      "height": 96
+    },
+    "guides_pressed": {
+      "x": 796,
+      "y": 100,
       "width": 96,
       "height": 96
     },

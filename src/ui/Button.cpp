@@ -12,15 +12,15 @@ bool Button::updateInput(Vector2 mousePosition, bool enabled) noexcept {
   if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
     m_armed = hovered;
   }
-  const bool clicked = m_armed && hovered &&
-                       IsMouseButtonReleased(MOUSE_BUTTON_LEFT);
+  const bool clicked =
+      m_armed && hovered && IsMouseButtonReleased(MOUSE_BUTTON_LEFT);
   const bool down = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
   if (!down) {
     m_armed = false;
   }
-  m_visualState = !hovered ? VisualState::Normal
+  m_visualState = !hovered            ? VisualState::Normal
                   : (m_armed && down) ? VisualState::Pressed
-                                     : VisualState::Hover;
+                                      : VisualState::Hover;
   return clicked;
 }
 
@@ -30,10 +30,12 @@ void Button::resetInteraction() noexcept {
 }
 
 Rectangle Button::sourceRectangle() const noexcept {
-  // Each group is normal, hover, pressed, matching assets/textures/UI/Buttons.json.
+  // Each group is normal, hover, pressed, matching
+  // assets/textures/UI/Buttons.json.
   static constexpr Rectangle frames[][3] = {
       {{0, 0, 360, 100}, {0, 208, 360, 100}, {0, 416, 360, 100}},
       {{500, 0, 96, 96}, {648, 0, 96, 96}, {796, 0, 96, 96}},
+      {{500, 100, 96, 96}, {648, 100, 96, 96}, {796, 100, 96, 96}},
       {{520, 208, 480, 120}, {520, 344, 480, 120}, {520, 480, 480, 120}},
       {{0, 640, 320, 96}, {336, 640, 320, 96}, {672, 640, 320, 96}},
   };
