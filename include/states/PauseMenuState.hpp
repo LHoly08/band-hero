@@ -12,13 +12,13 @@ class PauseMenuState final : public State {
 public:
   inline PauseMenuState(StateStack &stack) noexcept
       : State(stack),
-        m_continueButton({.x = 780, .y = 370},
-                         {.x = 0, .y = 0, .width = 360, .height = 100},
+        m_continueButton({.x = 590, .y = 430},
+                         {.x = 0, .y = 300, .width = 740, .height = 100},
                          "Continue"),
-        m_mainMenuButton({.x = 780, .y = 490},
+        m_mainMenuButton({.x = 590, .y = 550},
                          {.x = 0, .y = 0, .width = 360, .height = 100},
                          "Main Menu"),
-        m_quitButton({.x = 780, .y = 610},
+        m_quitButton({.x = 970, .y = 550},
                      {.x = 0, .y = 0, .width = 360, .height = 100}, "Quit") {}
   ~PauseMenuState() override = default;
 

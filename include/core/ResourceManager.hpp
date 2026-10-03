@@ -23,6 +23,12 @@ public:
     Buttons = 0,
   };
 
+  enum class Settings : std::uint8_t {
+    Background = 0,
+    Panel,
+    Controls
+  };
+
   enum class Gameplay : std::uint8_t {
     Notes = 0,
     Instruments,
@@ -207,6 +213,38 @@ public:
   inline static void drawImage(const Rectangle &rect, const Vector2 &pos,
                                const Color &tint = WHITE) noexcept {
     return get().iDrawImage<Texture_t>(rect, pos, tint);
+  }
+
+  // Draw an entire image at an independent layout size (e.g. a backdrop).
+  template <auto Texture_t>
+    requires isTexture<Texture_t>
+  inline static void drawImageTo(const Rectangle &destination,
+                                Color tint = WHITE) noexcept {
+    const auto &texture = get().m_textures[Textures::getOffset<Texture_t>()];
+    if (!IsTextureValid(texture)) return;
+    const Vector2 position = scaledSize(Vector2{destination.x, destination.y});
+    const Vector2 size = scaledSize(Vector2{destination.width, destination.height});
+    DrawTexturePro(texture, {0, 0, float(texture.width), float(texture.height)},
+                   {position.x, position.y, size.x, size.y}, {0, 0}, 0, tint);
+  }
+
+  // Settings skins are rasterized at 2x. Nine-slicing keeps corners and borders
+  // sharp while allowing controls of different widths without stretching edges.
+  template <auto Texture_t>
+    requires isTexture<Texture_t>
+  inline static void drawSettingsSkin(const Rectangle &source,
+                                     const Rectangle &destination) noexcept {
+    const auto &texture = get().m_textures[Textures::getOffset<Texture_t>()];
+    if (!IsTextureValid(texture)) return;
+    const Vector2 position = scaledSize(Vector2{destination.x, destination.y});
+    const Vector2 scale = scaledSize(Vector2{.5f, .5f});
+    rlPushMatrix();
+    rlTranslatef(position.x, position.y, 0);
+    rlScalef(scale.x, scale.y, 1);
+    DrawTextureNPatch(texture, {source, 48, 48, 48, 48, NPATCH_NINE_PATCH},
+                     {0, 0, destination.width * 2, destination.height * 2},
+                     {0, 0}, 0, WHITE);
+    rlPopMatrix();
   }
 
   template <TextureType... Types> inline static void loadTextures() {

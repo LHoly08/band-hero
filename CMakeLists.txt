@@ -40,7 +40,7 @@ if(UNIX)
     target_link_libraries(lua PUBLIC m)
 endif()
 
-file(GLOB_RECURSE SRC_FILES "src/*.cpp")
+file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS "src/*.cpp")
 
 add_executable(BandHero ${SRC_FILES})
 

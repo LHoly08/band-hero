@@ -7,6 +7,7 @@
 #include "raylib.h"
 
 #include "config/Settings.hpp"
+#include "config/DisplaySettings.hpp"
 
 #include "core/ResourceManager.hpp"
 
@@ -20,32 +21,15 @@ Game::Game(const Vector2 &windowSize,
            const std::string_view &&windowName) noexcept {
   InitWindow(windowSize.x, windowSize.y, windowName.data());
   InitAudioDevice();
+  SetMasterVolume(Settings::getMasterVolume() / 100.f);
 
   SetExitKey(KeyboardKey::KEY_NULL);
-  ToggleFullscreen();
+  DisplaySettings::get().apply();
 
   std::filesystem::path instrumentPaths("Instruments/");
 
   if (!std::filesystem::is_directory(instrumentPaths)) {
     std::filesystem::create_directory(instrumentPaths);
-  }
-
-  // TODO: make loading of config file
-  std::ifstream file(Settings::startupFile);
-
-  if (!file.is_open()) [[unlikely]] {
-    file.close();
-    Settings::defaultStartupSettings();
-  } else [[likely]] {
-    file.close();
-  }
-  file.open(Settings::startupFile, std::ios::binary);
-
-  {
-    std::uint16_t fps{};
-    file.read(reinterpret_cast<char *>(&fps), sizeof(fps));
-
-    SetTargetFPS(fps);
   }
 
   m_stack.push<MainMenuState>();

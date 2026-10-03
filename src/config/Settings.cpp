@@ -57,6 +57,13 @@ std::vector<std::string> serialPortCandidates() {
 
 Settings::Settings() { iLoadSettings(); }
 
+void Settings::setMasterVolume(int percent) noexcept {
+  get().masterVolume = std::clamp(percent, 0, 100);
+  if (IsAudioDeviceReady()) {
+    SetMasterVolume(get().masterVolume / 100.f);
+  }
+}
+
 std::vector<std::string> Settings::getAvailableSerialPorts() {
   return serialPortCandidates();
 }
@@ -65,10 +72,18 @@ void Settings::iDefaultSettings() noexcept {
   guitarBassColors = {RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE};
   serialPort.clear();
   serialBaudRate = 115200;
+  masterVolume = 100;
+  if (IsAudioDeviceReady()) {
+    SetMasterVolume(1.f);
+  }
   iSaveSettings();
 }
 
 void Settings::iLoadSettings() noexcept {
+  masterVolume = 100;
+  if (IsAudioDeviceReady()) {
+    SetMasterVolume(1.f);
+  }
   std::ifstream file{fileName, std::ios::binary};
 
   if (!file) {
@@ -110,12 +125,22 @@ void Settings::iLoadSettings() noexcept {
         (static_cast<std::uint32_t>(encodedBaudRate[3]) << 24);
     iSetSerialBaudRate(baudRate);
   }
+
+  // Older files end after the baud rate; keep their volume at 100%.
+  unsigned char encodedVolume{};
+  if (file.read(reinterpret_cast<char *>(&encodedVolume), 1) &&
+      encodedVolume <= 100) {
+    masterVolume = encodedVolume;
+  }
+  if (IsAudioDeviceReady()) {
+    SetMasterVolume(masterVolume / 100.f);
+  }
 }
 
-void Settings::iSaveSettings() noexcept {
+bool Settings::iSaveSettings() noexcept {
   std::ofstream file{fileName, std::ios::binary | std::ios::trunc};
   if (!file) {
-    return;
+    return false;
   }
 
   for (const Color color : guitarBassColors) {
@@ -138,6 +163,10 @@ void Settings::iSaveSettings() noexcept {
       static_cast<unsigned char>((serialBaudRate >> 24) & 0xff)};
   file.write(reinterpret_cast<const char *>(encodedBaudRate.data()),
              encodedBaudRate.size());
+  const auto encodedVolume = static_cast<unsigned char>(masterVolume);
+  file.write(reinterpret_cast<const char *>(&encodedVolume), 1);
+  file.close();
+  return !file.fail();
 }
 
 bool Settings::iDetectSerialPort() noexcept {

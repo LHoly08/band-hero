@@ -27,6 +27,12 @@ public:
   inline static Color getNoteTint(std::uint8_t index) noexcept {
     return get().iGetNoteTint(index);
   }
+  inline static void setNoteTint(std::uint8_t index, Color color) noexcept {
+    if (index < get().guitarBassColors.size()) {
+      color.a = 255;
+      get().guitarBassColors[index] = color;
+    }
+  }
   inline static const std::string &getSerialPort() noexcept {
     return get().serialPort;
   }
@@ -34,6 +40,8 @@ public:
     return get().serialBaudRate;
   }
   static std::vector<std::string> getAvailableSerialPorts();
+  inline static int getMasterVolume() noexcept { return get().masterVolume; }
+  static void setMasterVolume(int percent) noexcept;
   static constexpr std::array<std::uint32_t, 11> supportedBaudRates{
       110, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200};
 
@@ -50,7 +58,7 @@ public:
   }
 
   inline static void loadSettings() noexcept { return get().iLoadSettings(); }
-  inline static void saveSettings() noexcept { return get().iSaveSettings(); }
+  inline static bool saveSettings() noexcept { return get().iSaveSettings(); }
   inline static void defaultSettings() noexcept {
     return get().iDefaultSettings();
   }
@@ -86,7 +94,7 @@ private:
 
   void iDefaultSettings() noexcept;
   void iLoadSettings() noexcept;
-  void iSaveSettings() noexcept;
+  bool iSaveSettings() noexcept;
   bool iDetectSerialPort() noexcept;
   bool iSetSerialBaudRate(std::uint32_t baudRate) noexcept;
 
@@ -111,6 +119,7 @@ private:
                                         GREEN, BLUE,   PURPLE};
   std::string serialPort;
   std::uint32_t serialBaudRate{115200};
+  int masterVolume{100};
 };
 
 template <InstrumentType Type>

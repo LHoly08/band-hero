@@ -7,6 +7,7 @@
 
 #include "states/GamemodeState.hpp"
 #include "states/GuidesState.hpp"
+#include "states/PauseMenuState.hpp"
 #include "states/SettingsState.hpp"
 
 #include "ui/Button.hpp"

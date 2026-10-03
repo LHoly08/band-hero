@@ -6,20 +6,22 @@
 
 #include "states/BuildingState.hpp"
 #include "states/SongSelectState.hpp"
+#include "ui/Button.hpp"
 
 namespace bh {
 
 void GamemodeState::draw() const noexcept {
-  m_localButton.draw<WHITE, true>();
-  m_lanButton.draw<WHITE, true>();
-  m_onlineButton.draw<WHITE, true>();
-  m_backButton.draw<WHITE, true>();
+  m_localButton.draw<WHITE, true, 40, TextAlign::Center>();
+  m_lanButton.draw<WHITE, true, 40, TextAlign::Center>();
+  m_onlineButton.draw<WHITE, true, 40, TextAlign::Center>();
+  m_backButton.draw<WHITE, true, 40, TextAlign::Center>();
 }
 
 void GamemodeState::update(float dt) noexcept { auto _ = dt; }
 
 void GamemodeState::events() noexcept {
   const Vector2 mousePos = GetMousePosition();
+  
   const bool localClicked = m_localButton.updateInput(mousePos);
   const bool lanClicked = m_lanButton.updateInput(mousePos);
   const bool onlineClicked = m_onlineButton.updateInput(mousePos);

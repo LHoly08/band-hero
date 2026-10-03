@@ -19,9 +19,9 @@ namespace bh {
 SongSelectState::SongSelectState(StateStack &stack) noexcept
     : State(stack),
       m_mainMenuButton({.x = 30, .y = 950},
-                       {.x = 0, .y = 640, .width = 320, .height = 96},
+                       {.x = 0, .y = 0, .width = 360, .height = 100},
                        "Main Menu"),
-      m_addSongButton({.x = 1530, .y = 30},
+      m_addSongButton({.x = 30, .y = 830},
                       {.x = 0, .y = 0, .width = 360, .height = 100},
                       "Add Song") {
 
@@ -64,8 +64,8 @@ void SongSelectState::refreshSongButtons() noexcept {
 
 void SongSelectState::draw() const noexcept {
 
-  m_mainMenuButton.draw<WHITE, true, 40, TextAlign::Right>();
-  m_addSongButton.draw<WHITE, true, 40, TextAlign::Right>();
+  m_mainMenuButton.draw<WHITE, true, 40, TextAlign::Center>();
+  m_addSongButton.draw<WHITE, true, 40, TextAlign::Center>();
 
   for (const auto &songOptionButton : m_songOptions) {
     songOptionButton.draw<WHITE, true>();

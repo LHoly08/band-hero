@@ -3,20 +3,19 @@
 #include "states/State.hpp"
 
 #include "ui/Button.hpp"
-
 namespace bh {
 
 class GamemodeState final : public State {
 public:
   inline GamemodeState(StateStack &stack) noexcept
       : State(stack),
-        m_localButton({.x = 100, .y = 100},
-                      {.x = 0, .y = 0, .width = 360, .height = 100}, "Local"),
-        m_lanButton({.x = 500, .y = 500},
+        m_localButton({.x = 590, .y = 370},
+                      {.x = 0, .y = 300, .width = 740, .height = 100}, "Local"),
+        m_lanButton({.x = 590, .y = 490},
                     {.x = 0, .y = 0, .width = 360, .height = 100}, "LAN"),
-        m_onlineButton({.x = 1000, .y = 300},
+        m_onlineButton({.x = 970, .y = 490},
                        {.x = 0, .y = 0, .width = 360, .height = 100}, "Online"),
-        m_backButton({.x = 1231, .y = 214},
+        m_backButton({.x = 780, .y = 610},
                      {.x = 0, .y = 0, .width = 360, .height = 100},
                      "Main Menu") {}
   ~GamemodeState() override = default;

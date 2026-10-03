@@ -52,6 +52,11 @@ void ResourceManager::iLoadTexture(std::size_t index) noexcept {
   constexpr auto files = Textures::files();
   if (!IsTextureValid(m_textures[index])) {
     m_textures[index] = LoadTexture(assetPath(files[index]).c_str());
+    if (IsTextureValid(m_textures[index])) {
+      // UI and scene artwork scale with the window; smooth fractional zooms
+      // instead of enlarging individual texels with the default point filter.
+      SetTextureFilter(m_textures[index], TEXTURE_FILTER_BILINEAR);
+    }
   }
 }
 

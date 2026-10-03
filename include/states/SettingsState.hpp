@@ -1,40 +1,30 @@
 #pragma once
 
-#include <cstdint>
-
 #include "states/State.hpp"
-
 #include "ui/Button.hpp"
+#include "ui/settings/GeneralSettings.hpp"
+#include "ui/settings/GameplaySettings.hpp"
+#include "ui/settings/InstrumentSettings.hpp"
 
 namespace bh {
-
 class SettingsState final : public State {
 public:
-  inline SettingsState(StateStack &stack) noexcept
-      : State(stack),
-        m_saveButton({.x = 500, .y = 600}, {0, 0, 360, 100}, "Save"),
-        m_menuButton({.x = 1000, .y = 350}, {0, 0, 360, 100}, "Main Menu"),
-        m_defaultButton({.x = 700, .y = 100}, {0, 0, 360, 100}, "Defaults") {}
-  ~SettingsState() override = default;
-
+  explicit SettingsState(StateStack &stack) noexcept
+      : State(stack), m_menuButton({100, 885}, {0, 0, 360, 100}, "Main Menu") {}
   void draw() const noexcept override;
   void update(float dt) noexcept override;
   void events() noexcept override;
   void onEnter() noexcept override;
   void onExit() noexcept override;
-
 private:
-  enum class SettingsSection : std::uint8_t {
-    Startup = 0,
-    Play,
-    Instruments,
-  };
-
-  Button m_saveButton;
+  enum class Section { General, Instruments, Gameplay };
+  bool commit() noexcept;
   Button m_menuButton;
-  Button m_defaultButton;
-
-  SettingsSection m_menuSection{SettingsSection::Startup};
+  GeneralSettings m_general;
+  GameplaySettings m_gameplay;
+  InstrumentSettings m_instruments;
+  Section m_section{Section::General};
+  bool m_dirty{};
+  bool m_saveFailed{};
 };
-
 } // namespace bh
