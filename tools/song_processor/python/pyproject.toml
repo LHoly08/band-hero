@@ -10,6 +10,19 @@ requires-python = ">=3.10"
 dependencies = [
     "demucs>=4,<5",
     "numpy",
+    # Direct wheel references let plain pip installs include CUDA without an
+    # extra index flag. Keep the version and Python/platform matrix in sync.
+    "torch @ https://download.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp310-cp310-win_amd64.whl ; sys_platform == 'win32' and (platform_machine == 'AMD64' or platform_machine == 'x86_64') and implementation_name == 'cpython' and python_version == '3.10'",
+    "torch @ https://download.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp310-cp310-manylinux_2_28_x86_64.whl ; sys_platform == 'linux' and (platform_machine == 'AMD64' or platform_machine == 'x86_64') and implementation_name == 'cpython' and python_version == '3.10'",
+    "torch @ https://download.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp311-cp311-win_amd64.whl ; sys_platform == 'win32' and (platform_machine == 'AMD64' or platform_machine == 'x86_64') and implementation_name == 'cpython' and python_version == '3.11'",
+    "torch @ https://download.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp311-cp311-manylinux_2_28_x86_64.whl ; sys_platform == 'linux' and (platform_machine == 'AMD64' or platform_machine == 'x86_64') and implementation_name == 'cpython' and python_version == '3.11'",
+    "torch @ https://download.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp312-cp312-win_amd64.whl ; sys_platform == 'win32' and (platform_machine == 'AMD64' or platform_machine == 'x86_64') and implementation_name == 'cpython' and python_version == '3.12'",
+    "torch @ https://download.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp312-cp312-manylinux_2_28_x86_64.whl ; sys_platform == 'linux' and (platform_machine == 'AMD64' or platform_machine == 'x86_64') and implementation_name == 'cpython' and python_version == '3.12'",
+    "torch @ https://download.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp313-cp313-win_amd64.whl ; sys_platform == 'win32' and (platform_machine == 'AMD64' or platform_machine == 'x86_64') and implementation_name == 'cpython' and python_version == '3.13'",
+    "torch @ https://download.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp313-cp313-manylinux_2_28_x86_64.whl ; sys_platform == 'linux' and (platform_machine == 'AMD64' or platform_machine == 'x86_64') and implementation_name == 'cpython' and python_version == '3.13'",
+    "torch @ https://download.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp314-cp314-win_amd64.whl ; sys_platform == 'win32' and (platform_machine == 'AMD64' or platform_machine == 'x86_64') and implementation_name == 'cpython' and python_version == '3.14'",
+    "torch @ https://download.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp314-cp314-manylinux_2_28_x86_64.whl ; sys_platform == 'linux' and (platform_machine == 'AMD64' or platform_machine == 'x86_64') and implementation_name == 'cpython' and python_version == '3.14'",
+    "torch>=2.7,<3; sys_platform != 'win32' and sys_platform != 'linux' or platform_machine != 'AMD64' and platform_machine != 'x86_64' or implementation_name != 'cpython' or python_version < '3.10' or python_version >= '3.15'",
 ]
 
 [project.scripts]

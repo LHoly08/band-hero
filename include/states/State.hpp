@@ -18,4 +18,5 @@ public:
 protected:
   StateStack &m_stack;
 };
+
 } // namespace bh
