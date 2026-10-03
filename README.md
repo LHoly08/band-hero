@@ -1,5 +1,11 @@
 # band-hero
 
+## License
+
+Copyright (c) 2026 LHoly08. BandHero is licensed under the
+GNU General Public License version 3 only (`GPL-3.0-only`). See [LICENSE](LICENSE)
+for the full terms. Third-party code retains its own license notices.
+
 ## Game settings
 
 Open Settings from the main menu. General and Gameplay changes save automatically;
