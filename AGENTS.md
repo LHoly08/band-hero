@@ -24,3 +24,4 @@
 
 - Check `git status` before editing and preserve existing work in progress.
 - Keep asset paths in code consistent with the files under `assets/`.
+- Prefer changing the assets instead of coding them into the game.

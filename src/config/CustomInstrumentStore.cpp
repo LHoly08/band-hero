@@ -12,6 +12,8 @@
 
 namespace bh {
 namespace {
+// Settings owns only this trailing override block. Preserve the user's base
+// script and helper functions rather than regenerating the entire Lua file.
 constexpr std::string_view Begin = "\n-- BandHero settings overrides v1\n";
 constexpr std::string_view End = "-- End BandHero settings overrides v1\n";
 using Lua = std::unique_ptr<lua_State, decltype(&lua_close)>;
@@ -115,6 +117,8 @@ bool valid(const InstrumentDefinition &d, std::string &error) {
   return true;
 }
 std::string functionSource(lua_State *state, const std::string &source, const char *name) {
+  // Lua supplies the actual function's source line range, avoiding a text scan
+  // that could mistake nested blocks or comments for the function boundary.
   lua_getglobal(state, name);
   if (!lua_isfunction(state, -1)) { lua_pop(state, 1); return {}; }
   lua_Debug info{};
@@ -127,6 +131,8 @@ std::string functionSource(lua_State *state, const std::string &source, const ch
   return result;
 }
 bool writeAtomic(const std::filesystem::path &path, const std::string &source, std::string &error) {
+  // Write beside the target so replacement stays on the same filesystem.
+  // Keep the existing file intact if writing or replacement fails.
   auto temporary = path;
   temporary += ".bandhero-tmp";
   std::error_code ec;
@@ -228,6 +234,7 @@ bool CustomInstrumentStore::save(InstrumentDefinition &d, std::string &error) {
       return false;
     }
   }
+  // Refuse stale editor snapshots instead of overwriting external edits.
   if (std::filesystem::exists(d.path, ec) && read(d.path) != d.source) {
     error = "This file changed outside the game. Reopen settings before editing it."; return false;
   }
@@ -247,6 +254,8 @@ bool CustomInstrumentStore::save(InstrumentDefinition &d, std::string &error) {
     source += std::to_string(d.second) + " }\n";
   }
   source += End;
+  // Validate the combined base + overrides too: edited functions may interact
+  // with helper code even when each function validated independently.
   auto state = newState();
   if (!execute(state.get(), source, error)) return false;
   if (!writeAtomic(d.path, source, error)) return false;

@@ -14,6 +14,8 @@
 #include "ui/Button.hpp"
 #include "ui/Theme.hpp"
 
+#include <cstdio>
+
 namespace bh {
 
 SongSelectState::SongSelectState(StateStack &stack) noexcept
@@ -23,7 +25,16 @@ SongSelectState::SongSelectState(StateStack &stack) noexcept
                        "Main Menu"),
       m_addSongButton({.x = 30, .y = 830},
                       {.x = 0, .y = 0, .width = 360, .height = 100},
-                      "Add Song") {
+                      "Add Song"),
+      m_hardSongButton({.x = 1530, .y = 710},
+                      {.x = 0, .y = 0, .width = 360, .height = 100},
+                      "Hard"),
+      m_mediumSongButton({.x = 1530, .y = 830},
+                      {.x = 0, .y = 0, .width = 360, .height = 100},
+                      "Medium"),
+      m_easySongButton({.x = 1530, .y = 950},
+                      {.x = 0, .y = 0, .width = 360, .height = 100},
+                      "Easy") {
 
   std::error_code error;
   std::filesystem::directory_iterator songs(s_SongsDir, error);
@@ -49,13 +60,8 @@ SongSelectState::SongSelectState(StateStack &stack) noexcept
 }
 
 void SongSelectState::refreshSongButtons() noexcept {
-  if (IsMusicValid(m_song)) {
-    StopMusicStream(m_song);
-    UnloadMusicStream(m_song);
-    m_song = {};
-  }
-  m_selectedOption = 0;
-
+  // Scrolling changes only the viewport. Keep the selected song and its stream
+  // alive; release button presses so a recycled row cannot select another song.
   for (std::size_t i{}; i < m_songOptions.size(); ++i) {
     m_songOptions[i].changeText(m_songNames[m_firstVisibleSong + i]);
     m_songOptions[i].resetInteraction();
@@ -68,8 +74,18 @@ void SongSelectState::draw() const noexcept {
   m_mainMenuButton.draw<WHITE, true, 40, TextAlign::Center>();
   m_addSongButton.draw<WHITE, true, 40, TextAlign::Center>();
 
-  for (const auto &songOptionButton : m_songOptions) {
-    songOptionButton.draw<WHITE, true>();
+  for (std::size_t i = 0; i < m_songOptions.size(); ++i) {
+    if (m_firstVisibleSong + i == m_selectedSong) {
+      m_songOptions[i].draw<theme::Highlight, true>();
+    } else {
+      m_songOptions[i].draw<WHITE, true>();
+    }
+  }
+
+  if (m_selectedSong != NoSong) {
+    m_hardSongButton.draw<WHITE, true, 40, TextAlign::Center>();
+    m_mediumSongButton.draw<WHITE, true, 40, TextAlign::Center>();
+    m_easySongButton.draw<WHITE, true, 40, TextAlign::Center>();
   }
 }
 
@@ -84,14 +100,67 @@ void SongSelectState::update(float dt) noexcept {
 void SongSelectState::events() noexcept {
 
   const Vector2 MousePos{GetMousePosition()};
+  const bool enabled = m_selectedSong != NoSong;
+
   const bool mainMenuClicked = m_mainMenuButton.updateInput(MousePos);
   const bool addSongClicked = m_addSongButton.updateInput(MousePos);
+  const bool hardClicked = m_hardSongButton.updateInput(MousePos, enabled);
+  const bool mediumClicked = m_mediumSongButton.updateInput(MousePos, enabled);
+  const bool easyClicked = m_easySongButton.updateInput(MousePos, enabled);
+
 
   if (mainMenuClicked) [[unlikely]] {
     m_stack.replace<MainMenuState>();
 
   } else if (addSongClicked) [[unlikely]] {
     // TODO: Implement the addition of songs with the path to the file
+  }
+  if (enabled) {
+
+    std::string path = s_SongsDir;
+    path.append(m_songNames[m_selectedSong]);
+
+    constexpr auto getButtonDifficulty = [](std::meta::info metaIdentifier) consteval -> auto {
+      const std::string_view identifier = std::meta::identifier_of(metaIdentifier);
+      std::string difficulty{'/'};
+
+      for (auto it = identifier.begin(); it != identifier.end() && !(*it >= 'A' && *it <= 'Z'); ++it) {
+        difficulty += *it;
+      }
+      difficulty.at(1) = difficulty.at(1) - 32;
+      difficulty += '/';
+
+      return std::define_static_string(difficulty);
+    };
+
+    if (hardClicked) [[unlikely]] {
+      path.append(getButtonDifficulty(^^hardClicked));
+      std::puts(path.c_str());
+      m_stack.push<PlayerSelectState>(std::move(path));
+
+      StopMusicStream(m_song);
+      UnloadMusicStream(m_song);
+      m_song = {};
+
+    } else if (mediumClicked) [[unlikely]] {
+      path.append(getButtonDifficulty(^^mediumClicked));
+      std::puts(path.c_str());
+      m_stack.push<PlayerSelectState>(std::move(path));
+
+      StopMusicStream(m_song);
+      UnloadMusicStream(m_song);
+      m_song = {};
+
+    } else if (easyClicked) [[unlikely]] {
+      path.append(getButtonDifficulty(^^easyClicked));
+      std::puts(path.c_str());
+      m_stack.push<PlayerSelectState>(std::move(path));
+
+      StopMusicStream(m_song);
+      UnloadMusicStream(m_song);
+      m_song = {};
+
+    }
   }
 
   const float wheel = GetMouseWheelMove();
@@ -114,26 +183,21 @@ void SongSelectState::events() noexcept {
 
     if (clickedOption) [[unlikely]] {
 
-      if (m_selectedOption != i + 1) [[likely]] {
-        m_selectedOption = i + 1;
+      const auto songIndex = m_firstVisibleSong + i;
+      if (m_selectedSong != songIndex) [[likely]] {
+        m_selectedSong = songIndex;
+
         if (IsMusicValid(m_song)) [[likely]] {
           StopMusicStream(m_song);
           UnloadMusicStream(m_song);
         }
 
         m_song = LoadMusicStream(
-            (s_SongsDir + songOptionButton.getText().append("/Audio/main.mp3"))
+            (s_SongsDir + m_songNames[m_selectedSong] + "/Audio/main.mp3")
                 .c_str());
 
         PlayMusicStream(m_song);
 
-      } else {
-        m_stack.push<PlayerSelectState>(s_SongsDir +
-                                        songOptionButton.getText() + "/");
-
-        StopMusicStream(m_song);
-        UnloadMusicStream(m_song);
-        m_song = {};
       }
     }
   }
@@ -142,7 +206,7 @@ void SongSelectState::events() noexcept {
 void SongSelectState::onEnter() noexcept {
   ResourceManager::loadTextures<Textures::UI>();
 
-  m_selectedOption = 0;
+  m_selectedSong = NoSong;
 }
 
 void SongSelectState::onExit() noexcept {

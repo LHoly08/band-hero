@@ -151,6 +151,16 @@ bool InstrumentSettings::canLeave() {
   }
   return true;
 }
+void InstrumentSettings::discard() {
+  const auto path = m_selected >= 0 ? m_instruments[m_selected].path : std::filesystem::path{};
+  onEnter();
+  const auto selected = std::ranges::find_if(m_instruments, [&](const auto &instrument) {
+    return instrument.path == path;
+  });
+  if (selected != m_instruments.end()) select(static_cast<int>(selected - m_instruments.begin()));
+  if (m_selected >= 0) m_page = m_selected / PageSize;
+  reset();
+}
 void InstrumentSettings::events() {
   using namespace settings_ui;
   if (m_confirmDelete) {

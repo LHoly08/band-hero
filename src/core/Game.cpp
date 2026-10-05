@@ -37,6 +37,8 @@ Game::Game(const Vector2 &windowSize,
 }
 
 Game::~Game() noexcept {
+  // State exit hooks and texture unloading need live graphics/audio devices.
+  // Tear down their owners before closing either device.
   m_stack.clear();
   ResourceManager::unload();
   CloseAudioDevice();

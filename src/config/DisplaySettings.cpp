@@ -15,6 +15,9 @@ DisplaySettings &DisplaySettings::get() {
 }
 
 void DisplaySettings::load() {
+  // startup.bin starts with legacy uint16 LE FPS. The optional extension is
+  // 'D', version 1, uint16 LE width/height, then fullscreen and FPS-counter bytes.
+  // Missing or invalid extension fields retain their default values.
   *this = DisplaySettings{};
   std::ifstream file("startup.bin", std::ios::binary);
   std::array<unsigned char, 10> bytes{};
@@ -49,6 +52,7 @@ bool DisplaySettings::save() const {
 void DisplaySettings::apply() const {
   if (!IsWindowReady()) return;
   const bool resize = GetScreenWidth() != width || GetScreenHeight() != height;
+  // Resize in windowed mode, then restore the requested fullscreen state.
   if (resize && IsWindowFullscreen()) ToggleFullscreen();
   if (resize) SetWindowSize(width, height);
   if (IsWindowFullscreen() != fullscreen) ToggleFullscreen();

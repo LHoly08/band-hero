@@ -1,6 +1,6 @@
 #pragma once
 
-#include <bitset>
+#include <array>
 #include <filesystem>
 #include <inplace_vector>
 #include <memory>
@@ -23,11 +23,9 @@ namespace bh {
 class PlayerSelectState final : public State {
 public:
   inline PlayerSelectState(StateStack &stack, std::string &&songName) noexcept
-      : State(stack), m_nextButton({.x = 100, .y = 100}, {0, 0, 360, 100},
+      : State(stack), m_nextButton({.x = 780, .y = 650}, {0, 0, 360, 100},
                                    "Choose Instruments"),
-        m_backButton({.x = 1420, .y = 0}, {0, 640, 320, 96}, "Back"),
-        m_increaseCountButton({.x = 500, .y = 500}, {0, 0, 360, 100}, ">"),
-        m_decreaseCountButton({.x = 1000, .y = 300}, {0, 0, 360, 100}, "<"),
+        m_backButton({.x = 30, .y = 950}, {0, 640, 320, 96}, "Back"),
         m_songName(std::move(songName)) {}
 
   ~PlayerSelectState() override = default;
@@ -43,21 +41,20 @@ private:
 
   Button m_nextButton;
   Button m_backButton;
-  Button m_increaseCountButton;
-  Button m_decreaseCountButton;
 
   std::vector<CustomInstrumentComposition> m_customInstruments;
 
   std::inplace_vector<std::uint8_t, 4> m_playerChoices;
   std::inplace_vector<std::unique_ptr<PlayerBase>, 4> m_players;
-  std::inplace_vector<std::inplace_vector<std::uint32_t, 3>, 4> m_check;
-  std::inplace_vector<std::pair<std::uint8_t, std::uint8_t>, 4> m_minMax;
+  // Each player must send three distinct nonzero note values; releases and
+  // repeated/held notes do not advance the controller check.
+  std::array<std::inplace_vector<std::uint32_t, 3>, 4> m_testNotes;
 
   const std::string m_songName;
 
   float m_counter{};
 
-  std::uint8_t m_checksPassed{};
+  bool m_controllerConnected{};
 
   enum class Stage : std::uint8_t {
     ChoosingPlayerCount = 0,

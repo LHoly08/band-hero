@@ -26,6 +26,7 @@ std::vector<std::string> serialPortCandidates() {
     const std::string name = "COM" + std::to_string(number);
     std::array<char, 1024> target{};
     if (QueryDosDeviceA(name.c_str(), target.data(), target.size()) != 0) {
+      // The device namespace form also works for COM ports numbered above 9.
       ports.emplace_back("\\\\.\\" + name);
     }
   }
@@ -80,6 +81,9 @@ void Settings::iDefaultSettings() noexcept {
 }
 
 void Settings::iLoadSettings() noexcept {
+  // settings.bin layout: six RGBA colors (24 bytes), uint16 LE port-name byte
+  // length, port bytes, uint32 LE baud rate, then optional uint8 volume percent.
+  // Decode integers explicitly so this format does not depend on struct padding.
   masterVolume = 100;
   if (IsAudioDeviceReady()) {
     SetMasterVolume(1.f);
@@ -170,6 +174,8 @@ bool Settings::iSaveSettings() noexcept {
 }
 
 bool Settings::iDetectSerialPort() noexcept {
+  // This probes whether a port opens, not whether a BandHero controller answers.
+  // Explicit port selection in General can override the first openable device.
   try {
     serialPort.clear();
     for (const std::string &candidate : serialPortCandidates()) {

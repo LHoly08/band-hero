@@ -47,6 +47,7 @@ concept CustomType =
 template <InstrumentType Type> struct Note {
 
   std::uint32_t note{};
+  // Runtime progress within a chord; this field is not stored in chart files.
   std::uint32_t playedBits{};
   float timeStamp{};
   std::uint8_t shape{};
@@ -57,6 +58,7 @@ template <InstrumentType Type>
 struct Note<Type> {
 
   std::uint32_t note{};
+  // Runtime progress within a chord; this field is not stored in chart files.
   std::uint32_t playedBits{};
   float timeStamp{};
   std::uint8_t shape{};
@@ -114,6 +116,7 @@ protected:
 
   void selectPlayable() noexcept;
 
+  // Times are seconds relative to the instrument's unpaused playback clock.
   static constexpr double RefillAhead = 5.0;
   static constexpr double EarlyWindow = 0.75;
   static constexpr double LateWindow = 0.5;
@@ -126,6 +129,9 @@ protected:
   std::uint32_t m_originalNote{};
   std::uint32_t m_playingNote{};
 
+  // The main thread alone owns active notes. The worker fills loadingBuffer,
+  // then publishes downloadingBuffer under the mutex; bufferReady prevents
+  // another publication until update() has consumed the previous batch.
   std::deque<NoteType> m_activeBuffer;
   std::vector<NoteType> m_loadingBuffer;
   std::vector<NoteType> m_downloadingBuffer;
@@ -138,6 +144,8 @@ protected:
 
   std::size_t m_selectedNote{NoNote};
   double m_time{};
+  // Declared last so destruction stops/joins the worker before its buffers,
+  // mutex and condition variable are destroyed.
   std::jthread m_loadingThread;
 };
 
@@ -156,6 +164,8 @@ Instrument<Type, Dif>::Instrument(std::uint32_t &noteCount,
     : m_noteCount(noteCount),
       m_loadingThread(
           std::bind_front(&Instrument<Type, Dif>::loadFile, this),
+          // The caller supplies the song directory with its trailing separator.
+          // Enum template arguments produce a basename such as BassHard.file.
           std::move(filename.append([this] consteval -> auto {
             constexpr auto self = std::meta::remove_cvref(^^decltype(*this));
 
@@ -163,8 +173,6 @@ Instrument<Type, Dif>::Instrument(std::uint32_t &noteCount,
 
             static constexpr auto templateArgs = [self]() consteval -> auto {
               auto templateArgs = std::meta::template_arguments_of(self);
-
-              std::reverse(templateArgs.begin(), templateArgs.end());
 
               return std::define_static_array(templateArgs);
             }();
@@ -180,8 +188,7 @@ Instrument<Type, Dif>::Instrument(std::uint32_t &noteCount,
                 template for (constexpr auto enumerator : enumerators) {
                   if constexpr (std::meta::extract<T>(enumerator) ==
                                 std::meta::extract<T>(arg)) {
-
-                    path.append("/");
+                                  
                     path.append(std::meta::identifier_of(enumerator));
                   }
                 }
@@ -234,6 +241,8 @@ void Instrument<Type, Dif>::selectPlayable() noexcept {
 
   double closest = std::numeric_limits<double>::infinity();
 
+  // Charts must be ordered by timestamp: the early-window cutoff below can
+  // stop the search. Choose the closest eligible chord, retaining played bits.
   for (std::size_t i = 0; i < m_activeBuffer.size(); ++i) {
 
     const auto &note = m_activeBuffer[i];
@@ -280,6 +289,9 @@ void Instrument<Type, Dif>::loadFile(std::stop_token stopToken,
     m_loadingBuffer.clear();
 
     for (std::size_t i = 0; i < BatchSize && !stopToken.stop_requested(); ++i) {
+      // Records contain only uint32 note bits followed by float timestamp,
+      // in the host's binary representation; never read sizeof(NoteType),
+      // which also includes runtime fields and may contain padding.
       NoteType note{};
       if (!file.read(reinterpret_cast<char *>(&note.note), sizeof(note.note)) ||
           !file.read(reinterpret_cast<char *>(&note.timeStamp),
@@ -303,6 +315,8 @@ void Instrument<Type, Dif>::loadFile(std::stop_token stopToken,
 
 template <InstrumentType Type, Difficulty Dif>
 bool Instrument<Type, Dif>::getPlay(std::uint32_t playedNote) noexcept {
+  // Reject extra or already-played bits. A valid subset advances the chord,
+  // but returns true (and awards a score) only when the entire chord is done.
   if (m_selectedNote == NoNote || !playedNote ||
       (playedNote & ~m_playingNote) || !m_playingNote) {
     return false;

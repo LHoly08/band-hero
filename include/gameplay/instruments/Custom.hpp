@@ -75,6 +75,8 @@ private:
   std::string m_name;
   lua_State *m_lua;
 
+  // Lua's drawNote callback records a request rather than drawing directly.
+  // C++ adds the player's X origin, timestamp-based Y, tint and sprite shape.
   struct Notification {
     float position{};
     bool called{false};
@@ -106,9 +108,8 @@ template <InstrumentType Type, Difficulty Dif>
 Custom<Type, Dif>::Custom(std::uint32_t &noteCount, std::string filename,
                           std::string_view instrumentName,
                           InstrumentComposition<Type> instrumentComposition)
-    : Base(noteCount, std::move(filename.append(getDifficultyString<Dif>())
-                                    .append("/")
-                                    .append(instrumentName)
+    : Base(noteCount, std::move(filename.append(instrumentName)
+                                    .append(getDifficultyString<Dif>())
                                     .append(".file"))),
       m_name(instrumentName), m_composition(instrumentComposition) {}
 
@@ -275,6 +276,8 @@ void Custom<InstrumentType::Custom_3, Dif>::draw(
 template <Difficulty Dif>
 bool Custom<InstrumentType::Custom_3, Dif>::getPlay(
     std::uint32_t playedNote) noexcept {
+  // PlayEasy/PlayHard transforms controller bits; the base class still owns
+  // timing and chord completion. A missing function uses the original input.
 
   if (m_lua) [[likely]] {
     lua_getglobal(m_lua, []<Difficulty D> consteval -> auto {

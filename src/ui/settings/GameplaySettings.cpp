@@ -14,7 +14,7 @@ void GameplaySettings::draw() const {
   for (int i = 0; i < 6; ++i) {
     choice({650 + i * 170.f, 295, 140, 160}, "", i == m_note);
     ResourceManager::drawImage<Textures::Gameplay::Notes>(
-        {0, 0, 150, 150}, {645 + i * 170.f, 280}, Settings::getNoteTint(i));
+        {150.f * (i % 4), 0, 150, 150}, {645 + i * 170.f, 280}, Settings::getNoteTint(i));
     text(std::to_string(i + 1), {710 + i * 170.f, 425}, 24);
   }
   const Color color = Settings::getNoteTint(m_note);
@@ -28,6 +28,17 @@ void GameplaySettings::draw() const {
     text(std::to_string(values[i]), {1640, 560 + i * 100.f}, 28);
   }
   text("These colors are shared by the game's instruments.", {620, 855}, 26, theme::MutedText);
+  card({600, 915, 1180, 85});
+  text("NOTE DESIGNS", {630, 945}, 20, theme::Primary);
+  // Notes.png is four horizontal 150px cells in this order. These previews
+  // share the selected tint; viewing a design does not change chart behavior.
+  const char *shapes[]{"Quarter", "Eighth", "Sixteenth", "Half"};
+  for (int i = 0; i < 4; ++i) {
+    const float x = 850 + i * 225.f;
+    ResourceManager::drawImageRegionTo<Textures::Gameplay::Notes>(
+        {150.f * i, 0, 150, 150}, {x, 915, 80, 80}, color);
+    text(shapes[i], {x + 80, 946}, 21, theme::MutedText);
+  }
 }
 bool GameplaySettings::events() {
   for (int i = 0; i < 6; ++i) {

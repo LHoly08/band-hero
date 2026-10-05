@@ -11,6 +11,9 @@ public:
   void draw() const;
   void events();
   bool canLeave();
+  // Reload saved definitions and retain the selected file when it still exists.
+  // Unlike reset(), this removes drafts; reset() only releases input focus.
+  void discard();
   bool deletionPending() const { return m_confirmDelete; }
   void reset();
 private:

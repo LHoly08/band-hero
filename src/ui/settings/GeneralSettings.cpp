@@ -8,24 +8,29 @@
 
 namespace bh {
 namespace {
-constexpr Rectangle FPSPrevious{1220, 488, 60, 60};
-constexpr Rectangle FPSNext{1660, 488, 60, 60};
-constexpr Rectangle ResolutionPrevious{1220, 745, 60, 60};
-constexpr Rectangle ResolutionNext{1660, 745, 60, 60};
-constexpr Rectangle Fullscreen{1570, 840, 150, 50};
-constexpr Rectangle Counter{1570, 588, 150, 50};
+constexpr Rectangle FPSPrevious{1220, 473, 60, 60};
+constexpr Rectangle FPSNext{1660, 473, 60, 60};
+constexpr Rectangle ResolutionPrevious{1220, 650, 60, 60};
+constexpr Rectangle ResolutionNext{1660, 650, 60, 60};
+constexpr Rectangle Fullscreen{1570, 725, 150, 50};
+constexpr Rectangle Counter{1570, 558, 150, 50};
+constexpr Rectangle PortPrevious{1130, 850, 60, 50};
+constexpr Rectangle PortNext{1510, 850, 60, 50};
+constexpr Rectangle RefreshPorts{1590, 850, 150, 50};
+constexpr Rectangle BaudPrevious{1130, 920, 60, 50};
+constexpr Rectangle BaudNext{1510, 920, 60, 50};
 
 void selector(Rectangle previous, Rectangle next, const std::string &value) {
   using namespace settings_ui;
   choice(previous, "<");
   choice(next, ">");
-  const float size = 32;
-  const float width = ResourceManager::measureText<Fonts_t::Buttons>(value, size);
-  text(value, {(previous.x + previous.width + next.x - width) / 2,
-               previous.y + 14}, size, theme::Highlight);
+  fittedText(value, {previous.x + previous.width + 12, previous.y + 12,
+                    next.x - previous.x - previous.width - 24, 36},
+             32, theme::Highlight);
 }
 }
 void GeneralSettings::onEnter() {
+  refreshSerialPorts();
   m_resolutions.clear();
   const int monitor = GetCurrentMonitor();
   const int maxWidth = GetMonitorWidth(monitor);
@@ -54,6 +59,15 @@ void GeneralSettings::onEnter() {
   m_frameRates.erase(repeated.begin(), repeated.end());
   m_frameRates.push_back(0);
 }
+void GeneralSettings::refreshSerialPorts() {
+  // Retain a configured but disconnected port, and put the explicit None option
+  // first. Refresh updates choices without silently changing the saved device.
+  m_serialPorts = Settings::getAvailableSerialPorts();
+  const auto &current = Settings::getSerialPort();
+  if (!current.empty() && !std::ranges::contains(m_serialPorts, current))
+    m_serialPorts.push_back(current);
+  m_serialPorts.insert(m_serialPorts.begin(), "");
+}
 void GeneralSettings::draw() const {
   using namespace settings_ui;
   const auto &display = DisplaySettings::get();
@@ -67,28 +81,38 @@ void GeneralSettings::draw() const {
   m_volume.draw(volume, 100, theme::Highlight);
   text(volume == 0 ? "Muted" : std::to_string(volume) + "%", {1682, 338}, 24, theme::Highlight);
 
-  card({600, 440, 1180, 220});
-  text("PERFORMANCE", {630, 460}, 21, theme::Primary);
-  text("Frame-rate limit", {640, 503}, 30);
+  card({600, 430, 1180, 180});
+  text("PERFORMANCE", {630, 445}, 21, theme::Primary);
+  text("Frame-rate limit", {640, 478}, 30);
   selector(FPSPrevious, FPSNext, display.fps == 0 ? "Unlimited" : std::to_string(display.fps) + " FPS");
   text(m_refreshRate > 0 ? "Monitor refresh rate: " + std::to_string(m_refreshRate) + " Hz" :
                           "Choose a frame-rate limit.",
-       {640, 550}, 22, theme::MutedText);
-  panel({630, 580, 1120, 1}, theme::Border);
-  text("FPS counter", {640, 596}, 28);
-  text("Show while playing", {1030, 600}, 22, theme::MutedText);
+       {640, 520}, 22, theme::MutedText);
+  panel({630, 550, 1120, 1}, theme::Border);
+  text("FPS counter", {640, 566}, 28);
+  text("Show while playing", {1030, 570}, 22, theme::MutedText);
   toggle(Counter, display.showFPS);
 
-  card({600, 685, 1180, 240});
-  text("DISPLAY", {630, 705}, 21, theme::Primary);
-  text("Resolution", {640, 760}, 30);
+  card({600, 625, 1180, 160});
+  text("DISPLAY", {630, 637}, 21, theme::Primary);
+  text("Resolution", {640, 665}, 30);
   selector(ResolutionPrevious, ResolutionNext,
            std::to_string(display.width) + " x " + std::to_string(display.height));
-  panel({630, 825, 1120, 1}, theme::Border);
-  text("Fullscreen", {640, 850}, 28);
+  panel({630, 715, 1120, 1}, theme::Border);
+  text("Fullscreen", {640, 735}, 28);
   text(display.fullscreen ? "Use the whole screen" : "Play in a window",
-       {1030, 855}, 22, theme::MutedText);
+       {1030, 740}, 22, theme::MutedText);
   toggle(Fullscreen, display.fullscreen);
+
+  card({600, 800, 1180, 195});
+  text("SERIAL CONTROLLER", {630, 815}, 21, theme::Primary);
+  text("Serial port", {640, 862}, 28);
+  std::string port = Settings::getSerialPort();
+  if (port.starts_with("\\\\.\\")) port.erase(0, 4);
+  selector(PortPrevious, PortNext, port.empty() ? "None" : port);
+  choice(RefreshPorts, "Refresh");
+  text("Baud rate", {640, 932}, 28);
+  selector(BaudPrevious, BaudNext, std::to_string(Settings::getSerialBaudRate()));
 }
 bool GeneralSettings::events() {
   using namespace settings_ui;
@@ -123,6 +147,23 @@ bool GeneralSettings::events() {
     return true;
   }
   if (clicked(Counter)) { display.showFPS = !display.showFPS; changed = true; }
+  if (clicked(RefreshPorts)) refreshSerialPorts();
+  const int portStep = clicked(PortNext) ? 1 : clicked(PortPrevious) ? -1 : 0;
+  if (portStep && !m_serialPorts.empty()) {
+    const auto current = std::ranges::find(m_serialPorts, Settings::getSerialPort());
+    const int count = static_cast<int>(m_serialPorts.size());
+    const int index = (static_cast<int>(current - m_serialPorts.begin()) + portStep + count) % count;
+    Settings::setSerialPort(m_serialPorts[index]);
+    changed = true;
+  }
+  const int baudStep = clicked(BaudNext) ? 1 : clicked(BaudPrevious) ? -1 : 0;
+  if (baudStep) {
+    const auto &rates = Settings::supportedBaudRates;
+    const auto current = std::ranges::find(rates, Settings::getSerialBaudRate());
+    const int count = static_cast<int>(rates.size());
+    const int index = (static_cast<int>(current - rates.begin()) + baudStep + count) % count;
+    changed = Settings::setSerialBaudRate(rates[index]) || changed;
+  }
   return changed;
 }
 } // namespace bh

@@ -7,6 +7,9 @@
 namespace bh {
 enum class CustomKind { Sections = 1, Bits, Script };
 
+// Editor snapshot: first/second are section count/bits per section for Sections,
+// or Easy/Hard effective bits for Bits. Script uses functions in FunctionNames
+// order. source retains the last loaded/saved file for external-change checks.
 struct InstrumentDefinition {
   std::filesystem::path path;
   std::string name;
@@ -20,6 +23,8 @@ struct InstrumentDefinition {
 class CustomInstrumentStore {
 public:
   static constexpr std::array<const char *, 3> FunctionNames{"PlayEasy", "PlayHard", "Draw"};
+  // Invalid and duplicate definitions stay in the list with an error so the
+  // editor can repair them; callers must check error before offering gameplay.
   static std::vector<InstrumentDefinition> list();
   static InstrumentDefinition load(const std::filesystem::path &path);
   static bool save(InstrumentDefinition &definition, std::string &error);

@@ -14,6 +14,9 @@ namespace bh {
 template <typename T>
 concept DerivedState = std::derived_from<T, State>;
 
+// Transitions are queued until act(), so a state cannot destroy itself while
+// its events/update callback is still running. Only the top state is active.
+// Covering a state calls onExit(); revealing it again calls onEnter().
 class StateStack {
 public:
   StateStack();

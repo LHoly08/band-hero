@@ -13,15 +13,19 @@ sliders save when released. Instrument edits stay as drafts until you choose
 **Save instrument**.
 
 - **General:** drag master volume, choose the FPS limit and resolution, toggle
-  fullscreen, and show an FPS counter throughout the game.
+  fullscreen, and show an FPS counter throughout the game. Choose the serial
+  controller port and baud rate; use **Refresh** after connecting a device.
+  Choose **None** to disable the serial controller. Serial changes save automatically
+  and apply when entering player selection or gameplay.
 - **Custom Instruments:** create an instrument with a name and type, or select
   an existing instrument. Custom 1 edits section count and bits per section;
   Custom 2 edits effective bits for Easy and Hard, with Easy capped at Hard's
   count. Custom 3 edits the complete
   `PlayEasy`, `PlayHard`, and `Draw` Lua functions in separate tabs. The editor
   supports arrows, Home/End, mouse-wheel scrolling, and Ctrl+A/C/V. Invalid edits
-  show an error and leave the last valid file intact. Save valid changes or choose
-  **Revert edits** before leaving the section. Existing helper code is preserved.
+  show an error and leave the last valid file intact. Switching to General,
+  Gameplay, or Main Menu discards unsaved instrument edits automatically.
+  **Revert edits** also discards edits while staying in the editor. Existing helper code is preserved.
   Names must be unique (capitalization and extra spaces are ignored). Use
   **Delete** to remove an instrument after confirmation. Existing duplicate
   names are flagged for renaming and excluded from player selection.

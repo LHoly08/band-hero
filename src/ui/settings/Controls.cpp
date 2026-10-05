@@ -18,7 +18,7 @@ Vector2 mousePosition() {
 }
 void panel(Rectangle rect, Color color) { DrawRectangleRec(screenRect(rect), color); }
 void card(Rectangle rect) {
-  ResourceManager::drawSettingsSkin<Textures::Settings::Panel>(
+  ResourceManager::drawSettingsSkin<Textures::UI::Panel>(
       {0, 0, 768, 384}, rect);
 }
 void toggle(Rectangle rect, bool enabled) {
@@ -45,7 +45,7 @@ void fittedText(std::string_view value, Rectangle bounds, float size, Color colo
 void choice(Rectangle rect, std::string_view label, bool selected) {
   const bool hover = CheckCollisionPointRec(mousePosition(), rect);
   const float frame = selected ? 2.f : hover ? 1.f : 0.f;
-  ResourceManager::drawSettingsSkin<Textures::Settings::Controls>(
+  ResourceManager::drawSettingsSkin<Textures::UI::Controls>(
       {0, frame * 128, 768, 128}, rect);
   float size = std::min(28.f, rect.height * .5f);
   const float measured = ResourceManager::measureText<Fonts_t::Buttons>(label, size);

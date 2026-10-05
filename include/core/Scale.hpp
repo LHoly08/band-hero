@@ -18,6 +18,8 @@ template <typename T>
 concept Scalable = std::is_integral_v<T> || std::is_floating_point_v<T> ||
                    std::is_same_v<Vector2, T>;
 
+// Layout coordinates use a 1920 x 1080 reference canvas. Scale X and Y
+// independently to raylib's logical screen size (not framebuffer/DPI pixels).
 template <Scalable T = Vector2, ScreenAxis Axis = ScreenAxis::X>
 inline T scaledSize(T size) noexcept {
 

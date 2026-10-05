@@ -61,6 +61,10 @@ void GameState<PlayerCount>::update(float dt) noexcept {
     player->update(dt);
   }
 
+  // Controller packets are four-byte little-endian words: the low two bits
+  // identify player 0-3 and the remaining 30 bits encode that player's input.
+  // Accept only complete four-byte reads. Short reads consume their bytes but
+  // are discarded rather than retained for the next update.
   if (std::uint32_t buffer{};
       m_serial.readBytes(&buffer, sizeof(buffer), 1) == sizeof(buffer)) {
 

@@ -3,6 +3,9 @@
 #include "raylib.h"
 
 namespace bh::settings_ui {
+// Small plain-text Lua editor. Cursor/line offsets index string bytes; typing
+// accepts printable ASCII, while pasted text is retained with CRs stripped.
+// Selection is whole-document only, rather than an arbitrary text range.
 class ScriptEditor {
 public:
   explicit ScriptEditor(Rectangle rect) : m_rect(rect) {}

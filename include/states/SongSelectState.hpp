@@ -30,6 +30,9 @@ private:
   std::inplace_vector<Button, 5> m_songOptions;
   Button m_mainMenuButton;
   Button m_addSongButton;
+  Button m_hardSongButton;
+  Button m_mediumSongButton;
+  Button m_easySongButton;
   Music m_song{};
 
   std::vector<std::string> m_songNames;
@@ -37,7 +40,9 @@ private:
 
   void refreshSongButtons() noexcept;
 
-  std::uint8_t m_selectedOption{};
+  static constexpr std::size_t NoSong = static_cast<std::size_t>(-1);
+  // Selection belongs to the full song list, not a reusable visible button.
+  std::size_t m_selectedSong{NoSong};
 };
 
 } // namespace bh

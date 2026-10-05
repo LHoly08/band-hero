@@ -39,16 +39,22 @@ public:
   inline static std::uint32_t getSerialBaudRate() noexcept {
     return get().serialBaudRate;
   }
+  // Enumerate device names without opening them; saved ports may be absent
+  // when unplugged. Windows names include the \\.\ device namespace prefix.
   static std::vector<std::string> getAvailableSerialPorts();
   inline static int getMasterVolume() noexcept { return get().masterVolume; }
   static void setMasterVolume(int percent) noexcept;
   static constexpr std::array<std::uint32_t, 11> supportedBaudRates{
       110, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200};
 
+  // Empty means no selected controller. Serial setters save immediately;
+  // an existing connection is reopened by the next state's onEnter().
   inline static void setSerialPort(std::string port) {
     get().serialPort = std::move(port);
     get().iSaveSettings();
   }
+  // The result reports baud validation, not whether writing settings succeeded.
+  // Call saveSettings() when the caller needs to report persistence failures.
   inline static bool setSerialBaudRate(std::uint32_t baudRate) noexcept {
     if (!get().iSetSerialBaudRate(baudRate)) {
       return false;

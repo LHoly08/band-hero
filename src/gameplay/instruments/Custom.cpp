@@ -7,6 +7,8 @@ namespace bh {
 template <>
 bool Custom<InstrumentType::Custom_1, Difficulty::Easy>::getPlay(
     std::uint32_t playedNote) noexcept {
+  // Easy treats any input within a section as the whole section being played;
+  // Hard preserves individual bits. Both discard bits outside the composition.
 
   playedNote &=
       ((1 << (m_composition.NumberSections * m_composition.NumberBitsSection)) -

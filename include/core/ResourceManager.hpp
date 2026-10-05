@@ -21,14 +21,10 @@ class Textures {
 public:
   enum class UI : std::uint8_t {
     Buttons = 0,
+    Panel,
+    Controls,
     Background,
     Waves,
-  };
-
-  enum class Settings : std::uint8_t {
-    Background = 0,
-    Panel,
-    Controls
   };
 
   enum class Gameplay : std::uint8_t {
@@ -235,6 +231,20 @@ public:
     const Vector2 size = scaledSize(Vector2{destination.width, destination.height});
     DrawTexturePro(texture, {0, 0, float(texture.width), float(texture.height)},
                    {position.x, position.y, size.x, size.y}, {0, 0}, 0, tint);
+  }
+
+  // Draw a sprite-sheet cell at a chosen layout size.
+  template <auto Texture_t>
+    requires isTexture<Texture_t>
+  inline static void drawImageRegionTo(const Rectangle &source,
+                                      const Rectangle &destination,
+                                      Color tint = WHITE) noexcept {
+    const auto &texture = get().m_textures[Textures::getOffset<Texture_t>()];
+    if (!IsTextureValid(texture)) return;
+    const auto position = scaledSize(Vector2{destination.x, destination.y});
+    const auto size = scaledSize(Vector2{destination.width, destination.height});
+    DrawTexturePro(texture, source, {position.x, position.y, size.x, size.y},
+                   {0, 0}, 0, tint);
   }
 
   // Settings skins are rasterized at 2x. Nine-slicing keeps corners and borders
