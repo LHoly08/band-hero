@@ -22,6 +22,7 @@
 namespace bh {
 
 void PlayerSelectState::draw() const noexcept {
+  drawBackground();
   m_backButton.draw<WHITE, true, 40, TextAlign::Center>();
 
   switch (m_stage) {

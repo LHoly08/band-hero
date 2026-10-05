@@ -1,5 +1,8 @@
 #pragma once
 
+#include "core/AnimationPlayer.hpp"
+#include "core/ResourceManager.hpp"
+
 namespace bh {
 
 class StateStack;
@@ -15,8 +18,21 @@ public:
   virtual void onEnter() noexcept = 0;
   virtual void onExit() noexcept = 0;
 
+  void updateAnimations(float dt) noexcept { m_backgroundAnimation.update(dt); }
+
 protected:
+  void drawBackground() const noexcept {
+    ResourceManager::drawImageTo<Textures::UI::Background>({0, 0, 1920, 1080});
+    const auto waves = ResourceManager::texture<Textures::UI::Waves>();
+    m_backgroundAnimation.draw(waves, {0, 952, 1920, 128});
+    m_backgroundAnimation.draw(waves, {1792, 1080, 1080, 128}, WHITE, -90.f);
+  }
+
   StateStack &m_stack;
+
+private:
+  // Full-width transparent edge strips, smoothly blended over a static backdrop.
+  AnimationPlayer m_backgroundAnimation{AnimationPlayer::Clip{2, 30, 60, 15.f, true, true, true}};
 };
 
 } // namespace bh

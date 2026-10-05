@@ -63,6 +63,7 @@ void SongSelectState::refreshSongButtons() noexcept {
 }
 
 void SongSelectState::draw() const noexcept {
+  drawBackground();
 
   m_mainMenuButton.draw<WHITE, true, 40, TextAlign::Center>();
   m_addSongButton.draw<WHITE, true, 40, TextAlign::Center>();

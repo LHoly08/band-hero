@@ -51,6 +51,7 @@ public:
   }
   void update(float dt) noexcept {
     if (!m_stack.empty()) {
+      m_stack.back()->updateAnimations(dt);
       m_stack.back()->update(dt);
     }
   }

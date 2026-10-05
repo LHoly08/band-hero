@@ -9,8 +9,7 @@
 namespace bh {
 
 void BuildingState::draw() const noexcept {
-  ResourceManager::drawImage<Textures::Building::Background>({0, 0, 1920, 1080},
-                                                             {0, 0});
+  ResourceManager::drawImageTo<Textures::Building::Background>({0, 0, 1920, 1080});
   m_backButton.draw<WHITE, true, 40, TextAlign::Right>();
 }
 

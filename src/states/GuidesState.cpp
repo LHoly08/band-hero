@@ -14,6 +14,7 @@
 namespace bh {
 
 void GuidesState::draw() const noexcept {
+  drawBackground();
   m_mainMenuButton.draw<WHITE, true, 40, TextAlign::Center>();
   m_firstGuideButton.draw<WHITE, true, 40, TextAlign::Center>();
   m_secondGuideButton.draw<WHITE, true, 40, TextAlign::Center>();

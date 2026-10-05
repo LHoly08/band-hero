@@ -21,6 +21,8 @@ class Textures {
 public:
   enum class UI : std::uint8_t {
     Buttons = 0,
+    Background,
+    Waves,
   };
 
   enum class Settings : std::uint8_t {
@@ -213,6 +215,13 @@ public:
   inline static void drawImage(const Rectangle &rect, const Vector2 &pos,
                                const Color &tint = WHITE) noexcept {
     return get().iDrawImage<Texture_t>(rect, pos, tint);
+  }
+
+  // Borrow a texture for animation/custom drawing; only ResourceManager unloads it.
+  template <auto Texture_t>
+    requires isTexture<Texture_t>
+  inline static Texture2D texture() noexcept {
+    return get().m_textures[Textures::getOffset<Texture_t>()];
   }
 
   // Draw an entire image at an independent layout size (e.g. a backdrop).

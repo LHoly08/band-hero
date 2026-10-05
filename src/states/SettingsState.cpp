@@ -9,7 +9,7 @@ namespace bh {
 void SettingsState::draw() const noexcept {
 
   using namespace settings_ui;
-  ResourceManager::drawImageTo<Textures::Settings::Background>({0, 0, 1920, 1080});
+  drawBackground();
   
   card({60, 60, 450, 960});
   text("BAND HERO", {100, 105}, 23, theme::Primary);

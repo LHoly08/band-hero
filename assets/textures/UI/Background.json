@@ -1,0 +1,8 @@
+{
+  "texture": "Background.png",
+  "width": 1920,
+  "height": 1080,
+  "animated": false,
+  "overlay": "Waves.png",
+  "description": "Full-resolution static purple backdrop and cyan border, with no waves baked in."
+}

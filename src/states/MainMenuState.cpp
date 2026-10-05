@@ -15,8 +15,7 @@
 namespace bh {
 
 void MainMenuState::draw() const noexcept {
-  ResourceManager::drawImage<Textures::MainMenu::Background>({0, 0, 1920, 1080},
-                                                             {0, 0});
+  ResourceManager::drawImageTo<Textures::MainMenu::Background>({0, 0, 1920, 1080});
   ResourceManager::drawImage<Textures::MainMenu::Title>({0, 0, 600, 160},
                                                         {140, 250});
   m_playButton.draw<WHITE, true, 40, TextAlign::Center>();

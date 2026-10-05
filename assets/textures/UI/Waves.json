@@ -1,0 +1,14 @@
+{
+  "texture": "Waves.png",
+  "columns": 2,
+  "rows": 30,
+  "frameWidth": 1920,
+  "frameHeight": 128,
+  "frameCount": 60,
+  "framesPerSecond": 15,
+  "durationSeconds": 4,
+  "loop": true,
+  "interpolate": true,
+  "additive": true,
+  "description": "Transparent native-resolution sine-wave strips, sampled continuously and blended between frames. Draw across the bottom and rotated -90 degrees along the right edge."
+}

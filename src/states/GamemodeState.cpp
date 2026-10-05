@@ -11,6 +11,7 @@
 namespace bh {
 
 void GamemodeState::draw() const noexcept {
+  drawBackground();
   m_localButton.draw<WHITE, true, 40, TextAlign::Center>();
   m_lanButton.draw<WHITE, true, 40, TextAlign::Center>();
   m_onlineButton.draw<WHITE, true, 40, TextAlign::Center>();
