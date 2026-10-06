@@ -42,7 +42,7 @@ InstrumentCardLayout instrumentCard(std::size_t index, std::size_t count) {
 }
 
 void PlayerSelectState::draw() const noexcept {
-  drawBackground();
+  m_background.draw();
 
   switch (m_stage) {
   case Stage::ChoosingPlayerCount: {
@@ -153,6 +153,7 @@ void PlayerSelectState::draw() const noexcept {
 }
 
 void PlayerSelectState::update(float dt) noexcept {
+  m_background.update(dt);
 
   switch (m_stage) {
   case Stage::TestingInstruments: {

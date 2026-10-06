@@ -10,9 +10,7 @@ namespace bh {
 class BuildingState final : public State {
 public:
   inline BuildingState(StateStack &stack) noexcept
-      : State(stack),
-        m_backButton({.x = 800, .y = 850},
-                     {.x = 0, .y = 640, .width = 320, .height = 96}, "Back") {}
+      : State(stack) {}
   ~BuildingState() override = default;
 
   void draw() const noexcept override;
@@ -22,7 +20,11 @@ public:
   void onExit() noexcept override;
 
 private:
-  Button m_backButton;
+  Button m_backButton{
+    {.x = 800, .y = 850},
+    {.x = 0, .y = 640, .width = 320, .height = 96},
+    "Back"
+  };
 };
 
 } // namespace bh

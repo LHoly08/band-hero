@@ -14,14 +14,14 @@
 namespace bh {
 
 void GuidesState::draw() const noexcept {
-  drawBackground();
+  m_background.draw();
   m_mainMenuButton.draw<WHITE, true, 40, TextAlign::Center>();
   m_firstGuideButton.draw<WHITE, true, 40, TextAlign::Center>();
   m_secondGuideButton.draw<WHITE, true, 40, TextAlign::Center>();
   m_thirdGuideButton.draw<WHITE, true, 40, TextAlign::Center>();
 }
 
-void GuidesState::update(float dt) noexcept { auto _ = dt; }
+void GuidesState::update(float dt) noexcept { m_background.update(dt); }
 
 void GuidesState::events() noexcept {
   const Vector2 MousePos = GetMousePosition();

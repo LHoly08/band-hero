@@ -3,6 +3,7 @@
 #include <array>
 
 #include "states/State.hpp"
+#include "ui/AnimatedBackground.hpp"
 
 #include "ui/Button.hpp"
 
@@ -11,19 +12,7 @@ namespace bh {
 class GuidesState final : public State {
 public:
   inline GuidesState(StateStack &stack) noexcept
-      : State(stack),
-        m_mainMenuButton({.x = 1350, .y = 30},
-                         {.x = 0, .y = 0, .width = 360, .height = 100},
-                         "Main Menu"),
-        m_firstGuideButton({.x = 195, .y = 30},
-                           {.x = 0, .y = 0, .width = 360, .height = 100},
-                           "Bass Guide"),
-        m_secondGuideButton({.x = 580, .y = 30},
-                            {.x = 0, .y = 0, .width = 360, .height = 100},
-                            "Drums Guide"),
-        m_thirdGuideButton({.x = 965, .y = 30},
-                           {.x = 0, .y = 0, .width = 360, .height = 100},
-                           "Guitar Guide") {}
+      : State(stack) {}
   ~GuidesState() override = default;
 
   void draw() const noexcept override;
@@ -33,10 +22,28 @@ public:
   void onExit() noexcept override;
 
 private:
-  Button m_mainMenuButton;
-  Button m_firstGuideButton;
-  Button m_secondGuideButton;
-  Button m_thirdGuideButton;
+  AnimatedBackground m_background;
+
+  Button m_mainMenuButton{
+    {.x = 1350, .y = 30},
+    {.x = 0, .y = 0, .width = 360, .height = 100},
+    "Main Menu"
+  };
+  Button m_firstGuideButton{
+    {.x = 195, .y = 30},
+    {.x = 0, .y = 0, .width = 360, .height = 100},
+    "Bass Guide"
+  };
+  Button m_secondGuideButton{
+    {.x = 580, .y = 30},
+    {.x = 0, .y = 0, .width = 360, .height = 100},
+    "Drums Guide"
+  };
+  Button m_thirdGuideButton{
+    {.x = 965, .y = 30},
+    {.x = 0, .y = 0, .width = 360, .height = 100},
+    "Guitar Guide"
+  };
 
   enum class Guide : std::uint8_t {
     Bass = 0,

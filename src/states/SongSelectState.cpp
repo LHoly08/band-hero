@@ -19,22 +19,7 @@
 namespace bh {
 
 SongSelectState::SongSelectState(StateStack &stack) noexcept
-    : State(stack),
-      m_mainMenuButton({.x = 30, .y = 950},
-                       {.x = 0, .y = 0, .width = 360, .height = 100},
-                       "Main Menu"),
-      m_addSongButton({.x = 30, .y = 830},
-                      {.x = 0, .y = 0, .width = 360, .height = 100},
-                      "Add Song"),
-      m_hardSongButton({.x = 1530, .y = 710},
-                      {.x = 0, .y = 0, .width = 360, .height = 100},
-                      "Hard"),
-      m_mediumSongButton({.x = 1530, .y = 830},
-                      {.x = 0, .y = 0, .width = 360, .height = 100},
-                      "Medium"),
-      m_easySongButton({.x = 1530, .y = 950},
-                      {.x = 0, .y = 0, .width = 360, .height = 100},
-                      "Easy") {
+    : State(stack) {
 
   std::error_code error;
   std::filesystem::directory_iterator songs(s_SongsDir, error);
@@ -69,7 +54,7 @@ void SongSelectState::refreshSongButtons() noexcept {
 }
 
 void SongSelectState::draw() const noexcept {
-  drawBackground();
+  m_background.draw();
 
   m_mainMenuButton.draw<WHITE, true, 40, TextAlign::Center>();
   m_addSongButton.draw<WHITE, true, 40, TextAlign::Center>();
@@ -82,6 +67,8 @@ void SongSelectState::draw() const noexcept {
     }
   }
 
+  //ResourceManager::drawText();
+
   if (m_selectedSong != NoSong) {
     m_hardSongButton.draw<WHITE, true, 40, TextAlign::Center>();
     m_mediumSongButton.draw<WHITE, true, 40, TextAlign::Center>();
@@ -90,7 +77,7 @@ void SongSelectState::draw() const noexcept {
 }
 
 void SongSelectState::update(float dt) noexcept {
-  auto _ = dt;
+  m_background.update(dt);
 
   if (IsMusicValid(m_song)) {
     UpdateMusicStream(m_song);

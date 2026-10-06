@@ -11,14 +11,14 @@
 namespace bh {
 
 void GamemodeState::draw() const noexcept {
-  drawBackground();
+  m_background.draw();
   m_localButton.draw<WHITE, true, 40, TextAlign::Center>();
   m_lanButton.draw<WHITE, true, 40, TextAlign::Center>();
   m_onlineButton.draw<WHITE, true, 40, TextAlign::Center>();
   m_backButton.draw<WHITE, true, 40, TextAlign::Center>();
 }
 
-void GamemodeState::update(float dt) noexcept { auto _ = dt; }
+void GamemodeState::update(float dt) noexcept { m_background.update(dt); }
 
 void GamemodeState::events() noexcept {
   const Vector2 mousePos = GetMousePosition();

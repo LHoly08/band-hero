@@ -9,7 +9,7 @@ namespace bh {
 void SettingsState::draw() const noexcept {
 
   using namespace settings_ui;
-  drawBackground();
+  m_background.draw();
   
   card({60, 60, 450, 960});
   text("BAND HERO", {100, 105}, 23, theme::Primary);
@@ -46,7 +46,7 @@ bool SettingsState::commit() noexcept {
   }
   return !m_saveFailed;
 }
-void SettingsState::update(float dt) noexcept { (void)dt; }
+void SettingsState::update(float dt) noexcept { m_background.update(dt); }
 
 void SettingsState::events() noexcept {
   if (m_instruments.deletionPending()) {

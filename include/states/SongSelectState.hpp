@@ -7,6 +7,7 @@
 #include "core/ResourceManager.hpp"
 
 #include "states/State.hpp"
+#include "ui/AnimatedBackground.hpp"
 
 #include "ui/Button.hpp"
 
@@ -25,14 +26,35 @@ public:
   void onExit() noexcept override;
 
 private:
+  AnimatedBackground m_background;
   static constexpr std::string s_SongsDir{"Songs/"};
 
   std::inplace_vector<Button, 5> m_songOptions;
-  Button m_mainMenuButton;
-  Button m_addSongButton;
-  Button m_hardSongButton;
-  Button m_mediumSongButton;
-  Button m_easySongButton;
+  Button m_mainMenuButton{
+    {.x = 30, .y = 950},
+    {.x = 0, .y = 0, .width = 360, .height = 100},
+    "Main Menu"
+  };
+  Button m_addSongButton{
+    {.x = 30, .y = 830},
+    {.x = 0, .y = 0, .width = 360, .height = 100},
+    "Add Song"
+  };
+  Button m_hardSongButton{
+    {.x = 1530, .y = 710},
+    {.x = 0, .y = 0, .width = 360, .height = 100},
+    "Hard"
+  };
+  Button m_mediumSongButton{
+    {.x = 1530, .y = 830},
+    {.x = 0, .y = 0, .width = 360, .height = 100},
+    "Medium"
+  };
+  Button m_easySongButton{
+    {.x = 1530, .y = 950},
+    {.x = 0, .y = 0, .width = 360, .height = 100},
+    "Easy"
+  };
   Music m_song{};
 
   std::vector<std::string> m_songNames;

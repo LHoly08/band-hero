@@ -15,6 +15,7 @@
 #include "serial/serialib.h"
 
 #include "states/State.hpp"
+#include "ui/AnimatedBackground.hpp"
 
 #include "ui/Button.hpp"
 
@@ -23,11 +24,8 @@ namespace bh {
 class PlayerSelectState final : public State {
 public:
   inline PlayerSelectState(StateStack &stack, std::string &&songName) noexcept
-      : State(stack), m_nextButton({.x = 780, .y = 650}, {0, 0, 360, 100},
-                                   "Choose Instruments"),
-        m_backButton({.x = 30, .y = 950}, {0, 640, 320, 96}, "Back"),
+      : State(stack),
         m_songName(std::move(songName)) {}
-
   ~PlayerSelectState() override = default;
 
   void draw() const noexcept override;
@@ -37,10 +35,19 @@ public:
   void onExit() noexcept override;
 
 private:
+  AnimatedBackground m_background;
   serialib m_serial;
 
-  Button m_nextButton;
-  Button m_backButton;
+  Button m_nextButton{
+    {.x = 780, .y = 650},
+    {0, 0, 360, 100},
+    "Choose Instruments"
+  };
+  Button m_backButton{
+    {.x = 30, .y = 950},
+    {0, 640, 320, 96},
+    "Back"
+  };
 
   std::vector<CustomInstrumentComposition> m_customInstruments;
 
