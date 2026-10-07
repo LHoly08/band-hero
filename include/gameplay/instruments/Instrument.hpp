@@ -37,7 +37,7 @@ enum class InstrumentType : std::uint8_t {
 
 template <InstrumentType Type>
 concept SectionInstrumentType =
-    Type != InstrumentType::Drums && Type != InstrumentType::Custom_2;
+    Type == InstrumentType::Bass || Type == InstrumentType::Guitar || Type == InstrumentType::Custom_1;
 
 template <InstrumentType Type>
 concept CustomType =
@@ -59,9 +59,14 @@ struct Note<Type> {
 
   std::uint32_t note{};
   // Runtime progress within a chord; this field is not stored in chart files.
-  std::uint32_t playedBits{};
+  std::uint32_t playedSections{};
   float timeStamp{};
   std::uint8_t shape{};
+};
+
+struct SectionLayout {
+  std::uint8_t numberSections{};
+  std::uint8_t bitsPerSection{};
 };
 
 template <InstrumentType Type>
@@ -88,6 +93,7 @@ public:
     requires CustomType<Type>;
   explicit Instrument(std::uint32_t &noteCount, std::string &&filename)
     requires(!CustomType<Type>);
+
   virtual ~Instrument() {
     if (IsMusicStreamPlaying(m_audio)) {
       StopMusicStream(m_audio);
@@ -100,7 +106,31 @@ public:
   virtual void draw(std::uint32_t startingPositionX) const noexcept = 0;
   void update(float dt);
 
-  inline void start() { PlayMusicStream(m_audio); }
+  inline void loadAudio(std::string_view songPath) { 
+    std::string path{songPath};
+    path.append([]<InstrumentType T>() consteval -> auto {
+      
+      static constexpr auto enumerators = std::define_static_array(std::meta::enumerators_of(^^InstrumentType));
+
+      template for (constexpr auto enumerator : enumerators) {
+        
+        if (std::meta::extract<InstrumentType>(enumerator) == T) {
+
+          std::string file{std::meta::identifier_of(enumerator)};
+          file.append(".wav");
+          return std::define_static_string(file);
+        }
+      }
+      std::unreachable();
+
+    }.template operator()<Type>());
+
+    m_audio = LoadMusicStream(path.c_str());
+  }
+
+  inline void startAudio() noexcept {
+    PlayMusicStream(m_audio);
+  }
 
   inline void pause(bool p) noexcept {
     {
@@ -108,6 +138,14 @@ public:
       m_paused = p;
     }
     m_bufferCv.notify_all();
+  }
+  
+  inline std::uint8_t getType() {
+    if constexpr (!CustomType<Type>) {
+      return static_cast<std::uint8_t>(Type);
+    } else {
+      return 0;
+    }
   }
 
 protected:
@@ -122,6 +160,10 @@ protected:
   void loadFile(std::stop_token stopToken, std::string &&filename);
 
   void selectPlayable() noexcept;
+
+  bool getPlay(std::uint32_t playedNote, SectionLayout layout) noexcept
+    requires SectionInstrumentType<Type>;
+  bool completeSelectedNote() noexcept;
 
   // Times are seconds relative to the instrument's unpaused playback clock.
   static constexpr double RefillAhead = 5.0;
@@ -247,12 +289,11 @@ void Instrument<Type, Dif>::update(float dt) {
 template <InstrumentType Type, Difficulty Dif>
 void Instrument<Type, Dif>::selectPlayable() noexcept {
   m_selectedNote = NoNote;
-  m_originalNote = m_playingNote = 0;
 
   double closest = std::numeric_limits<double>::infinity();
 
   // Charts must be ordered by timestamp: the early-window cutoff below can
-  // stop the search. Choose the closest eligible chord, retaining played bits.
+  // stop the search. Choose the closest eligible chord, retaining its progress.
   for (std::size_t i = 0; i < m_activeBuffer.size(); ++i) {
 
     const auto &note = m_activeBuffer[i];
@@ -267,8 +308,6 @@ void Instrument<Type, Dif>::selectPlayable() noexcept {
     if (std::abs(offset) < closest) {
       closest = std::abs(offset);
       m_selectedNote = i;
-      m_originalNote = note.note;
-      m_playingNote = note.note & ~note.playedBits;
     }
   }
 }
@@ -325,21 +364,70 @@ void Instrument<Type, Dif>::loadFile(std::stop_token stopToken,
 
 template <InstrumentType Type, Difficulty Dif>
 bool Instrument<Type, Dif>::getPlay(std::uint32_t playedNote) noexcept {
-  // Reject extra or already-played bits. A valid subset advances the chord,
-  // but returns true (and awards a score) only when the entire chord is done.
-  if (m_selectedNote == NoNote || !playedNote ||
-      (playedNote & ~m_playingNote) || !m_playingNote) {
+  if constexpr (SectionInstrumentType<Type>) {
+    // This virtual entry point exists for every type; sections use the
+    // layout overload instead of instantiating bit-based scoring.
+    return false;
+  } else {
+    if (m_selectedNote == NoNote || !playedNote) {
+      return false;
+    }
+    auto &note = m_activeBuffer[m_selectedNote];
+    const auto remainingBits = note.note & ~note.playedBits;
+    // Reject extra or already-played bits. Valid subsets complete a chord
+    // across inputs, awarding a score only after all required bits are played.
+    if (playedNote & ~remainingBits) {
+      return false;
+    }
+
+    note.playedBits |= playedNote;
+
+    if (note.note & ~note.playedBits) {
+      return false;
+    }
+    return completeSelectedNote();
+  }
+}
+
+template <InstrumentType Type, Difficulty Dif>
+bool Instrument<Type, Dif>::getPlay(std::uint32_t playedNote,
+                                    SectionLayout layout) noexcept
+  requires SectionInstrumentType<Type>
+{
+  if (m_selectedNote == NoNote || !playedNote) {
     return false;
   }
 
   auto &note = m_activeBuffer[m_selectedNote];
-  note.playedBits |= playedNote;
-  m_playingNote = m_originalNote & ~note.playedBits;
+  const std::uint32_t sectionMask = (1u << layout.bitsPerSection) - 1u;
+  std::uint32_t requiredSections{};
 
-  if (m_playingNote) {
-    return false;
+  for (std::uint8_t section = 0; section < layout.numberSections; ++section) {
+    const auto shift = section * layout.bitsPerSection;
+    const auto expected = (note.note >> shift) & sectionMask;
+    if (!expected) {
+      continue;
+    }
+
+    const std::uint32_t sectionBit = 1u << section;
+    requiredSections |= sectionBit;
+    const auto played = (playedNote >> shift) & sectionMask;
+    // Easy accepts any nonzero fret on the required string. Hard compares
+    // the entire section value; a wrong string never blocks another match.
+    if (played && (Dif == Difficulty::Easy || played == expected)) {
+      note.playedSections |= sectionBit;
+    }
   }
 
+  if (!requiredSections ||
+      (note.playedSections & requiredSections) != requiredSections) {
+    return false;
+  }
+  return completeSelectedNote();
+}
+
+template <InstrumentType Type, Difficulty Dif>
+bool Instrument<Type, Dif>::completeSelectedNote() noexcept {
   m_activeBuffer.erase(m_activeBuffer.begin() + m_selectedNote);
   ++m_noteCount;
   selectPlayable();

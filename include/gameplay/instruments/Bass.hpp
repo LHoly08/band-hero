@@ -46,24 +46,9 @@ public:
       return ((1 << BassBits) - 1);
     }();
 
-    if constexpr (Dif == Difficulty::Easy) {
-
-      for (std::uint8_t i{}; i < BassComposition<Dif>::Strings; ++i) {
-
-        constexpr std::uint8_t shiftAmount{BassComposition<Dif>::FretBits};
-
-        // Creation of x bits all set to 1
-        constexpr std::uint8_t fullBits =
-            (1 << BassComposition<Dif>::FretBits) - 1;
-
-        // Get if string was played
-        bool played = (playedNote >> (i * shiftAmount)) & fullBits;
-
-        // Set every bit of the string to 1 if played
-        playedNote |= played * (fullBits << (i * shiftAmount));
-      }
-    }
-    return Base::getPlay(playedNote);
+    return Base::getPlay(playedNote,
+                         {BassComposition<Dif>::Strings,
+                          BassComposition<Dif>::FretBits});
   }
 
   void draw(std::uint32_t startingPositionX) const noexcept override;

@@ -102,6 +102,7 @@ void SongSelectState::events() noexcept {
   } else if (addSongClicked) [[unlikely]] {
     // TODO: Implement the addition of songs with the path to the file
   }
+  
   if (enabled) {
 
     std::string path = s_SongsDir;
@@ -119,11 +120,13 @@ void SongSelectState::events() noexcept {
 
       return std::define_static_string(difficulty);
     };
+    std::string audios = path;
+    audios.append("/Audio/");
 
     if (hardClicked) [[unlikely]] {
       path.append(getButtonDifficulty(^^hardClicked));
       std::puts(path.c_str());
-      m_stack.push<PlayerSelectState>(std::move(path));
+      m_stack.push<PlayerSelectState>(std::move(path), std::move(audios));
 
       StopMusicStream(m_song);
       UnloadMusicStream(m_song);
@@ -132,7 +135,7 @@ void SongSelectState::events() noexcept {
     } else if (mediumClicked) [[unlikely]] {
       path.append(getButtonDifficulty(^^mediumClicked));
       std::puts(path.c_str());
-      m_stack.push<PlayerSelectState>(std::move(path));
+      m_stack.push<PlayerSelectState>(std::move(path), std::move(audios));
 
       StopMusicStream(m_song);
       UnloadMusicStream(m_song);
@@ -141,7 +144,7 @@ void SongSelectState::events() noexcept {
     } else if (easyClicked) [[unlikely]] {
       path.append(getButtonDifficulty(^^easyClicked));
       std::puts(path.c_str());
-      m_stack.push<PlayerSelectState>(std::move(path));
+      m_stack.push<PlayerSelectState>(std::move(path), std::move(audios));
 
       StopMusicStream(m_song);
       UnloadMusicStream(m_song);

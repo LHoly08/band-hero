@@ -30,11 +30,16 @@ class GameState final : public State {
 public:
   inline GameState(
       StateStack &stack,
-      std::array<std::unique_ptr<PlayerBase>, PlayerCount> &&players) noexcept
+      std::array<std::unique_ptr<PlayerBase>, PlayerCount> &&players, std::string &&filename) noexcept
       : State(stack), m_players(std::move(players)) {
-
+    
     for (auto &player : m_players) {
-      player->start();
+      player->loadAudio(filename);
+    }
+
+    // TODO: Get the GameState to play the Audios that are not played by an instrument
+    for (auto &player : m_players) {
+      player->startAudio();
     }
   }
   ~GameState() override = default;

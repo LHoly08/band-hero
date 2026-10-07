@@ -23,9 +23,9 @@ namespace bh {
 
 class PlayerSelectState final : public State {
 public:
-  inline PlayerSelectState(StateStack &stack, std::string &&songName) noexcept
+  inline PlayerSelectState(StateStack &stack, std::string &&songName, std::string &&audioDirectory) noexcept
       : State(stack),
-        m_songName(std::move(songName)) {}
+        m_songName(std::move(songName)), m_audioDirectory(std::move(audioDirectory)) {}
   ~PlayerSelectState() override = default;
 
   void draw() const noexcept override;
@@ -58,6 +58,7 @@ private:
   std::array<std::inplace_vector<std::uint32_t, 3>, 4> m_testNotes;
 
   const std::string m_songName;
+  std::string m_audioDirectory;
 
   float m_counter{};
 

@@ -7,28 +7,16 @@ namespace bh {
 template <>
 bool Custom<InstrumentType::Custom_1, Difficulty::Easy>::getPlay(
     std::uint32_t playedNote) noexcept {
-  // Easy treats any input within a section as the whole section being played;
-  // Hard preserves individual bits. Both discard bits outside the composition.
+  // Easy accepts any input within a section; Hard compares its complete value.
+  // Both discard bits outside the composition.
 
   playedNote &=
       ((1 << (m_composition.NumberSections * m_composition.NumberBitsSection)) -
        1);
 
-  for (std::uint8_t i{}; i < m_composition.NumberSections; ++i) {
-
-    const std::uint8_t shiftAmount{m_composition.NumberBitsSection};
-
-    // Creation of x bits all set to 1
-    const std::uint8_t fullBits = (1 << shiftAmount) - 1;
-
-    // Get if section was played
-    bool played = (playedNote >> (i * shiftAmount)) & fullBits;
-
-    // Set every bit of the section to 1 if played
-    playedNote |= played * (fullBits << (i * shiftAmount));
-  }
-
-  return Base::getPlay(playedNote);
+  return Base::getPlay(playedNote,
+                       {m_composition.NumberSections,
+                        m_composition.NumberBitsSection});
 }
 
 template <>
@@ -39,7 +27,9 @@ bool Custom<InstrumentType::Custom_1, Difficulty::Hard>::getPlay(
       ((1 << (m_composition.NumberSections * m_composition.NumberBitsSection)) -
        1);
 
-  return Base::getPlay(playedNote);
+  return Base::getPlay(playedNote,
+                       {m_composition.NumberSections,
+                        m_composition.NumberBitsSection});
 }
 
 template <>
