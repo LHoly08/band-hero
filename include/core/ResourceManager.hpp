@@ -41,6 +41,10 @@ public:
     Background = 0,
   };
 
+  enum class Achievements : std::uint8_t {
+    Medals = 0,
+  };
+
   template <auto Ty> inline static consteval std::uint8_t getOffset() {
 
     static constexpr auto v = std::define_static_array(std::meta::members_of(
@@ -213,7 +217,8 @@ public:
     return get().iDrawImage<Texture_t>(rect, pos, tint);
   }
 
-  // Borrow a texture for animation/custom drawing; only ResourceManager unloads it.
+  // Borrow a texture for animation/custom drawing; only ResourceManager unloads
+  // it.
   template <auto Texture_t>
     requires isTexture<Texture_t>
   inline static Texture2D texture() noexcept {
@@ -224,11 +229,13 @@ public:
   template <auto Texture_t>
     requires isTexture<Texture_t>
   inline static void drawImageTo(const Rectangle &destination,
-                                Color tint = WHITE) noexcept {
+                                 Color tint = WHITE) noexcept {
     const auto &texture = get().m_textures[Textures::getOffset<Texture_t>()];
-    if (!IsTextureValid(texture)) return;
+    if (!IsTextureValid(texture))
+      return;
     const Vector2 position = scaledSize(Vector2{destination.x, destination.y});
-    const Vector2 size = scaledSize(Vector2{destination.width, destination.height});
+    const Vector2 size =
+        scaledSize(Vector2{destination.width, destination.height});
     DrawTexturePro(texture, {0, 0, float(texture.width), float(texture.height)},
                    {position.x, position.y, size.x, size.y}, {0, 0}, 0, tint);
   }
@@ -237,12 +244,14 @@ public:
   template <auto Texture_t>
     requires isTexture<Texture_t>
   inline static void drawImageRegionTo(const Rectangle &source,
-                                      const Rectangle &destination,
-                                      Color tint = WHITE) noexcept {
+                                       const Rectangle &destination,
+                                       Color tint = WHITE) noexcept {
     const auto &texture = get().m_textures[Textures::getOffset<Texture_t>()];
-    if (!IsTextureValid(texture)) return;
+    if (!IsTextureValid(texture))
+      return;
     const auto position = scaledSize(Vector2{destination.x, destination.y});
-    const auto size = scaledSize(Vector2{destination.width, destination.height});
+    const auto size =
+        scaledSize(Vector2{destination.width, destination.height});
     DrawTexturePro(texture, source, {position.x, position.y, size.x, size.y},
                    {0, 0}, 0, tint);
   }
@@ -252,17 +261,18 @@ public:
   template <auto Texture_t>
     requires isTexture<Texture_t>
   inline static void drawSettingsSkin(const Rectangle &source,
-                                     const Rectangle &destination) noexcept {
+                                      const Rectangle &destination) noexcept {
     const auto &texture = get().m_textures[Textures::getOffset<Texture_t>()];
-    if (!IsTextureValid(texture)) return;
+    if (!IsTextureValid(texture))
+      return;
     const Vector2 position = scaledSize(Vector2{destination.x, destination.y});
     const Vector2 scale = scaledSize(Vector2{.5f, .5f});
     rlPushMatrix();
     rlTranslatef(position.x, position.y, 0);
     rlScalef(scale.x, scale.y, 1);
     DrawTextureNPatch(texture, {source, 48, 48, 48, 48, NPATCH_NINE_PATCH},
-                     {0, 0, destination.width * 2, destination.height * 2},
-                     {0, 0}, 0, WHITE);
+                      {0, 0, destination.width * 2, destination.height * 2},
+                      {0, 0}, 0, WHITE);
     rlPopMatrix();
   }
 

@@ -31,7 +31,12 @@ public:
   inline GameState(
       StateStack &stack,
       std::array<std::unique_ptr<PlayerBase>, PlayerCount> &&players) noexcept
-      : State(stack), m_players(std::move(players)) {}
+      : State(stack), m_players(std::move(players)) {
+
+    for (auto &player : m_players) {
+      player->start();
+    }
+  }
   ~GameState() override = default;
 
   void draw() const noexcept override;
@@ -43,6 +48,8 @@ public:
 private:
   serialib m_serial;
   std::array<std::unique_ptr<PlayerBase>, PlayerCount> m_players;
+  float m_time{};
+  const float m_duration{};
 };
 
 template <std::uint8_t PlayerCount>

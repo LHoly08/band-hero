@@ -24,6 +24,7 @@ public:
 
   virtual void play(std::uint32_t notePlayed) noexcept = 0;
   virtual void pauseInstrument(bool p) noexcept = 0;
+  virtual void start() noexcept = 0;
 
   inline static void setPlayerCount(std::uint8_t count) noexcept {
     assert(count != 0 && count <= 4);
@@ -80,6 +81,7 @@ public:
   }
 
   inline void update(float dt) override { m_instrument.update(dt); }
+  inline void start() noexcept override { m_instrument.start(); }
 
 private:
   const std::uint32_t id;

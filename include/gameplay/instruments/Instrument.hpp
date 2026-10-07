@@ -88,12 +88,19 @@ public:
     requires CustomType<Type>;
   explicit Instrument(std::uint32_t &noteCount, std::string &&filename)
     requires(!CustomType<Type>);
-  virtual ~Instrument() = default;
+  virtual ~Instrument() {
+    if (IsMusicStreamPlaying(m_audio)) {
+      StopMusicStream(m_audio);
+    }
+    UnloadMusicStream(m_audio);
+  };
 
   virtual bool getPlay(std::uint32_t playedNote) noexcept;
 
   virtual void draw(std::uint32_t startingPositionX) const noexcept = 0;
   void update(float dt);
+
+  inline void start() { PlayMusicStream(m_audio); }
 
   inline void pause(bool p) noexcept {
     {
@@ -125,6 +132,8 @@ protected:
 
   using NoteType = Note<Type>;
   std::mutex m_bufferMutex;
+
+  Music m_audio{};
 
   std::uint32_t m_originalNote{};
   std::uint32_t m_playingNote{};
@@ -188,7 +197,7 @@ Instrument<Type, Dif>::Instrument(std::uint32_t &noteCount,
                 template for (constexpr auto enumerator : enumerators) {
                   if constexpr (std::meta::extract<T>(enumerator) ==
                                 std::meta::extract<T>(arg)) {
-                                  
+
                     path.append(std::meta::identifier_of(enumerator));
                   }
                 }
@@ -209,6 +218,7 @@ void Instrument<Type, Dif>::update(float dt) {
     }
   }
   m_time += dt;
+  UpdateMusicStream(m_audio);
 
   if (m_activeBuffer.empty() ||
       m_activeBuffer.back().timeStamp - m_time < RefillAhead) {
