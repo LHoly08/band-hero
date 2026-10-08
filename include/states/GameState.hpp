@@ -20,6 +20,7 @@
 #include "serial/serialib.h"
 
 #include "states/PauseMenuState.hpp"
+#include "states/MainMenuState.hpp"
 #include "states/State.hpp"
 
 namespace bh {
@@ -50,8 +51,8 @@ private:
   std::array<std::unique_ptr<PlayerBase>, PlayerCount> m_players;
   std::inplace_vector<Music, 6> m_audios;
   bool m_audioStarted{false};
-  float m_time{};
   const float m_duration{};
+  float m_time{};
 };
 
 template <std::uint8_t PlayerCount>
@@ -60,7 +61,12 @@ GameState<PlayerCount>::GameState(
     StateStack &stack,
     std::array<std::unique_ptr<PlayerBase>, PlayerCount> &&players,
     std::string &&filename) noexcept
-    : State(stack), m_players(std::move(players)) {
+    : State(stack), m_players(std::move(players)), m_duration([filename] -> float {
+      Music temp = LoadMusicStream((filename + "main.mp3").c_str());
+      const float duration = GetMusicTimeLength(temp);
+      UnloadMusicStream(temp);
+      return duration + 1;
+    }()) {
   // Only the standard instruments own one of the six backing stems.
   // Custom instruments load their own custom_N.wav files.
   std::array<bool, 3> playerInstruments{};
@@ -114,6 +120,13 @@ void GameState<PlayerCount>::draw() const noexcept {
 template <std::uint8_t PlayerCount>
   requires MaxPlayerAmount<PlayerCount>
 void GameState<PlayerCount>::update(float dt) noexcept {
+  m_time += dt;
+
+  if (m_time >= m_duration) {
+    m_stack.reset<MainMenuState>();
+    return;
+  }
+
   for (auto &audio : m_audios) {
     UpdateMusicStream(audio);
   }

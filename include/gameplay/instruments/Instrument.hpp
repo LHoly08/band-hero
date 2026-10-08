@@ -287,6 +287,7 @@ void Instrument<Type, Dif>::update(float dt) {
     }
   }
   m_time += dt;
+
   if (IsMusicValid(m_audio)) {
     UpdateMusicStream(m_audio);
   }
