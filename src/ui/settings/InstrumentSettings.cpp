@@ -5,14 +5,26 @@
 namespace bh {
 namespace {
 constexpr Rectangle NewButton{620, 235, 330, 60};
-constexpr Rectangle CreateButton{1020, 665, 300, 60};
-constexpr Rectangle CancelButton{1350, 665, 300, 60};
+constexpr Rectangle CreateButton{1020, 775, 300, 60};
+constexpr Rectangle CancelButton{1350, 775, 300, 60};
 constexpr Rectangle SaveButton{1020, 850, 300, 58};
 constexpr Rectangle RevertButton{1450, 850, 280, 58};
 constexpr Rectangle DeleteButton{1540, 378, 190, 48};
 constexpr Rectangle ConfirmDelete{930, 610, 300, 54};
 constexpr Rectangle CancelDelete{1290, 610, 300, 54};
 constexpr int PageSize = 7;
+Rectangle stemButton(std::size_t index, bool creating) {
+  return {1020 + index * 144.f, creating ? 700.f : 790.f, 134, 44};
+}
+void drawStems(SourceStem selected, bool creating) {
+  using namespace settings_ui;
+  text("Chart source stem", {1020, creating ? 660.f : 755.f}, 24);
+  for (std::size_t i = 0; i < SourceStemNames.size(); ++i) {
+    std::string label(SourceStemNames[i]);
+    label[0] += 'A' - 'a';
+    choice(stemButton(i, creating), label, selected == static_cast<SourceStem>(i));
+  }
+}
 const char *kindName(CustomKind kind) {
   switch (kind) {
   case CustomKind::Sections: return "Custom 1 - Sections";
@@ -90,6 +102,7 @@ void InstrumentSettings::draw() const {
     text("Choose a type", {1020, 415}, 28);
     for (int i = 1; i <= 3; ++i)
       choice({1020, 465 + (i - 1) * 62.f, 710, 52}, kindName(static_cast<CustomKind>(i)), m_newType == i);
+    drawStems(m_newStem, true);
     choice(CreateButton, "Create");
     choice(CancelButton, "Cancel");
   } else {
@@ -101,7 +114,7 @@ void InstrumentSettings::draw() const {
       for (int i = 0; i < 3; ++i)
         choice({1020 + i * 240.f, 435, 230, 48}, CustomInstrumentStore::FunctionNames[i], m_function == i);
       m_script.draw();
-      text("drawNote(position, colorIndex)  /  Colors: 0-5", {1020, 819}, 21, theme::MutedText);
+      text("drawNote(position, colorIndex)  /  Colors: 0-5", {1020, 728}, 21, theme::MutedText);
     } else {
       const char *first = d.kind == CustomKind::Sections ? "Number of sections" : "Effective bits - Easy";
       const char *second = d.kind == CustomKind::Sections ? "Bits per section" : "Effective bits - Hard";
@@ -112,9 +125,10 @@ void InstrumentSettings::draw() const {
         text(std::to_string(row == 0 ? d.first : d.second), {1250, y + 58}, 32, theme::Highlight);
         choice({1450, y + 45, 70, 55}, "+");
       }
-      text(d.kind == CustomKind::Sections ? "Up to 6 sections and 30 total bits." : "1-30 bits. Easy cannot exceed Hard.",
-           {1020, 815}, 24, theme::MutedText);
+      text(d.kind == CustomKind::Sections ? "Sections share a 30-bit input budget." : "1-30 bits. Easy cannot exceed Hard.",
+           {1020, 728}, 21, theme::MutedText);
     }
+    drawStems(d.sourceStem, false);
     choice(SaveButton, "Save instrument", m_dirty);
     if (m_dirty || !m_error.empty()) choice(RevertButton, "Revert edits");
   }
@@ -189,6 +203,7 @@ void InstrumentSettings::events() {
   if (clicked(NewButton) && canLeave()) {
     m_creating = true;
     m_newType = 0;
+    m_newStem = SourceStem::Guitar;
     m_name.value.clear();
     m_error.clear();
     reset();
@@ -202,11 +217,13 @@ void InstrumentSettings::events() {
   if (!m_creating && m_selected < 0) return;
   const bool nameChanged = m_name.input();
   if (m_creating) {
+    for (std::size_t i = 0; i < SourceStemNames.size(); ++i)
+      if (clicked(stemButton(i, true))) m_newStem = static_cast<SourceStem>(i);
     for (int i = 1; i <= 3; ++i) if (clicked({1020, 465 + (i - 1) * 62.f, 710, 52})) m_newType = i;
     if (clicked(CreateButton)) {
       if (m_newType == 0) { m_error = "Choose an instrument type."; return; }
       InstrumentDefinition created;
-      if (CustomInstrumentStore::create(m_name.value, static_cast<CustomKind>(m_newType), created, m_error)) {
+      if (CustomInstrumentStore::create(m_name.value, static_cast<CustomKind>(m_newType), created, m_error, m_newStem)) {
         m_instruments.push_back(std::move(created));
         select(static_cast<int>(m_instruments.size()) - 1);
         m_page = m_selected / PageSize;
@@ -222,6 +239,12 @@ void InstrumentSettings::events() {
   auto &d = m_instruments[m_selected];
   if (clicked(DeleteButton)) { reset(); m_confirmDelete = true; return; }
   bool changed = nameChanged;
+  for (std::size_t i = 0; i < SourceStemNames.size(); ++i) {
+    if (clicked(stemButton(i, false)) && d.sourceStem != static_cast<SourceStem>(i)) {
+      d.sourceStem = static_cast<SourceStem>(i);
+      changed = true;
+    }
+  }
   if (nameChanged) d.name = m_name.value;
   if (d.kind == CustomKind::Script) {
     for (int i = 0; i < 3; ++i) {
@@ -239,7 +262,7 @@ void InstrumentSettings::events() {
         int &value = row == 0 ? d.first : d.second;
         const int minimum = d.kind == CustomKind::Bits && row == 1 ? std::clamp(d.first, 1, 30) : 1;
         const int maximum = d.kind == CustomKind::Sections ?
-            std::max(1, std::min(row == 0 ? 6 : 8, 30 / std::max(1, row == 0 ? d.second : d.first))) :
+            std::max(1, std::min(row == 0 ? 30 : 8, 30 / std::max(1, row == 0 ? d.second : d.first))) :
             row == 0 ? std::clamp(d.second, 1, 30) : 30;
         const int adjusted = std::clamp(value + delta, minimum, maximum);
         changed = changed || adjusted != value;

@@ -15,8 +15,11 @@ template <typename T>
 concept DerivedState = std::derived_from<T, State>;
 
 // Transitions are queued until act(), so a state cannot destroy itself while
-// its events/update callback is still running. Only the top state is active.
-// Covering a state calls onExit(); revealing it again calls onEnter().
+// its events/update callback is still running. Only the top state is active,
+// but all states draw from bottom to top. States own texture references from
+// construction to destruction, including while queued or suspended.
+// Only the active state has entered: covering it calls onExit(), and revealing
+// it again calls onEnter(). Covered states retain textures and remain drawable.
 class StateStack {
 public:
   StateStack();
@@ -47,9 +50,8 @@ public:
   }
 
   void draw() const noexcept {
-    // These states are full screens; suspended screens have released textures.
-    if (!m_stack.empty()) {
-      m_stack.back()->draw();
+    for (const auto &state : m_stack) {
+      state->draw();
     }
   }
   void update(float dt) noexcept {

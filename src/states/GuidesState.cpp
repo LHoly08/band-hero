@@ -32,7 +32,7 @@ void GuidesState::events() noexcept {
   const bool thirdClicked = m_thirdGuideButton.updateInput(MousePos);
 
   if (mainMenuClicked) [[unlikely]] {
-    m_stack.replace<MainMenuState>();
+    m_stack.pop();
     return;
   }
 
@@ -50,9 +50,9 @@ void GuidesState::events() noexcept {
 void GuidesState::changeGuide(Guide newGuide) noexcept {
   constexpr std::array guides{Guide::Bass, Guide::Drums, Guide::Guitar,
                               Guide::Hub};
-                              
-  constexpr std::array<std::string_view, 4> names{
-      "Bass Guide", "Drums Guide", "Guitar Guide", "Hub Guide"};
+
+  constexpr std::array<std::string_view, 4> names{"Bass Guide", "Drums Guide",
+                                                  "Guitar Guide", "Hub Guide"};
   const std::array buttons{&m_firstGuideButton, &m_secondGuideButton,
                            &m_thirdGuideButton};
 
@@ -70,12 +70,9 @@ void GuidesState::changeGuide(Guide newGuide) noexcept {
   }
 }
 
-void GuidesState::onEnter() noexcept {
-  ResourceManager::loadTextures<Textures::UI>();
-}
+void GuidesState::onEnter() noexcept {}
 
 void GuidesState::onExit() noexcept {
-  ResourceManager::unloadTextures<Textures::UI>();
 
   m_mainMenuButton.resetInteraction();
   m_firstGuideButton.resetInteraction();

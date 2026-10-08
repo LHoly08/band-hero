@@ -21,11 +21,12 @@ private:
   bool save();
   std::vector<InstrumentDefinition> m_instruments;
   settings_ui::TextField m_name{{1020, 310, 710, 60}};
-  settings_ui::ScriptEditor m_script{{1020, 495, 710, 320}};
+  settings_ui::ScriptEditor m_script{{1020, 495, 710, 220}};
   int m_selected{-1};
   int m_page{};
   int m_function{};
   int m_newType{};
+  SourceStem m_newStem{SourceStem::Guitar};
   bool m_creating{};
   bool m_dirty{};
   bool m_saved{};

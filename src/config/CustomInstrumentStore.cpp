@@ -85,6 +85,9 @@ bool namesMatch(std::string_view first, std::string_view second) {
   return a == b;
 }
 bool valid(const InstrumentDefinition &d, std::string &error) {
+  if (static_cast<std::size_t>(d.sourceStem) >= SourceStemNames.size()) {
+    error = "SourceStem must be bass, drums, guitar, piano or other."; return false;
+  }
   if (d.kind != CustomKind::Sections && d.kind != CustomKind::Bits && d.kind != CustomKind::Script) {
     error = "Choose an instrument type."; return false;
   }
@@ -94,8 +97,8 @@ bool valid(const InstrumentDefinition &d, std::string &error) {
     error = "Enter a name (1-64 characters)."; return false;
   }
   if (d.kind == CustomKind::Sections &&
-      (d.first < 1 || d.first > 6 || d.second < 1 || d.second > 8 || d.first * d.second > 30)) {
-    error = "Use 1-6 sections, 1-8 bits each, and at most 30 bits in total."; return false;
+      (d.first < 1 || d.second < 1 || d.second > 8 || d.first > 30 / d.second)) {
+    error = "Use at least 1 section, 1-8 bits each, and at most 30 bits in total."; return false;
   }
   if (d.kind == CustomKind::Bits && (d.first < 1 || d.first > 30 || d.second < 1 || d.second > 30)) {
     error = "Easy and Hard must each use 1-30 bits."; return false;
@@ -176,6 +179,22 @@ InstrumentDefinition CustomInstrumentStore::load(const std::filesystem::path &pa
   lua_getglobal(state.get(), "name");
   if (lua_type(state.get(), -1) == LUA_TSTRING) d.name = lua_tostring(state.get(), -1);
   lua_pop(state.get(), 1);
+  // Definitions written before the selector existed use the default guitar.
+  lua_getglobal(state.get(), "SourceStem");
+  if (!lua_isnil(state.get(), -1)) {
+    std::size_t length{};
+    const char *value = lua_type(state.get(), -1) == LUA_TSTRING
+        ? lua_tolstring(state.get(), -1, &length) : nullptr;
+    const auto stem = value ? std::ranges::find(SourceStemNames, std::string_view(value, length))
+                            : SourceStemNames.end();
+    if (stem == SourceStemNames.end()) {
+      // Retain the rest of the definition so the editor can repair this field.
+      d.sourceStem = static_cast<bh::SourceStem>(SourceStemNames.size());
+    } else {
+      d.sourceStem = static_cast<bh::SourceStem>(stem - SourceStemNames.begin());
+    }
+  }
+  lua_pop(state.get(), 1);
   lua_getglobal(state.get(), "Type");
   const int type = lua_isinteger(state.get(), -1) ? static_cast<int>(lua_tointeger(state.get(), -1)) : 0;
   lua_pop(state.get(), 1);
@@ -245,6 +264,7 @@ bool CustomInstrumentStore::save(InstrumentDefinition &d, std::string &error) {
   }
   std::string source = base + std::string(Begin);
   source += "name = " + quote(d.name) + "\nType = Custom_" + std::to_string(static_cast<int>(d.kind)) + "\n";
+  source += "SourceStem = " + quote(std::string(SourceStemNames[static_cast<std::size_t>(d.sourceStem)])) + "\n";
   if (d.kind == CustomKind::Script) {
     for (const auto &function : d.functions) source += function + '\n';
   } else {
@@ -287,10 +307,12 @@ bool CustomInstrumentStore::remove(const InstrumentDefinition &d, std::string &e
 }
 
 bool CustomInstrumentStore::create(std::string name, CustomKind kind,
-                                   InstrumentDefinition &result, std::string &error) {
+                                   InstrumentDefinition &result, std::string &error,
+                                   SourceStem sourceStem) {
   InstrumentDefinition d;
   d.name = std::move(name);
   d.kind = kind;
+  d.sourceStem = sourceStem;
   if (kind == CustomKind::Bits) {
     d.first = 2;
     d.second = 3;

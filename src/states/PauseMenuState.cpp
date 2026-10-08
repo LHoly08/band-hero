@@ -98,14 +98,12 @@ void PauseMenuState::events() noexcept {
 }
 
 void PauseMenuState::onEnter() noexcept {
-  ResourceManager::loadTextures<Textures::UI>();
 
   m_delay = 0;
   m_clicked = false;
 }
 
 void PauseMenuState::onExit() noexcept {
-  ResourceManager::unloadTextures<Textures::UI>();
 
   m_continueButton.resetInteraction();
   m_quitButton.resetInteraction();

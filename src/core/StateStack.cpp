@@ -9,7 +9,7 @@ void StateStack::clear() noexcept {
     m_stack.back()->onExit();
   }
   m_stack.clear();
-  // Pending states have not entered and therefore own no GPU resources.
+  // Destroy pending states too, releasing their construction-time resources.
   while (!actions.empty()) {
     actions.pop();
   }
@@ -52,7 +52,6 @@ void StateStack::act() noexcept {
       if (!m_stack.empty()) {
         m_stack.back()->onExit();
       }
-      // Suspended states already exited when covered by a Push.
       m_stack.clear();
       m_stack.push_back(std::move(action.state));
       m_stack.back()->onEnter();

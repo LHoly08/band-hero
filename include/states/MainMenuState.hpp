@@ -21,6 +21,8 @@ public:
   void onExit() noexcept override;
 
 private:
+  std::vector<ResourceManager::TextureHandle> m_textures =
+      ResourceManager::acquireTextures<Textures::UI, Textures::MainMenu>();
   Button m_playButton{
     {.x = 240, .y = 440},
     {0, 0, 360, 100},

@@ -10,8 +10,7 @@
 namespace bh {
 class SettingsState final : public State {
 public:
-  explicit SettingsState(StateStack &stack) noexcept
-      : State(stack) {}
+  explicit SettingsState(StateStack &stack) noexcept;
   ~SettingsState() override = default;
   
   void draw() const noexcept override;
@@ -21,6 +20,10 @@ public:
   void onExit() noexcept override;
 
 private:
+  std::vector<ResourceManager::TextureHandle> m_textures =
+      ResourceManager::acquireTextures<Textures::UI>();
+  ResourceManager::TextureHandle m_notes =
+      ResourceManager::acquireTexture<Textures::Gameplay::Notes>();
   AnimatedBackground m_background;
   enum class Section { General, Instruments, Gameplay };
 

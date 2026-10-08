@@ -26,6 +26,8 @@ public:
   void onExit() noexcept override;
 
 private:
+  std::vector<ResourceManager::TextureHandle> m_textures =
+      ResourceManager::acquireTextures<Textures::UI>();
   AnimatedBackground m_background;
   static constexpr std::string s_SongsDir{"Songs/"};
 

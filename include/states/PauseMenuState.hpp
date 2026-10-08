@@ -21,6 +21,8 @@ public:
   void onExit() noexcept override;
 
 private:
+  std::vector<ResourceManager::TextureHandle> m_textures =
+      ResourceManager::acquireTextures<Textures::UI>();
   Button m_continueButton{
     {.x = 590, .y = 430},
     {.x = 0, .y = 300, .width = 740, .height = 100},

@@ -26,6 +26,7 @@ public:
   virtual void pauseInstrument(bool p) noexcept = 0;
   virtual void loadAudio(std::string_view songPath) = 0;
   virtual void startAudio() noexcept = 0;
+  virtual void controlAudio(bool resume) noexcept = 0;
   virtual std::uint8_t getInstrumentType() noexcept = 0;
 
   inline static void setPlayerCount(std::uint8_t count) noexcept {
@@ -84,9 +85,20 @@ public:
 
   inline void update(float dt) override { m_instrument.update(dt); }
 
-  inline void loadAudio(std::string_view songPath) override { m_instrument.loadAudio(songPath); }
+  inline void loadAudio(std::string_view songPath) override {
+    m_instrument.loadAudio(songPath);
+  }
   inline void startAudio() noexcept override { m_instrument.startAudio(); }
-  inline std::uint8_t getInstrumentType() noexcept override { return m_instrument.getType(); }
+  inline void controlAudio(bool resume) noexcept override {
+    if (resume) {
+      m_instrument.template controlAudio<true>();
+    } else {
+      m_instrument.template controlAudio<false>();
+    }
+  }
+  inline std::uint8_t getInstrumentType() noexcept override {
+    return m_instrument.getType();
+  }
 
 private:
   const std::uint32_t id;

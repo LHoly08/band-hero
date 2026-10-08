@@ -10,6 +10,37 @@
 #include "raylib.h"
 
 namespace bh {
+ResourceManager::TextureHandle::TextureHandle(std::size_t index) noexcept
+    : m_index(index) {
+  ResourceManager::get().iLoadTexture(m_index);
+}
+
+ResourceManager::TextureHandle::TextureHandle(const TextureHandle &other) noexcept
+    : m_index(other.m_index) {
+  if (m_index != Empty) {
+    ResourceManager::get().iLoadTexture(m_index);
+  }
+}
+
+ResourceManager::TextureHandle::TextureHandle(TextureHandle &&other) noexcept
+    : m_index(std::exchange(other.m_index, Empty)) {}
+
+ResourceManager::TextureHandle &
+ResourceManager::TextureHandle::operator=(TextureHandle other) noexcept {
+  std::swap(m_index, other.m_index);
+  return *this;
+}
+
+ResourceManager::TextureHandle::~TextureHandle() {
+  if (m_index != Empty) {
+    ResourceManager::get().iUnloadTexture(m_index);
+  }
+}
+
+Texture2D ResourceManager::TextureHandle::texture() const noexcept {
+  return m_index == Empty ? Texture2D{} : ResourceManager::get().m_textures[m_index];
+}
+
 std::string ResourceManager::assetPath(std::string_view relativePath) {
   // Installed builds keep assets beside the executable, regardless of cwd.
   const auto installedPath =
@@ -21,7 +52,8 @@ std::string ResourceManager::assetPath(std::string_view relativePath) {
 }
 
 ResourceManager::ResourceManager()
-    : m_textures(Textures::size()), m_fonts(Fonts::size()) {
+    : m_textures(Textures::size()), m_textureUsers(Textures::size()),
+      m_fonts(Fonts::size()) {
 
   {
     m_fonts.front() = GetFontDefault();
@@ -49,6 +81,7 @@ ResourceManager::ResourceManager()
 }
 
 void ResourceManager::iLoadTexture(std::size_t index) noexcept {
+  ++m_textureUsers[index];
   constexpr auto files = Textures::files();
   if (!IsTextureValid(m_textures[index])) {
     m_textures[index] = LoadTexture(assetPath(files[index]).c_str());
@@ -61,6 +94,10 @@ void ResourceManager::iLoadTexture(std::size_t index) noexcept {
 }
 
 void ResourceManager::iUnloadTexture(std::size_t index) noexcept {
+  // Each state's load owns a reference, including states below an overlay.
+  if (m_textureUsers[index] == 0 || --m_textureUsers[index] != 0) {
+    return;
+  }
   if (IsTextureValid(m_textures[index])) {
     UnloadTexture(m_textures[index]);
   }
@@ -70,6 +107,8 @@ void ResourceManager::iUnloadTexture(std::size_t index) noexcept {
 void ResourceManager::iUnload() noexcept {
 
   for (std::size_t i{}; i < m_textures.size(); ++i) {
+    // Final shutdown releases textures even if a caller retained a reference.
+    m_textureUsers[i] = 1;
     iUnloadTexture(i);
   }
   for (auto &f : m_fonts | std::ranges::views::drop(1)) {

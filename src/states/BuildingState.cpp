@@ -22,12 +22,9 @@ void BuildingState::events() noexcept {
   }
 }
 
-void BuildingState::onEnter() noexcept {
-  ResourceManager::loadTextures<Textures::UI, Textures::Building>();
-}
+void BuildingState::onEnter() noexcept {}
 
 void BuildingState::onExit() noexcept {
-  ResourceManager::unloadTextures<Textures::UI, Textures::Building>();
 
   m_backButton.resetInteraction();
 }

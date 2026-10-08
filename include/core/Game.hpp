@@ -3,10 +3,11 @@
 
 #include "raylib.h"
 
-#include "core/StateStack.hpp"
 #include "config/DisplaySettings.hpp"
+
 #include "core/ResourceManager.hpp"
 #include "core/Scale.hpp"
+#include "core/StateStack.hpp"
 
 #include "ui/Theme.hpp"
 
@@ -39,6 +40,7 @@ private:
     ClearBackground(theme::Background);
 
     m_stack.draw();
+
     if (DisplaySettings::get().showFPS) {
       const Vector2 position = scaledSize(Vector2{1730, 20});
       const Vector2 size = scaledSize(Vector2{165, 48});

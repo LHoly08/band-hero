@@ -11,6 +11,7 @@
 #include <mutex>
 #include <stop_token>
 #include <string>
+#include <string_view>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -37,7 +38,8 @@ enum class InstrumentType : std::uint8_t {
 
 template <InstrumentType Type>
 concept SectionInstrumentType =
-    Type == InstrumentType::Bass || Type == InstrumentType::Guitar || Type == InstrumentType::Custom_1;
+    Type == InstrumentType::Bass || Type == InstrumentType::Guitar ||
+    Type == InstrumentType::Custom_1;
 
 template <InstrumentType Type>
 concept CustomType =
@@ -95,10 +97,10 @@ public:
     requires(!CustomType<Type>);
 
   virtual ~Instrument() {
-    if (IsMusicStreamPlaying(m_audio)) {
+    if (IsMusicValid(m_audio)) {
       StopMusicStream(m_audio);
+      UnloadMusicStream(m_audio);
     }
-    UnloadMusicStream(m_audio);
   };
 
   virtual bool getPlay(std::uint32_t playedNote) noexcept;
@@ -106,30 +108,52 @@ public:
   virtual void draw(std::uint32_t startingPositionX) const noexcept = 0;
   void update(float dt);
 
-  inline void loadAudio(std::string_view songPath) { 
+  inline void loadAudio(std::string_view songPath) {
     std::string path{songPath};
     path.append([]<InstrumentType T>() consteval -> auto {
-      
-      static constexpr auto enumerators = std::define_static_array(std::meta::enumerators_of(^^InstrumentType));
+      static constexpr auto enumerators =
+          std::define_static_array(std::meta::enumerators_of(^^InstrumentType));
 
       template for (constexpr auto enumerator : enumerators) {
-        
+
         if (std::meta::extract<InstrumentType>(enumerator) == T) {
 
           std::string file{std::meta::identifier_of(enumerator)};
+          // Enum identifiers are ASCII; std::tolower is not constexpr.
+          for (auto &c : file) {
+            if (c >= 'A' && c <= 'Z') {
+              c += 'a' - 'A';
+            }
+          }
           file.append(".wav");
           return std::define_static_string(file);
         }
       }
       std::unreachable();
-
     }.template operator()<Type>());
 
+    if (IsMusicValid(m_audio)) {
+      StopMusicStream(m_audio);
+      UnloadMusicStream(m_audio);
+    }
     m_audio = LoadMusicStream(path.c_str());
+    m_audio.looping = false;
   }
 
   inline void startAudio() noexcept {
-    PlayMusicStream(m_audio);
+    if (IsMusicValid(m_audio)) {
+      PlayMusicStream(m_audio);
+    }
+  }
+  template <bool Resume> inline void controlAudio() noexcept {
+    if (!IsMusicValid(m_audio)) {
+      return;
+    }
+    if constexpr (Resume) {
+      ResumeMusicStream(m_audio);
+    } else {
+      PauseMusicStream(m_audio);
+    }
   }
 
   inline void pause(bool p) noexcept {
@@ -139,14 +163,8 @@ public:
     }
     m_bufferCv.notify_all();
   }
-  
-  inline std::uint8_t getType() {
-    if constexpr (!CustomType<Type>) {
-      return static_cast<std::uint8_t>(Type);
-    } else {
-      return 0;
-    }
-  }
+
+  inline std::uint8_t getType() { return static_cast<std::uint8_t>(Type); }
 
 protected:
   inline void drawNote(const Vector2 &position, const Color &tint,
@@ -173,6 +191,12 @@ protected:
   static constexpr std::size_t NoNote = std::numeric_limits<std::size_t>::max();
 
   using NoteType = Note<Type>;
+  static std::vector<NoteType> makeBatchBuffer() {
+    std::vector<NoteType> buffer;
+    buffer.reserve(BatchSize);
+    return buffer;
+  }
+
   std::mutex m_bufferMutex;
 
   Music m_audio{};
@@ -182,7 +206,8 @@ protected:
 
   // The main thread alone owns active notes. The worker fills loadingBuffer,
   // then publishes downloadingBuffer under the mutex; bufferReady prevents
-  // another publication until update() has consumed the previous batch.
+  // another publication until update() has consumed the previous batch and
+  // returned its storage for reuse.
   std::deque<NoteType> m_activeBuffer;
   std::vector<NoteType> m_loadingBuffer;
   std::vector<NoteType> m_downloadingBuffer;
@@ -204,7 +229,8 @@ template <InstrumentType Type, Difficulty Dif>
 Instrument<Type, Dif>::Instrument(std::uint32_t &noteCount,
                                   std::string &&filename)
   requires CustomType<Type>
-    : m_noteCount(noteCount),
+    : m_loadingBuffer(makeBatchBuffer()),
+      m_downloadingBuffer(makeBatchBuffer()), m_noteCount(noteCount),
       m_loadingThread(std::bind_front(&Instrument<Type, Dif>::loadFile, this),
                       std::move(filename)) {}
 
@@ -212,7 +238,8 @@ template <InstrumentType Type, Difficulty Dif>
 Instrument<Type, Dif>::Instrument(std::uint32_t &noteCount,
                                   std::string &&filename)
   requires(!CustomType<Type>)
-    : m_noteCount(noteCount),
+    : m_loadingBuffer(makeBatchBuffer()),
+      m_downloadingBuffer(makeBatchBuffer()), m_noteCount(noteCount),
       m_loadingThread(
           std::bind_front(&Instrument<Type, Dif>::loadFile, this),
           // The caller supplies the song directory with its trailing separator.
@@ -260,22 +287,34 @@ void Instrument<Type, Dif>::update(float dt) {
     }
   }
   m_time += dt;
-  UpdateMusicStream(m_audio);
+  if (IsMusicValid(m_audio)) {
+    UpdateMusicStream(m_audio);
+  }
 
   if (m_activeBuffer.empty() ||
       m_activeBuffer.back().timeStamp - m_time < RefillAhead) {
+
+    std::vector<NoteType> batch;
     {
       std::lock_guard lock(m_bufferMutex);
       if (m_bufferReady) {
-        for (auto &note : m_downloadingBuffer) {
-          note.shape = static_cast<std::uint8_t>(GetRandomValue(0, 1));
-          m_activeBuffer.push_back(note);
-        }
-        m_downloadingBuffer.clear();
-        m_bufferReady = false;
+        batch.swap(m_downloadingBuffer);
       }
     }
-    m_bufferCv.notify_all();
+    if (!batch.empty()) {
+      for (auto &note : batch) {
+        note.shape = static_cast<std::uint8_t>(GetRandomValue(0, 1));
+        m_activeBuffer.push_back(note);
+      }
+      batch.clear();
+      {
+        std::lock_guard lock(m_bufferMutex);
+        // Keep the worker waiting until its reusable storage is back in place.
+        batch.swap(m_downloadingBuffer);
+        m_bufferReady = false;
+      }
+      m_bufferCv.notify_all();
+    }
   }
 
   while (!m_activeBuffer.empty() &&
@@ -348,7 +387,6 @@ void Instrument<Type, Dif>::loadFile(std::stop_token stopToken,
         finished = true;
         break;
       }
-
       m_loadingBuffer.push_back(note);
     }
     if (stopToken.stop_requested()) {

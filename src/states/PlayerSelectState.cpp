@@ -506,9 +506,10 @@ void PlayerSelectState::events() noexcept {
   }
 }
 
-void PlayerSelectState::onEnter() noexcept {
-  ResourceManager::loadTextures<Textures::UI>();
-
+PlayerSelectState::PlayerSelectState(StateStack &stack, std::string &&songName,
+                                     std::string &&audioDirectory) noexcept
+    : State(stack), m_songName(std::move(songName)),
+      m_audioDirectory(std::move(audioDirectory)) {
   m_customInstruments.clear();
   for (const auto &definition : CustomInstrumentStore::list()) {
     if (!definition.error.empty() || m_customInstruments.size() >= 125) continue;
@@ -533,13 +534,14 @@ void PlayerSelectState::onEnter() noexcept {
     if ((choice >> 1) >= 3 + m_customInstruments.size()) choice = 1;
   }
 
+}
+
+void PlayerSelectState::onEnter() noexcept {
   m_serial.openDevice(Settings::getSerialPort().c_str(),
                       Settings::getSerialBaudRate());
 }
 
 void PlayerSelectState::onExit() noexcept {
-  ResourceManager::unloadTextures<Textures::UI>();
-
   m_serial.closeDevice();
 
   m_backButton.resetInteraction();

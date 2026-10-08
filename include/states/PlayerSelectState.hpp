@@ -23,9 +23,8 @@ namespace bh {
 
 class PlayerSelectState final : public State {
 public:
-  inline PlayerSelectState(StateStack &stack, std::string &&songName, std::string &&audioDirectory) noexcept
-      : State(stack),
-        m_songName(std::move(songName)), m_audioDirectory(std::move(audioDirectory)) {}
+  PlayerSelectState(StateStack &stack, std::string &&songName,
+                    std::string &&audioDirectory) noexcept;
   ~PlayerSelectState() override = default;
 
   void draw() const noexcept override;
@@ -35,6 +34,8 @@ public:
   void onExit() noexcept override;
 
 private:
+  std::vector<ResourceManager::TextureHandle> m_textures =
+      ResourceManager::acquireTextures<Textures::UI>();
   AnimatedBackground m_background;
   serialib m_serial;
 

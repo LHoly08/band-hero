@@ -5,6 +5,7 @@
 #include "core/ResourceManager.hpp"
 #include "core/StateStack.hpp"
 
+#include "states/AchievementsState.hpp"
 #include "states/BuildingState.hpp"
 #include "states/GamemodeState.hpp"
 #include "states/GuidesState.hpp"
@@ -16,7 +17,8 @@
 namespace bh {
 
 void MainMenuState::draw() const noexcept {
-  ResourceManager::drawImageTo<Textures::MainMenu::Background>({0, 0, 1920, 1080});
+  ResourceManager::drawImageTo<Textures::MainMenu::Background>(
+      {0, 0, 1920, 1080});
   ResourceManager::drawImage<Textures::MainMenu::Title>({0, 0, 600, 160},
                                                         {140, 250});
   m_playButton.draw<WHITE, true, 40, TextAlign::Center>();
@@ -46,23 +48,19 @@ void MainMenuState::events() noexcept {
     return;
 
   } else if (settingsClicked) [[unlikely]] {
-    m_stack.replace<SettingsState>();
+    m_stack.push<SettingsState>();
 
   } else if (guidesClicked) [[unlikely]] {
-    m_stack.replace<GuidesState>();
-  
+    m_stack.push<GuidesState>();
+
   } else if (achievementsClicked) [[unlikely]] {
-    m_stack.push<BuildingState>();
+    m_stack.push<AchievementsState>();
   }
 }
 
-void MainMenuState::onEnter() noexcept {
-  ResourceManager::loadTextures<Textures::UI, Textures::MainMenu>();
-}
+void MainMenuState::onEnter() noexcept {}
 
 void MainMenuState::onExit() noexcept {
-  ResourceManager::unloadTextures<Textures::UI, Textures::MainMenu>();
-
   m_playButton.resetInteraction();
   m_quitButton.resetInteraction();
   m_settingsButton.resetInteraction();

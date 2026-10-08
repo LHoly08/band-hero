@@ -184,6 +184,43 @@ using Fonts_t = Fonts::Type;
 
 class ResourceManager final {
 public:
+  // An owning reference. Copies acquire another reference; moves transfer it.
+  // The last owner releases the GPU texture.
+  class TextureHandle {
+  public:
+    TextureHandle() noexcept = default;
+    TextureHandle(const TextureHandle &other) noexcept;
+    TextureHandle(TextureHandle &&other) noexcept;
+    TextureHandle &operator=(TextureHandle other) noexcept;
+    ~TextureHandle();
+
+    Texture2D texture() const noexcept;
+
+  private:
+    friend class ResourceManager;
+    explicit TextureHandle(std::size_t index) noexcept;
+    static constexpr std::size_t Empty = static_cast<std::size_t>(-1);
+    std::size_t m_index{Empty};
+  };
+
+  template <auto Texture>
+    requires isTexture<Texture>
+  inline static TextureHandle acquireTexture() noexcept {
+    return TextureHandle(Textures::getOffset<Texture>());
+  }
+
+  template <TextureType... Types>
+  inline static std::vector<TextureHandle> acquireTextures() {
+    std::vector<TextureHandle> handles;
+    handles.reserve((getOffsets<Types>().size() + ... + 0));
+    ([&] {
+      for (const auto index : getOffsets<Types>()) {
+        handles.push_back(TextureHandle(index));
+      }
+    }(), ...);
+    return handles;
+  }
+
   inline static ResourceManager &get() {
     static ResourceManager s_instance{};
     return s_instance;
@@ -348,6 +385,7 @@ private:
   ResourceManager();
 
   std::vector<Texture2D> m_textures;
+  std::vector<std::size_t> m_textureUsers;
   std::vector<Font> m_fonts;
 };
 

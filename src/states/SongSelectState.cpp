@@ -194,14 +194,10 @@ void SongSelectState::events() noexcept {
 }
 
 void SongSelectState::onEnter() noexcept {
-  ResourceManager::loadTextures<Textures::UI>();
-
   m_selectedSong = NoSong;
 }
 
 void SongSelectState::onExit() noexcept {
-  ResourceManager::unloadTextures<Textures::UI>();
-
   if (IsMusicValid(m_song)) {
     StopMusicStream(m_song);
     UnloadMusicStream(m_song);

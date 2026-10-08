@@ -22,6 +22,8 @@ public:
   void onExit() noexcept override;
 
 private:
+  std::vector<ResourceManager::TextureHandle> m_textures =
+      ResourceManager::acquireTextures<Textures::UI>();
   AnimatedBackground m_background;
 
   Button m_mainMenuButton{

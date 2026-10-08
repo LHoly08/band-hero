@@ -20,6 +20,8 @@ public:
   void onExit() noexcept override;
 
 private:
+  std::vector<ResourceManager::TextureHandle> m_textures =
+      ResourceManager::acquireTextures<Textures::UI, Textures::Building>();
   Button m_backButton{
     {.x = 800, .y = 850},
     {.x = 0, .y = 640, .width = 320, .height = 96},
