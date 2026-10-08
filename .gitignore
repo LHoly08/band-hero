@@ -19,6 +19,7 @@ sdkconfig
 # BandHero generated files
 settings.bin
 startup.bin
+medals.bin
 Instruments/
 Songs/
 

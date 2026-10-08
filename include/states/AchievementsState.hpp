@@ -1,5 +1,7 @@
 #pragma once
 
+#include "medals/AchievementsManager.hpp"
+
 #include "states/State.hpp"
 
 #include "ui/AnimatedBackground.hpp"
@@ -24,5 +26,6 @@ private:
   AnimatedBackground m_background;
 
   Button m_menuButton{{100, 885}, {0, 0, 360, 100}, "Main Menu"};
+  std::vector<Achievements> m_medals = AchievementsManager::getEarnedMedals();
 };
 } // namespace bh

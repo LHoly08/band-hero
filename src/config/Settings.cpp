@@ -82,13 +82,14 @@ void Settings::iDefaultSettings() noexcept {
 
 void Settings::iLoadSettings() noexcept {
   // settings.bin layout: six RGBA colors (24 bytes), uint16 LE port-name byte
-  // length, port bytes, uint32 LE baud rate, then optional uint8 volume percent.
-  // Decode integers explicitly so this format does not depend on struct padding.
+  // length, port bytes, uint32 LE baud rate, then optional uint8 volume
+  // percent. Decode integers explicitly so this format does not depend on
+  // struct padding.
   masterVolume = 100;
   if (IsAudioDeviceReady()) {
     SetMasterVolume(1.f);
   }
-  std::ifstream file{fileName, std::ios::binary};
+  std::ifstream file{fileName.data(), std::ios::binary};
 
   if (!file) {
     iDefaultSettings();
@@ -142,7 +143,7 @@ void Settings::iLoadSettings() noexcept {
 }
 
 bool Settings::iSaveSettings() noexcept {
-  std::ofstream file{fileName, std::ios::binary | std::ios::trunc};
+  std::ofstream file{fileName.data(), std::ios::binary | std::ios::trunc};
   if (!file) {
     return false;
   }
@@ -174,8 +175,9 @@ bool Settings::iSaveSettings() noexcept {
 }
 
 bool Settings::iDetectSerialPort() noexcept {
-  // This probes whether a port opens, not whether a BandHero controller answers.
-  // Explicit port selection in General can override the first openable device.
+  // This probes whether a port opens, not whether a BandHero controller
+  // answers. Explicit port selection in General can override the first openable
+  // device.
   try {
     serialPort.clear();
     for (const std::string &candidate : serialPortCandidates()) {

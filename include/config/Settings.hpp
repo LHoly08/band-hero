@@ -119,7 +119,7 @@ private:
   void iCreateCustomInstrument(std::string &&name, std::uint8_t n1,
                                std::uint8_t n2);
 
-  static constexpr std::string fileName{"settings.bin"};
+  static constexpr std::string_view fileName{"settings.bin"};
 
   std::array<Color, 6> guitarBassColors{RED,   ORANGE, YELLOW,
                                         GREEN, BLUE,   PURPLE};
