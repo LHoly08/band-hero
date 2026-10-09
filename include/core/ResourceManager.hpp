@@ -45,7 +45,7 @@ public:
     Medals = 0,
   };
 
-  enum class Songs : std::uint8_t {
+  enum class SongInfo : std::uint8_t {
     Difficulty = 0,
   };
 

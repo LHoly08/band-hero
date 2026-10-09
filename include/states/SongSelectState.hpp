@@ -29,7 +29,7 @@ public:
 
 private:
   std::vector<ResourceManager::TextureHandle> m_textures =
-      ResourceManager::acquireTextures<Textures::UI, Textures::Songs>();
+      ResourceManager::acquireTextures<Textures::UI, Textures::SongInfo>();
   AnimatedBackground m_background;
   static constexpr std::string s_SongsDir{"Songs/"};
 

@@ -80,7 +80,7 @@ public:
 
 private:
   std::vector<ResourceManager::TextureHandle> m_textures =
-      ResourceManager::acquireTextures<Textures::UI, Textures::Songs,
+      ResourceManager::acquireTextures<Textures::UI, Textures::SongInfo,
                                        Textures::Achievements>();
   AnimatedBackground m_background;
   std::array<std::unique_ptr<PlayerBase>, PlayerCount> m_players;
@@ -129,7 +129,7 @@ void GameEndState<PlayerCount>::draw() const noexcept {
         {row.x + padding, row.y + (row.height - fontSize) / 2.f}, fontSize,
         theme::Text);
 
-    ResourceManager::drawImage<Textures::Songs::Difficulty>(
+    ResourceManager::drawImage<Textures::SongInfo::Difficulty>(
         {((m_nextDifficulty - 1) * 100.f), 0, 100, 100},
         {row.x + 360.f, row.y});
   }

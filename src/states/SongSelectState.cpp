@@ -65,7 +65,7 @@ void SongSelectState::draw() const noexcept {
 
       const std::uint8_t difficulty =
           (m_selectedDifficulties >> (i * 2)) & 0b11;
-      ResourceManager::drawImage<Textures::Songs::Difficulty>(
+      ResourceManager::drawImage<Textures::SongInfo::Difficulty>(
           {((difficulty - 1) * 100.f), 0, 100, 100}, {row.x - 100.f, row.y});
       const std::string &name = m_selectedSongs[i];
 
