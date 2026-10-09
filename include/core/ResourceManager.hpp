@@ -45,6 +45,10 @@ public:
     Medals = 0,
   };
 
+  enum class Songs : std::uint8_t {
+    Difficulty = 0,
+  };
+
   template <auto Ty> inline static consteval std::uint8_t getOffset() {
 
     static constexpr auto v = std::define_static_array(std::meta::members_of(
@@ -213,11 +217,13 @@ public:
   inline static std::vector<TextureHandle> acquireTextures() {
     std::vector<TextureHandle> handles;
     handles.reserve((getOffsets<Types>().size() + ... + 0));
-    ([&] {
-      for (const auto index : getOffsets<Types>()) {
-        handles.push_back(TextureHandle(index));
-      }
-    }(), ...);
+    (
+        [&] {
+          for (const auto index : getOffsets<Types>()) {
+            handles.push_back(TextureHandle(index));
+          }
+        }(),
+        ...);
     return handles;
   }
 

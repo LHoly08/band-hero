@@ -28,6 +28,7 @@ public:
   virtual void startAudio() noexcept = 0;
   virtual void controlAudio(bool resume) noexcept = 0;
   virtual std::uint8_t getInstrumentType() noexcept = 0;
+  virtual std::unique_ptr<PlayerBase> changeSong(std::string songPath) = 0;
 
   inline static void setPlayerCount(std::uint8_t count) noexcept {
     assert(count != 0 && count <= 4);
@@ -98,6 +99,15 @@ public:
   }
   inline std::uint8_t getInstrumentType() noexcept override {
     return m_instrument.getType();
+  }
+  inline std::unique_ptr<PlayerBase> changeSong(std::string songPath) override {
+    if constexpr (CustomType<Type>) {
+      return std::make_unique<Player<Type, Dif>>(id, std::move(songPath),
+                                                 m_instrument.getName(),
+                                                 m_instrument.getComposition());
+    } else {
+      return std::make_unique<Player<Type, Dif>>(id, std::move(songPath));
+    }
   }
 
 private:

@@ -16,17 +16,19 @@
 #include "core/ResourceManager.hpp"
 
 #include "gameplay/Player.hpp"
+#include "gameplay/SetList.hpp"
 
 #include "serial/serialib.h"
 
-#include "states/PauseMenuState.hpp"
 #include "states/MainMenuState.hpp"
+#include "states/PauseMenuState.hpp"
 #include "states/State.hpp"
 
 namespace bh {
 
-template <std::uint8_t T>
-concept MaxPlayerAmount = (T != 0) && (T <= 4);
+template <std::uint8_t PlayerCount>
+  requires MaxPlayerAmount<PlayerCount>
+class GameEndState;
 
 template <std::uint8_t PlayerCount>
   requires MaxPlayerAmount<PlayerCount>
@@ -35,7 +37,7 @@ public:
   inline GameState(
       StateStack &stack,
       std::array<std::unique_ptr<PlayerBase>, PlayerCount> &&players,
-      std::string &&filename) noexcept;
+      std::string &&filename, SetList setList) noexcept;
   ~GameState() override;
 
   void draw() const noexcept override;
@@ -50,6 +52,8 @@ private:
   serialib m_serial;
   std::array<std::unique_ptr<PlayerBase>, PlayerCount> m_players;
   std::inplace_vector<Music, 6> m_audios;
+  SetList m_setList{};
+
   bool m_audioStarted{false};
   const float m_duration{};
   float m_time{};
@@ -60,13 +64,14 @@ template <std::uint8_t PlayerCount>
 GameState<PlayerCount>::GameState(
     StateStack &stack,
     std::array<std::unique_ptr<PlayerBase>, PlayerCount> &&players,
-    std::string &&filename) noexcept
-    : State(stack), m_players(std::move(players)), m_duration([filename] -> float {
-      Music temp = LoadMusicStream((filename + "main.mp3").c_str());
-      const float duration = GetMusicTimeLength(temp);
-      UnloadMusicStream(temp);
-      return duration + 1;
-    }()) {
+    std::string &&filename, SetList setList) noexcept
+    : State(stack), m_players(std::move(players)),
+      m_setList(std::move(setList)), m_duration([filename] -> float {
+        Music temp = LoadMusicStream((filename + "main.mp3").c_str());
+        const float duration = GetMusicTimeLength(temp);
+        UnloadMusicStream(temp);
+        return duration + 1;
+      }()) {
   // Only the standard instruments own one of the six backing stems.
   // Custom instruments load their own custom_N.wav files.
   std::array<bool, 3> playerInstruments{};
@@ -83,7 +88,7 @@ GameState<PlayerCount>::GameState(
   }
 
   static constexpr std::array<std::string_view, 6> AudioNames{
-      "bass.wav", "drums.wav", "guitar.wav",
+      "bass.wav",   "drums.wav", "guitar.wav",
       "vocals.wav", "piano.wav", "other.wav"};
 
   for (std::uint8_t i{}; i < AudioNames.size(); ++i) {
@@ -123,7 +128,8 @@ void GameState<PlayerCount>::update(float dt) noexcept {
   m_time += dt;
 
   if (m_time >= m_duration) {
-    m_stack.reset<MainMenuState>();
+    m_stack.reset<GameEndState<PlayerCount>>(std::move(m_players),
+                                             std::move(m_setList));
     return;
   }
 
@@ -195,10 +201,11 @@ void GameState<PlayerCount>::onExit() noexcept {
   m_serial.closeDevice();
 
   for (auto &player : m_players) {
-    player->pauseInstrument(true);
-  }
-  for (auto &player : m_players) {
-    player->controlAudio(false);
+    // The end screen takes ownership before the queued transition exits us.
+    if (player) {
+      player->pauseInstrument(true);
+      player->controlAudio(false);
+    }
   }
   for (auto &audio : m_audios) {
     PauseMusicStream(audio);
@@ -206,3 +213,6 @@ void GameState<PlayerCount>::onExit() noexcept {
 }
 
 } // namespace bh
+
+// Define the end screen after GameState so each transition sees both templates.
+#include "states/GameEndState.hpp"

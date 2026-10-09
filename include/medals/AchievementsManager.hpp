@@ -26,6 +26,7 @@ enum class Achievements : std::uint8_t {
   Online,
   Setlist,
   Streak,
+  Medium,
 };
 
 class AchievementsManager final {

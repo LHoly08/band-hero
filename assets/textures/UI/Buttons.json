@@ -41,9 +41,15 @@
       "width": 740,
       "height": 100
     },
+    "remove_normal": {
+      "x": 800,
+      "y": 300,
+      "width": 96,
+      "height": 96
+    },
     "back_normal": {
       "x": 0,
-      "y": 640,
+      "y": 600,
       "width": 320,
       "height": 96
     },
@@ -77,9 +83,15 @@
       "width": 740,
       "height": 100
     },
+    "remove_hover": {
+      "x": 800,
+      "y": 400,
+      "width": 96,
+      "height": 96
+    },
     "back_hover": {
       "x": 336,
-      "y": 640,
+      "y": 600,
       "width": 320,
       "height": 96
     },
@@ -113,9 +125,15 @@
       "width": 740,
       "height": 100
     },
+    "remove_pressed": {
+      "x": 800,
+      "y": 500,
+      "width": 96,
+      "height": 96
+    },
     "back_pressed": {
       "x": 672,
-      "y": 640,
+      "y": 600,
       "width": 320,
       "height": 96
     }

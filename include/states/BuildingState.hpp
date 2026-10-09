@@ -9,8 +9,7 @@ namespace bh {
 
 class BuildingState final : public State {
 public:
-  inline BuildingState(StateStack &stack) noexcept
-      : State(stack) {}
+  inline BuildingState(StateStack &stack) noexcept : State(stack) {}
   ~BuildingState() override = default;
 
   void draw() const noexcept override;
@@ -22,11 +21,9 @@ public:
 private:
   std::vector<ResourceManager::TextureHandle> m_textures =
       ResourceManager::acquireTextures<Textures::UI, Textures::Building>();
-  Button m_backButton{
-    {.x = 800, .y = 850},
-    {.x = 0, .y = 640, .width = 320, .height = 96},
-    "Back"
-  };
+  Button m_backButton{{.x = 800, .y = 850},
+                      {.x = 0, .y = 600, .width = 320, .height = 96},
+                      "Back"};
 };
 
 } // namespace bh

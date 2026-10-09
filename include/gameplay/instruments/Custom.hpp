@@ -45,6 +45,9 @@ public:
 
   void draw(std::uint32_t startingPositionX) const noexcept override;
 
+  inline auto getComposition() const noexcept { return m_composition; }
+  inline std::string getName() const noexcept { return m_name; }
+
 private:
   std::string m_name;
   InstrumentComposition<Type> m_composition;
@@ -71,6 +74,9 @@ public:
 
   void draw(std::uint32_t startingPositionX) const noexcept override;
 
+  inline auto getComposition() const noexcept { return m_composition; }
+  inline std::string getName() const noexcept { return m_name; }
+
 private:
   std::string m_name;
   lua_State *m_lua;
@@ -84,6 +90,7 @@ private:
   };
 
   mutable Notification m_notification;
+  InstrumentComposition<InstrumentType::Custom_3> m_composition;
 };
 
 template <Difficulty Dif> static consteval auto getDifficultyString() {
@@ -118,11 +125,11 @@ Custom<InstrumentType::Custom_3, Dif>::Custom(
     std::uint32_t &noteCount, std::string filename,
     std::string_view instrumentName,
     InstrumentComposition<InstrumentType::Custom_3> instrumentComposition)
-    : Base(noteCount, std::move(filename.append(getDifficultyString<Dif>())
-                                    .append("/")
-                                    .append(instrumentName)
+    : Base(noteCount, std::move(filename.append(instrumentName)
+                                    .append(getDifficultyString<Dif>())
                                     .append(".file"))),
-      m_name(instrumentName), m_lua(luaL_newstate()) {
+      m_name(instrumentName), m_lua(luaL_newstate()),
+      m_composition(instrumentComposition) {
 
   if (!m_lua) {
     return;

@@ -3,28 +3,28 @@
 #include <array>
 #include <filesystem>
 #include <inplace_vector>
-#include <memory>
+#include <string>
 #include <variant>
 
 #include "core/ResourceManager.hpp"
 
 #include "gameplay/Player.hpp"
+#include "gameplay/SetList.hpp"
 
 #include "gameplay/instruments/Instrument.hpp"
 
 #include "serial/serialib.h"
 
 #include "states/State.hpp"
-#include "ui/AnimatedBackground.hpp"
 
+#include "ui/AnimatedBackground.hpp"
 #include "ui/Button.hpp"
 
 namespace bh {
 
 class PlayerSelectState final : public State {
 public:
-  PlayerSelectState(StateStack &stack, std::string &&songName,
-                    std::string &&audioDirectory) noexcept;
+  PlayerSelectState(StateStack &stack, SetList setList) noexcept;
   ~PlayerSelectState() override = default;
 
   void draw() const noexcept override;
@@ -40,15 +40,8 @@ private:
   serialib m_serial;
 
   Button m_nextButton{
-    {.x = 780, .y = 650},
-    {0, 0, 360, 100},
-    "Choose Instruments"
-  };
-  Button m_backButton{
-    {.x = 30, .y = 950},
-    {0, 640, 320, 96},
-    "Back"
-  };
+      {.x = 780, .y = 650}, {0, 0, 360, 100}, "Choose Instruments"};
+  Button m_backButton{{.x = 30, .y = 950}, {0, 600, 320, 96}, "Back"};
 
   std::vector<CustomInstrumentComposition> m_customInstruments;
 
@@ -58,8 +51,7 @@ private:
   // repeated/held notes do not advance the controller check.
   std::array<std::inplace_vector<std::uint32_t, 3>, 4> m_testNotes;
 
-  const std::string m_songName;
-  std::string m_audioDirectory;
+  SetList m_setList{};
 
   float m_counter{};
 

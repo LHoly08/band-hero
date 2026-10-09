@@ -7,6 +7,7 @@
 
 #include "states/AchievementsState.hpp"
 #include "states/BuildingState.hpp"
+#include "states/GameEndState.hpp"
 #include "states/GamemodeState.hpp"
 #include "states/GuidesState.hpp"
 #include "states/PauseMenuState.hpp"

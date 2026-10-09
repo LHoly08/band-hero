@@ -1,6 +1,11 @@
 #pragma once
 
+#include <cstdint>
+
 namespace bh {
+
+template <std::uint8_t T>
+concept MaxPlayerAmount = (T != 0) && (T <= 4);
 
 class StateStack;
 
