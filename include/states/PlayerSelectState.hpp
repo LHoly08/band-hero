@@ -14,6 +14,7 @@
 #include "gameplay/instruments/Instrument.hpp"
 
 #include "serial/serialib.h"
+#include "serial/ControllerInput.hpp"
 
 #include "states/State.hpp"
 
@@ -38,6 +39,7 @@ private:
       ResourceManager::acquireTextures<Textures::UI>();
   AnimatedBackground m_background;
   serialib m_serial;
+  std::array<ControllerState, 4> m_controllerStates;
 
   Button m_nextButton{
       {.x = 780, .y = 650}, {0, 0, 360, 100}, "Choose Instruments"};
@@ -54,8 +56,6 @@ private:
   SetList m_setList{};
 
   float m_counter{};
-
-  bool m_controllerConnected{};
 
   enum class Stage : std::uint8_t {
     ChoosingPlayerCount = 0,

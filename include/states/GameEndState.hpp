@@ -1,6 +1,8 @@
 #pragma once
 
+#include <algorithm>
 #include <array>
+#include <cmath>
 #include <iostream>
 #include <iterator>
 #include <memory>
@@ -22,6 +24,7 @@
 
 #include "ui/AnimatedBackground.hpp"
 #include "ui/Button.hpp"
+#include "ui/Theme.hpp"
 
 namespace bh {
 
@@ -32,9 +35,11 @@ public:
   inline GameEndState(
       StateStack &stack,
       std::array<std::unique_ptr<PlayerBase>, PlayerCount> players,
-      SetList setList) noexcept
+      SetList setList, std::uint32_t completedSongs = 1,
+      bool allSongsCompleted = true) noexcept
       : State(stack), m_players(std::move(players)),
-        m_setList(std::move(setList)), m_nextSongName([this] -> std::string {
+        m_setList(std::move(setList)), m_completedSongs(completedSongs),
+        m_allSongsCompleted(allSongsCompleted), m_nextSongName([this] -> std::string {
           if (m_setList.empty()) {
             return "";
           }
@@ -85,6 +90,11 @@ private:
   AnimatedBackground m_background;
   std::array<std::unique_ptr<PlayerBase>, PlayerCount> m_players;
   SetList m_setList;
+  std::uint32_t m_completedSongs{};
+  bool m_allSongsCompleted{true};
+  bool m_resultsReady{};
+  std::vector<Achievements> m_earnedMedals;
+  std::vector<Achievements> m_newMedals;
 
   Button m_playButton{{.x = 30, .y = 430}, {0, 700, 460, 100}, "Next Song"};
 
@@ -97,6 +107,7 @@ private:
   std::string m_nextSongName;
   std::uint8_t m_nextDifficulty;
 
+  static constexpr float NextSongDelay = 3.f;
   float m_delay{};
   bool m_start{false};
 };
@@ -105,6 +116,68 @@ template <std::uint8_t PlayerCount>
   requires MaxPlayerAmount<PlayerCount>
 void GameEndState<PlayerCount>::draw() const noexcept {
   m_background.draw();
+
+  ResourceManager::drawText<Fonts_t::Buttons>(
+      "SONG COMPLETE", {30, 150}, 42, theme::Text);
+  ResourceManager::drawText<Fonts_t::Buttons>(
+      "Song " + std::to_string(m_completedSongs), {30, 210}, 26,
+      theme::MutedText);
+  ResourceManager::drawSettingsSkin<Textures::UI::Panel>(
+      {0, 0, 768, 384}, {570, 120, 1320, 870});
+  ResourceManager::drawText<Fonts_t::Buttons>(
+      "ACHIEVEMENTS EARNED", {610, 155}, 36, theme::Text);
+  const std::string newCount = std::to_string(m_newMedals.size()) + " NEW";
+  const float newWidth =
+      ResourceManager::measureText<Fonts_t::Buttons>(newCount, 24);
+  ResourceManager::drawText<Fonts_t::Buttons>(
+      newCount, {1850 - newWidth, 162}, 24, theme::Highlight);
+
+  for (std::size_t i = 0; i < m_players.size(); ++i) {
+    const float x = 610 + i * (1240.f / PlayerCount);
+    const auto &player = m_players[i];
+    ResourceManager::drawText<Fonts_t::Buttons>(
+        "PLAYER " + std::to_string(i + 1), {x, 225}, 22, theme::Primary);
+    const auto percent = static_cast<int>(std::round(player->getCompletion() * 100));
+    const std::string result = std::to_string(player->getHitNoteCount()) + " / " +
+                              std::to_string(player->getLoadedNoteCount()) +
+                              " hits  (" + std::to_string(percent) + "%)";
+    const float width = ResourceManager::measureText<Fonts_t::Buttons>(result, 24);
+    const float size = std::min(24.f, (1240.f / PlayerCount - 20) * 24.f /
+                                        std::max(1.f, width));
+    ResourceManager::drawText<Fonts_t::Buttons>(
+        result, {x, 260}, size, theme::Text);
+  }
+
+  std::string_view hint = "Hover over a medal to see its unlock requirement.";
+  if (m_earnedMedals.empty()) {
+    ResourceManager::drawText<Fonts_t::Buttons>(
+        "No achievements earned", {610, 365}, 32, theme::MutedText);
+    hint = "Complete a nonempty chart to earn song achievements.";
+  }
+  for (std::size_t i = 0; i < m_earnedMedals.size(); ++i) {
+    const auto medal = m_earnedMedals[i];
+    const float x = 610 + (i % 5) * 248.f;
+    const float y = 335 + (i / 5) * 148.f;
+    AchievementsManager::drawMedal(medal, Rectangle{x + 70, y, 100, 100});
+    const auto name = AchievementsManager::name(medal);
+    const float width = ResourceManager::measureText<Fonts_t::Buttons>(name, 24);
+    const float size = std::min(24.f, 228.f * 24.f / std::max(1.f, width));
+    const float fitted = ResourceManager::measureText<Fonts_t::Buttons>(name, size);
+    ResourceManager::drawText<Fonts_t::Buttons>(
+        name, {x + (240 - fitted) / 2, y + 105}, size, theme::Text);
+    if (std::ranges::find(m_newMedals, medal) != m_newMedals.end()) {
+      ResourceManager::drawText<Fonts_t::Buttons>(
+          "NEW", {x + 175, y + 12}, 18, theme::Highlight);
+    }
+    const auto position = scaledSize(Vector2{x, y});
+    const auto extent = scaledSize(Vector2{240, 135});
+    if (CheckCollisionPointRec(GetMousePosition(),
+                               {position.x, position.y, extent.x, extent.y})) {
+      hint = AchievementsManager::description(medal);
+    }
+  }
+  ResourceManager::drawText<Fonts_t::Buttons>(
+      hint, {610, 950}, 22, theme::MutedText);
 
   m_mainMenuButton.draw<WHITE, true, 40, TextAlign::Center>();
   m_quitButton.draw<WHITE, true, 40, TextAlign::Center>();
@@ -132,6 +205,32 @@ void GameEndState<PlayerCount>::draw() const noexcept {
     ResourceManager::drawImage<Textures::SongInfo::Difficulty>(
         {((m_nextDifficulty - 1) * 100.f), 0, 100, 100},
         {row.x + 360.f, row.y});
+
+    if (m_start) {
+      ResourceManager::drawSettingsSkin<Textures::UI::Panel>(
+          {0, 0, 768, 384}, {570, 410, 780, 260});
+      const auto centeredText = [](std::string_view text, float y, float size,
+                                   Color color) {
+        const float width =
+            ResourceManager::measureText<Fonts_t::Buttons>(text, size);
+        ResourceManager::drawText<Fonts_t::Buttons>(
+            text, {960 - width / 2, y}, size, color);
+      };
+      const float remaining = std::max(0.f, NextSongDelay - m_delay);
+      const int seconds =
+          std::clamp(static_cast<int>(std::ceil(remaining)), 1, 3);
+      centeredText("NEXT SONG", 435, 26, theme::Text);
+      centeredText(std::to_string(seconds), 475, 100, theme::Highlight);
+      const auto position = scaledSize(Vector2{710, 610});
+      const auto size = scaledSize(Vector2{500, 10});
+      DrawRectangleRounded({position.x, position.y, size.x, size.y}, 1.f, 12,
+                           theme::Border);
+      if (remaining > 0.f) {
+        DrawRectangleRounded({position.x, position.y,
+                              size.x * remaining / NextSongDelay, size.y},
+                             1.f, 12, theme::Highlight);
+      }
+    }
   }
 }
 
@@ -143,13 +242,13 @@ void GameEndState<PlayerCount>::update(float dt) noexcept {
   m_background.update(dt);
 
   if (m_setList.empty()) {
-    if (m_delay >= 3.0f) {
+    if (m_delay >= 30.0f) {
       m_stack.reset<MainMenuState>();
     }
     return;
   }
 
-  if (m_start && m_delay >= 3.0f) {
+  if (m_start && m_delay >= NextSongDelay) {
     std::array<std::unique_ptr<PlayerBase>, PlayerCount> newPlayers;
     std::string nextSong = m_setList.getCharts();
 
@@ -163,7 +262,8 @@ void GameEndState<PlayerCount>::update(float dt) noexcept {
     m_setList.pop();
     m_stack.reset<GameState<PlayerCount>>(std::move(newPlayers),
                                           std::move(nextAudioDirectory),
-                                          std::move(m_setList));
+                                          std::move(m_setList), m_completedSongs,
+                                          m_allSongsCompleted);
   }
 }
 
@@ -191,6 +291,33 @@ template <std::uint8_t PlayerCount>
   requires MaxPlayerAmount<PlayerCount>
 void GameEndState<PlayerCount>::onEnter() noexcept {
   m_delay = 0;
+  if (m_resultsReady) {
+    return;
+  }
+  bool bandCompleted = true;
+  for (auto &player : m_players) {
+    player->finishSong();
+    bandCompleted = bandCompleted && player->hasCompletedSong();
+    const auto earned = player->getUnlockedAchievements();
+    m_earnedMedals.insert(m_earnedMedals.end(), earned.begin(), earned.end());
+  }
+  m_allSongsCompleted = m_allSongsCompleted && bandCompleted;
+  if (bandCompleted) {
+    if constexpr (PlayerCount >= 2) {
+      m_earnedMedals.push_back(Achievements::BandTogether);
+    }
+    if constexpr (PlayerCount == 4) {
+      m_earnedMedals.push_back(Achievements::FourPlayer);
+    }
+    if (m_setList.empty() && m_completedSongs >= 2 && m_allSongsCompleted) {
+      m_earnedMedals.push_back(Achievements::Setlist);
+    }
+  }
+  std::ranges::sort(m_earnedMedals);
+  const auto duplicates = std::ranges::unique(m_earnedMedals);
+  m_earnedMedals.erase(duplicates.begin(), duplicates.end());
+  m_newMedals = AchievementsManager::get().unlock(m_earnedMedals);
+  m_resultsReady = true;
 }
 
 template <std::uint8_t PlayerCount>

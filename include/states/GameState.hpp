@@ -37,7 +37,8 @@ public:
   inline GameState(
       StateStack &stack,
       std::array<std::unique_ptr<PlayerBase>, PlayerCount> &&players,
-      std::string &&filename, SetList setList) noexcept;
+      std::string &&filename, SetList setList,
+      std::uint32_t completedSongs = 0, bool allSongsCompleted = true) noexcept;
   ~GameState() override;
 
   void draw() const noexcept override;
@@ -53,10 +54,12 @@ private:
   std::array<std::unique_ptr<PlayerBase>, PlayerCount> m_players;
   std::inplace_vector<Music, 6> m_audios;
   SetList m_setList{};
+  std::uint32_t m_completedSongs{};
+  bool m_allSongsCompleted{true};
 
-  bool m_audioStarted{false};
   const float m_duration{};
   float m_time{};
+  bool m_audioStarted{false};
 };
 
 template <std::uint8_t PlayerCount>
@@ -64,9 +67,11 @@ template <std::uint8_t PlayerCount>
 GameState<PlayerCount>::GameState(
     StateStack &stack,
     std::array<std::unique_ptr<PlayerBase>, PlayerCount> &&players,
-    std::string &&filename, SetList setList) noexcept
+    std::string &&filename, SetList setList, std::uint32_t completedSongs,
+    bool allSongsCompleted) noexcept
     : State(stack), m_players(std::move(players)),
-      m_setList(std::move(setList)), m_duration([filename] -> float {
+      m_setList(std::move(setList)), m_completedSongs(completedSongs),
+      m_allSongsCompleted(allSongsCompleted), m_duration([filename] -> float {
         Music temp = LoadMusicStream((filename + "main.mp3").c_str());
         const float duration = GetMusicTimeLength(temp);
         UnloadMusicStream(temp);
@@ -117,6 +122,10 @@ GameState<PlayerCount>::~GameState() {
 template <std::uint8_t PlayerCount>
   requires MaxPlayerAmount<PlayerCount>
 void GameState<PlayerCount>::draw() const noexcept {
+  if (m_time >= m_duration) {
+    return;
+  }
+
   for (const auto &player : m_players) {
     player->draw();
   }
@@ -128,8 +137,14 @@ void GameState<PlayerCount>::update(float dt) noexcept {
   m_time += dt;
 
   if (m_time >= m_duration) {
-    m_stack.reset<GameEndState<PlayerCount>>(std::move(m_players),
-                                             std::move(m_setList));
+    // Include the final frame so notes leaving their hit window are counted.
+    for (auto &player : m_players) {
+      player->update(dt);
+    }
+    m_stack.push<GameEndState<PlayerCount>>(std::move(m_players),
+                                          std::move(m_setList),
+                                          m_completedSongs + 1,
+                                          m_allSongsCompleted);
     return;
   }
 
@@ -141,23 +156,20 @@ void GameState<PlayerCount>::update(float dt) noexcept {
     player->update(dt);
   }
 
-  // Controller packets are four-byte little-endian words: the low two bits
-  // identify player 0-3 and the remaining 30 bits encode that player's input.
-  // Accept only complete four-byte reads. Short reads consume their bytes but
-  // are discarded rather than retained for the next update.
-  if (std::uint32_t buffer{};
-      m_serial.readBytes(&buffer, sizeof(buffer), 1) == sizeof(buffer)) {
 
+  std::uint32_t packet{};
+  const int received = m_serial.readBytes(&packet, sizeof(packet), 1);
+
+  if (received == sizeof(packet)) [[likely]] {
     if constexpr (std::endian::native == std::endian::big) {
-      buffer = std::byteswap(buffer);
+      packet = std::byteswap(packet);
     }
-
-    if (std::uint8_t index = buffer & 0b11; index < PlayerCount) [[likely]] {
-      buffer >>= 2;
-
-      m_players[index]->play(buffer);
+    const auto index = packet & 0b11;
+    if (packet < PlayerCount) {
+      m_players[index]->play(packet >> 2);
     }
   }
+  
 }
 
 template <std::uint8_t PlayerCount>
@@ -172,10 +184,17 @@ void GameState<PlayerCount>::events() noexcept {
 template <std::uint8_t PlayerCount>
   requires MaxPlayerAmount<PlayerCount>
 void GameState<PlayerCount>::onEnter() noexcept {
-  m_serial.openDevice(Settings::getSerialPort().c_str(),
-                      Settings::getSerialBaudRate());
+  if (!Settings::getSerialPort().empty() &&
+      m_serial.openDevice(Settings::getSerialPort().c_str(),
+                          Settings::getSerialBaudRate()) != 1) {
+    m_serial.closeDevice();
+  }
+  if (m_serial.isDeviceOpen()) {
+    m_serial.flushReceiver();
+  }
 
   for (auto &player : m_players) {
+    player->resetControllerState();
     player->pauseInstrument(false);
   }
   for (auto &player : m_players) {

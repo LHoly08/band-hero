@@ -155,7 +155,7 @@ void SongSelectState::events() noexcept {
   } else if (startClicked) [[unlikely]] {
     m_stack.push<PlayerSelectState>(m_setList.clone());
   } else if (removeClicked) [[unlikely]] {
-    m_setList.pop();
+    m_setList.pop_back();
     m_selectedSongs.pop_back();
     m_selectedDifficulties &= ((1 << (m_selectedSongs.size() * 2)) - 1);
   }

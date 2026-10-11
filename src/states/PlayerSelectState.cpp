@@ -119,7 +119,7 @@ void PlayerSelectState::draw() const noexcept {
     const bool ready = std::ranges::all_of(
         m_testNotes | std::views::take(count),
         [](const auto &notes) { return notes.size() == 3; });
-    const int stage = !m_controllerConnected ? 0 : ready ? 2 : 1;
+    const int stage = !m_serial.isDeviceOpen() ? 0 : ready ? 2 : 1;
     unsigned int completedSteps{};
     for (std::size_t i = 0; i < count; ++i)
       completedSteps += m_testNotes[i].size();
@@ -142,7 +142,7 @@ void PlayerSelectState::draw() const noexcept {
       text(labels[i], {x, 380}, 28,
            i <= stage ? theme::Text : theme::MutedText);
     }
-    if (!m_controllerConnected) {
+    if (!m_serial.isDeviceOpen()) {
       text(Settings::getSerialPort().empty()
                ? "No controller port selected"
                : "Could not open the controller port",
@@ -200,11 +200,7 @@ void PlayerSelectState::update(float dt) noexcept {
   switch (m_stage) {
   case Stage::TestingInstruments: {
 
-    if (!m_controllerConnected)
-      break;
-
     if (!m_serial.isDeviceOpen()) {
-      m_controllerConnected = false;
       m_nextButton.changeText("Retry connection");
       m_nextButton.setPosition({780, 790});
       m_testNotes = {};
@@ -212,35 +208,36 @@ void PlayerSelectState::update(float dt) noexcept {
       break;
     }
 
-    // A read must return all four bytes. Short reads are consumed and
-    // discarded, never retained to complete a packet during a later update.
-    std::array<unsigned char, 4> packet{};
-    const int received = m_serial.readBytes(packet.data(), packet.size(), 1);
-
-    if (received == static_cast<int>(packet.size())) {
-      auto buffer = std::bit_cast<std::uint32_t>(packet);
-
+    std::uint32_t packet{};
+    const int received = m_serial.readBytes(&packet, sizeof(packet), 1);
+    if (received == sizeof(packet)) {
       if constexpr (std::endian::native == std::endian::big) {
-        buffer = std::byteswap(buffer);
+        packet = std::byteswap(packet);
       }
-      const auto index = buffer & 0b11;
+      const auto index = packet & 0b11;
+      const auto state = packet >> 2;
       if (index < static_cast<unsigned int>(m_playerCount - '0')) {
+        const auto choice = m_playerChoices[index] >> 1;
+        unsigned sections{};
+        unsigned bits{};
+        if (choice == 0 || choice == 1) {
+          sections = choice == 0 ? 6 : 4;
+          bits = 5;
+        } else if (choice >= 3) {
+          const auto &composition = m_customInstruments[choice - 3].composition;
+          if (const auto *layout = std::get_if<
+                  InstrumentComposition<InstrumentType::Custom_1>>(&composition)) {
+            sections = layout->NumberSections;
+            bits = layout->NumberBitsSection;
+          }
+        }
+        const auto presses = m_controllerStates[index].update(state, sections, bits);
         auto &notes = m_testNotes[index];
-        const auto note = buffer >> 2;
-
-        if (note != 0 && notes.size() < notes.capacity() &&
-            !std::ranges::contains(notes, note)) {
-          notes.push_back(note);
+        if (presses != 0 && notes.size() < notes.capacity() &&
+            !std::ranges::contains(notes, state)) {
+          notes.push_back(state);
         }
       }
-    } else if (received < 0) {
-      m_serial.closeDevice();
-      m_controllerConnected = false;
-      m_nextButton.changeText("Retry connection");
-      m_nextButton.setPosition({780, 790});
-      m_testNotes = {};
-      m_counter = 0;
-      break;
     }
     const bool ready = std::ranges::all_of(
         m_testNotes | std::views::take(m_playerCount - '0'),
@@ -305,7 +302,7 @@ void PlayerSelectState::events() noexcept {
   const bool testing = m_stage == Stage::TestingInstruments;
 
   const bool nextClicked =
-      m_nextButton.updateInput(mousePos, !testing || !m_controllerConnected);
+      m_nextButton.updateInput(mousePos, !testing || !m_serial.isDeviceOpen());
   const bool increaseClicked =
       choosingCount && settings_ui::clicked(IncreaseCount);
   const bool decreaseClicked =
@@ -328,14 +325,17 @@ void PlayerSelectState::events() noexcept {
     }
   }
 
-  if (testing && !m_controllerConnected && nextClicked && !backClicked) {
+  if (testing && !m_serial.isDeviceOpen() && nextClicked && !backClicked) {
     m_serial.closeDevice();
-    m_controllerConnected =
-        !Settings::getSerialPort().empty() &&
+    if (!Settings::getSerialPort().empty() &&
         m_serial.openDevice(Settings::getSerialPort().c_str(),
-                            Settings::getSerialBaudRate()) == 1;
-    if (m_controllerConnected)
+                            Settings::getSerialBaudRate()) != 1) {
+      m_serial.closeDevice();
+    }
+    if (m_serial.isDeviceOpen()) {
       m_serial.flushReceiver();
+      m_controllerStates = {};
+    }
     return;
   }
 
@@ -531,12 +531,15 @@ void PlayerSelectState::events() noexcept {
       m_testNotes = {};
       m_counter = 0;
       m_serial.closeDevice();
-      m_controllerConnected =
-          !Settings::getSerialPort().empty() &&
+      if (!Settings::getSerialPort().empty() &&
           m_serial.openDevice(Settings::getSerialPort().c_str(),
-                              Settings::getSerialBaudRate()) == 1;
-      if (m_controllerConnected)
+                              Settings::getSerialBaudRate()) != 1) {
+        m_serial.closeDevice();
+      }
+      if (m_serial.isDeviceOpen()) {
         m_serial.flushReceiver();
+        m_controllerStates = {};
+      }
       m_nextButton.changeText("Retry connection");
       m_nextButton.setPosition({780, 790});
 
@@ -609,8 +612,11 @@ PlayerSelectState::PlayerSelectState(StateStack &stack,
 }
 
 void PlayerSelectState::onEnter() noexcept {
-  m_serial.openDevice(Settings::getSerialPort().c_str(),
-                      Settings::getSerialBaudRate());
+  if (!Settings::getSerialPort().empty() &&
+      m_serial.openDevice(Settings::getSerialPort().c_str(),
+                          Settings::getSerialBaudRate()) != 1) {
+    m_serial.closeDevice();
+  }
 }
 
 void PlayerSelectState::onExit() noexcept {

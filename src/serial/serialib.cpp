@@ -471,7 +471,7 @@ char serialib::openDevice(const char *Device, const unsigned int Bauds,
 #endif
 }
 
-bool serialib::isDeviceOpen() {
+bool serialib::isDeviceOpen() const {
 #if defined(_WIN32) || defined(_WIN64)
   return hSerial != INVALID_HANDLE_VALUE;
 #endif
@@ -861,16 +861,20 @@ int serialib::available() {
   // Device errors
   DWORD commErrors;
   // Device status
-  COMSTAT commStatus;
+  COMSTAT commStatus{};
   // Read status
-  ClearCommError(hSerial, &commErrors, &commStatus);
+  if (!ClearCommError(hSerial, &commErrors, &commStatus)) {
+    return -1;
+  }
   // Return the number of pending bytes
   return commStatus.cbInQue;
 #endif
 #if defined(__linux__) || defined(__APPLE__)
   int nBytes = 0;
   // Return number of pending bytes in the receiver
-  ioctl(fd, FIONREAD, &nBytes);
+  if (ioctl(fd, FIONREAD, &nBytes) < 0) {
+    return -1;
+  }
   return nBytes;
 #endif
 }

@@ -78,6 +78,23 @@ public:
     }
   }
 
+  inline void pop_back() noexcept {
+    if (!start) {
+      return;
+    }
+    if (start.get() == end) {
+      reset();
+      return;
+    }
+
+    auto *previous = start.get();
+    while (previous->next.get() != end) {
+      previous = previous->next.get();
+    }
+    end = previous;
+    end->next.reset();
+  }
+
   inline bool empty() const { return start == nullptr; }
 
   inline void reset() {

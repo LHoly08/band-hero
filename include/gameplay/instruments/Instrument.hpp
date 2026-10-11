@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <cmath>
 #include <condition_variable>
 #include <cstdint>
@@ -138,6 +139,9 @@ public:
     }
     m_audio = LoadMusicStream(path.c_str());
     m_audio.looping = false;
+    if (IsMusicValid(m_audio)) {
+      SetMusicVolume(m_audio, m_audioVolume);
+    }
   }
 
   inline void startAudio() noexcept {
@@ -166,6 +170,29 @@ public:
 
   inline std::uint8_t getType() { return static_cast<std::uint8_t>(Type); }
 
+  inline std::uint32_t getLoadedNoteCount() const noexcept {
+    return m_loadedNotes.load(std::memory_order_relaxed);
+  }
+
+  inline std::uint32_t getHitNoteCount() const noexcept { return m_hitNotes; }
+  inline std::uint32_t getBestStreak() const noexcept { return m_bestStreak; }
+  inline bool hadIncorrectInput() const noexcept { return m_incorrectInput; }
+  inline bool hasCompletedChart() const noexcept {
+    const auto loaded = getLoadedNoteCount();
+    return m_chartLoaded.load(std::memory_order_relaxed) && loaded > 0 &&
+           m_noteCount == loaded;
+  }
+
+  // Freeze results before the end menu reads counters or awards medals.
+  inline void finishSong() noexcept {
+    pause(true);
+    m_loadingThread.request_stop();
+    if (m_loadingThread.joinable()) {
+      m_loadingThread.join();
+    }
+    controlAudio<false>();
+  }
+
 protected:
   inline void drawNote(const Vector2 &position, const Color &tint,
                        std::uint8_t shape) const noexcept {
@@ -182,6 +209,20 @@ protected:
   bool getPlay(std::uint32_t playedNote, SectionLayout layout) noexcept
     requires SectionInstrumentType<Type>;
   bool completeSelectedNote() noexcept;
+  void setAudioVolume(float volume) noexcept {
+    if (m_audioVolume == volume) {
+      return;
+    }
+    m_audioVolume = volume;
+    if (IsMusicValid(m_audio)) {
+      SetMusicVolume(m_audio, volume);
+    }
+  }
+  bool rejectInput() noexcept {
+    m_incorrectInput = true;
+    m_streak = 0;
+    return false;
+  }
 
   // Times are seconds relative to the instrument's unpaused playback clock.
   static constexpr double RefillAhead = 5.0;
@@ -189,6 +230,7 @@ protected:
   static constexpr double LateWindow = 0.5;
   static constexpr std::size_t BatchSize = 256;
   static constexpr std::size_t NoNote = std::numeric_limits<std::size_t>::max();
+  static constexpr float MissedNoteVolume = .25f;
 
   using NoteType = Note<Type>;
   static std::vector<NoteType> makeBatchBuffer() {
@@ -200,6 +242,7 @@ protected:
   std::mutex m_bufferMutex;
 
   Music m_audio{};
+  float m_audioVolume{1.f};
 
   std::uint32_t m_originalNote{};
   std::uint32_t m_playingNote{};
@@ -214,6 +257,14 @@ protected:
 
   std::condition_variable_any m_bufferCv;
   std::uint32_t &m_noteCount;
+  // Count complete chart records (one per chord), including prefetched notes.
+  // The loader writes this counter while the main thread reads it.
+  std::atomic<std::uint32_t> m_loadedNotes{};
+  std::atomic<bool> m_chartLoaded{};
+  std::uint32_t m_hitNotes{};
+  std::uint32_t m_streak{};
+  std::uint32_t m_bestStreak{};
+  bool m_incorrectInput{};
 
   bool m_bufferReady{false};
   bool m_paused{true};
@@ -322,6 +373,8 @@ void Instrument<Type, Dif>::update(float dt) {
          m_time - m_activeBuffer.front().timeStamp >= LateWindow) {
     m_activeBuffer.pop_front();
     ++m_noteCount;
+    m_streak = 0;
+    setAudioVolume(MissedNoteVolume);
   }
   selectPlayable();
 }
@@ -382,13 +435,26 @@ void Instrument<Type, Dif>::loadFile(std::stop_token stopToken,
       // in the host's binary representation; never read sizeof(NoteType),
       // which also includes runtime fields and may contain padding.
       NoteType note{};
-      if (!file.read(reinterpret_cast<char *>(&note.note), sizeof(note.note)) ||
-          !file.read(reinterpret_cast<char *>(&note.timeStamp),
+      if (!file.read(reinterpret_cast<char *>(&note.note), sizeof(note.note))) {
+        // A clean EOF completes the chart; a truncated record does not.
+        m_chartLoaded.store(file.eof() && file.gcount() == 0,
+                            std::memory_order_relaxed);
+        finished = true;
+        break;
+      }
+      if (!file.read(reinterpret_cast<char *>(&note.timeStamp),
                      sizeof(note.timeStamp))) {
         finished = true;
         break;
       }
       m_loadingBuffer.push_back(note);
+      m_loadedNotes.fetch_add(1, std::memory_order_relaxed);
+    }
+    // Detect EOF even when the final batch contains exactly BatchSize records.
+    if (!finished && !stopToken.stop_requested() &&
+        file.peek() == std::ifstream::traits_type::eof()) {
+      m_chartLoaded.store(file.eof(), std::memory_order_relaxed);
+      finished = true;
     }
     if (stopToken.stop_requested()) {
       return;
@@ -408,15 +474,18 @@ bool Instrument<Type, Dif>::getPlay(std::uint32_t playedNote) noexcept {
     // layout overload instead of instantiating bit-based scoring.
     return false;
   } else {
-    if (m_selectedNote == NoNote || !playedNote) {
+    if (!playedNote) {
       return false;
+    }
+    if (m_selectedNote == NoNote) {
+      return rejectInput();
     }
     auto &note = m_activeBuffer[m_selectedNote];
     const auto remainingBits = note.note & ~note.playedBits;
     // Reject extra or already-played bits. Valid subsets complete a chord
     // across inputs, awarding a score only after all required bits are played.
     if (playedNote & ~remainingBits) {
-      return false;
+      return rejectInput();
     }
 
     note.playedBits |= playedNote;
@@ -433,31 +502,40 @@ bool Instrument<Type, Dif>::getPlay(std::uint32_t playedNote,
                                     SectionLayout layout) noexcept
   requires SectionInstrumentType<Type>
 {
-  if (m_selectedNote == NoNote || !playedNote) {
+  if (!playedNote) {
     return false;
+  }
+  if (m_selectedNote == NoNote) {
+    return rejectInput();
   }
 
   auto &note = m_activeBuffer[m_selectedNote];
   const std::uint32_t sectionMask = (1u << layout.bitsPerSection) - 1u;
   std::uint32_t requiredSections{};
+  std::uint32_t matchingSections{};
 
   for (std::uint8_t section = 0; section < layout.numberSections; ++section) {
     const auto shift = section * layout.bitsPerSection;
     const auto expected = (note.note >> shift) & sectionMask;
+    const auto played = (playedNote >> shift) & sectionMask;
+    const std::uint32_t sectionBit = 1u << section;
+    if (played && (!expected || (note.playedSections & sectionBit) ||
+                   (Dif == Difficulty::Hard && played != expected))) {
+      return rejectInput();
+    }
     if (!expected) {
       continue;
     }
 
-    const std::uint32_t sectionBit = 1u << section;
     requiredSections |= sectionBit;
-    const auto played = (playedNote >> shift) & sectionMask;
     // Easy accepts any nonzero fret on the required string. Hard compares
     // the entire section value; a wrong string never blocks another match.
     if (played && (Dif == Difficulty::Easy || played == expected)) {
-      note.playedSections |= sectionBit;
+      matchingSections |= sectionBit;
     }
   }
 
+  note.playedSections |= matchingSections;
   if (!requiredSections ||
       (note.playedSections & requiredSections) != requiredSections) {
     return false;
@@ -469,6 +547,12 @@ template <InstrumentType Type, Difficulty Dif>
 bool Instrument<Type, Dif>::completeSelectedNote() noexcept {
   m_activeBuffer.erase(m_activeBuffer.begin() + m_selectedNote);
   ++m_noteCount;
+  ++m_hitNotes;
+  setAudioVolume(1.f);
+  ++m_streak;
+  if (m_streak > m_bestStreak) {
+    m_bestStreak = m_streak;
+  }
   selectPlayable();
   return true;
 }
