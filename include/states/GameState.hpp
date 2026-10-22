@@ -165,7 +165,7 @@ void GameState<PlayerCount>::update(float dt) noexcept {
       packet = std::byteswap(packet);
     }
     const auto index = packet & 0b11;
-    if (packet < PlayerCount) {
+    if (index < PlayerCount) {
       m_players[index]->play(packet >> 2);
     }
   }
