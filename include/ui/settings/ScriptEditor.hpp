@@ -8,7 +8,7 @@ namespace bh::settings_ui {
 // Selection is whole-document only, rather than an arbitrary text range.
 class ScriptEditor {
 public:
-  explicit ScriptEditor(Rectangle rect) : m_rect(rect) {}
+  explicit ScriptEditor(::Rectangle rect) : m_rect(rect) {}
   void setText(std::string text);
   const std::string &value() const { return m_text; }
   void draw() const;
@@ -16,7 +16,7 @@ public:
   void blur() { m_focused = false; m_selectAll = false; }
 private:
   void keepVisible();
-  Rectangle m_rect;
+  ::Rectangle m_rect;
   std::string m_text;
   std::size_t m_cursor{};
   int m_firstLine{};

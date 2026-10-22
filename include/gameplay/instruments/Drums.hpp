@@ -10,26 +10,26 @@
 
 namespace bh {
 
-template <Difficulty Dif> struct DrumsComposition;
+template <bh::Difficulty Dif> struct DrumsComposition;
 
-template <> struct DrumsComposition<Difficulty::Easy> {
+template <> struct DrumsComposition<bh::Difficulty::Easy> {
   enum : std::uint8_t {
     Pedals = 1,
     DrumsCymbals = 5,
   };
 };
 
-template <> struct DrumsComposition<Difficulty::Hard> {
+template <> struct DrumsComposition<bh::Difficulty::Hard> {
   enum : std::uint8_t {
     Pedals = 2,
     DrumsCymbals = 7,
   };
 };
 
-template <Difficulty Dif>
-class Drums final : public Instrument<InstrumentType::Drums, Dif> {
+template <bh::Difficulty Dif>
+class Drums final : public bh::Instrument<bh::InstrumentType::Drums, Dif> {
 public:
-  using Base = Instrument<InstrumentType::Drums, Dif>;
+  using Base = bh::Instrument<bh::InstrumentType::Drums, Dif>;
 
   inline explicit Drums(std::uint32_t &noteCount, std::string filename)
       : Base(noteCount, std::move(filename)) {}
@@ -53,7 +53,7 @@ public:
 private:
 };
 
-template <Difficulty Dif>
+template <bh::Difficulty Dif>
 void Drums<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 
   for (const auto &note : this->m_activeBuffer) {
@@ -72,8 +72,8 @@ void Drums<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 
         this->drawNote({.x = static_cast<float>(startingPositionX + i * 50),
                         .y = static_cast<float>((note.timeStamp - this->m_time) * 5 +
-                                                (OriginalWindowSize.y - 30))},
-                       Settings::getNoteTint(i), note.shape);
+                                                (bh::OriginalWindowSize.y - 30))},
+                       bh::Settings::getNoteTint(i), note.shape);
       }
     }
   }

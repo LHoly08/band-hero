@@ -10,54 +10,54 @@
 #include "raylib.h"
 
 namespace bh {
-ResourceManager::TextureHandle::TextureHandle(std::size_t index) noexcept
+bh::ResourceManager::TextureHandle::TextureHandle(std::size_t index) noexcept
     : m_index(index) {
-  ResourceManager::get().iLoadTexture(m_index);
+  bh::ResourceManager::get().iLoadTexture(m_index);
 }
 
-ResourceManager::TextureHandle::TextureHandle(const TextureHandle &other) noexcept
+bh::ResourceManager::TextureHandle::TextureHandle(const TextureHandle &other) noexcept
     : m_index(other.m_index) {
   if (m_index != Empty) {
-    ResourceManager::get().iLoadTexture(m_index);
+    bh::ResourceManager::get().iLoadTexture(m_index);
   }
 }
 
-ResourceManager::TextureHandle::TextureHandle(TextureHandle &&other) noexcept
+bh::ResourceManager::TextureHandle::TextureHandle(TextureHandle &&other) noexcept
     : m_index(std::exchange(other.m_index, Empty)) {}
 
-ResourceManager::TextureHandle &
-ResourceManager::TextureHandle::operator=(TextureHandle other) noexcept {
+bh::ResourceManager::TextureHandle &
+bh::ResourceManager::TextureHandle::operator=(TextureHandle other) noexcept {
   std::swap(m_index, other.m_index);
   return *this;
 }
 
-ResourceManager::TextureHandle::~TextureHandle() {
+bh::ResourceManager::TextureHandle::~TextureHandle() {
   if (m_index != Empty) {
-    ResourceManager::get().iUnloadTexture(m_index);
+    bh::ResourceManager::get().iUnloadTexture(m_index);
   }
 }
 
-Texture2D ResourceManager::TextureHandle::texture() const noexcept {
-  return m_index == Empty ? Texture2D{} : ResourceManager::get().m_textures[m_index];
+::Texture2D bh::ResourceManager::TextureHandle::texture() const noexcept {
+  return m_index == Empty ? ::Texture2D{} : bh::ResourceManager::get().m_textures[m_index];
 }
 
-std::string ResourceManager::assetPath(std::string_view relativePath) {
+std::string bh::ResourceManager::assetPath(std::string_view relativePath) {
   // Installed builds keep assets beside the executable, regardless of cwd.
   const auto installedPath =
-      std::filesystem::path(GetApplicationDirectory()) / relativePath;
+      std::filesystem::path(::GetApplicationDirectory()) / relativePath;
   if (std::filesystem::is_regular_file(installedPath)) {
     return installedPath.string();
   }
   return std::string(relativePath);
 }
 
-ResourceManager::ResourceManager()
-    : m_textures(Textures::size()), m_textureUsers(Textures::size()),
-      m_fonts(Fonts::size()) {
+bh::ResourceManager::ResourceManager()
+    : m_textures(bh::Textures::size()), m_textureUsers(bh::Textures::size()),
+      m_fonts(bh::Fonts::size()) {
 
   {
-    m_fonts.front() = GetFontDefault();
-    constexpr auto fontFiles = Fonts::files();
+    m_fonts.front() = ::GetFontDefault();
+    constexpr auto fontFiles = bh::Fonts::files();
 
     std::ranges::transform(
         fontFiles.begin(), fontFiles.end(), m_fonts.begin() + 1,
@@ -71,40 +71,40 @@ ResourceManager::ResourceManager()
                 [](char c) -> char { return std::tolower(c); });
           }
           // Rasterize above the normal button label size, then filter when scaled.
-          Font font = LoadFontEx(assetPath(path).c_str(), 96, nullptr, 224);
+          ::Font font = ::LoadFontEx(assetPath(path).c_str(), 96, nullptr, 224);
           if (font.texture.id != 0) {
-            SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
+            ::SetTextureFilter(font.texture, ::TEXTURE_FILTER_BILINEAR);
           }
           return font;
         });
   }
 }
 
-void ResourceManager::iLoadTexture(std::size_t index) noexcept {
+void bh::ResourceManager::iLoadTexture(std::size_t index) noexcept {
   ++m_textureUsers[index];
-  constexpr auto files = Textures::files();
-  if (!IsTextureValid(m_textures[index])) {
-    m_textures[index] = LoadTexture(assetPath(files[index]).c_str());
-    if (IsTextureValid(m_textures[index])) {
+  constexpr auto files = bh::Textures::files();
+  if (!::IsTextureValid(m_textures[index])) {
+    m_textures[index] = ::LoadTexture(assetPath(files[index]).c_str());
+    if (::IsTextureValid(m_textures[index])) {
       // UI and scene artwork scale with the window; smooth fractional zooms
       // instead of enlarging individual texels with the default point filter.
-      SetTextureFilter(m_textures[index], TEXTURE_FILTER_BILINEAR);
+      ::SetTextureFilter(m_textures[index], ::TEXTURE_FILTER_BILINEAR);
     }
   }
 }
 
-void ResourceManager::iUnloadTexture(std::size_t index) noexcept {
+void bh::ResourceManager::iUnloadTexture(std::size_t index) noexcept {
   // Each state's load owns a reference, including states below an overlay.
   if (m_textureUsers[index] == 0 || --m_textureUsers[index] != 0) {
     return;
   }
-  if (IsTextureValid(m_textures[index])) {
-    UnloadTexture(m_textures[index]);
+  if (::IsTextureValid(m_textures[index])) {
+    ::UnloadTexture(m_textures[index]);
   }
   m_textures[index] = {};
 }
 
-void ResourceManager::iUnload() noexcept {
+void bh::ResourceManager::iUnload() noexcept {
 
   for (std::size_t i{}; i < m_textures.size(); ++i) {
     // Final shutdown releases textures even if a caller retained a reference.
@@ -112,8 +112,8 @@ void ResourceManager::iUnload() noexcept {
     iUnloadTexture(i);
   }
   for (auto &f : m_fonts | std::ranges::views::drop(1)) {
-    if (f.texture.id != 0 && f.texture.id != GetFontDefault().texture.id) {
-      UnloadFont(f);
+    if (f.texture.id != 0 && f.texture.id != ::GetFontDefault().texture.id) {
+      ::UnloadFont(f);
     }
     f = {};
   }

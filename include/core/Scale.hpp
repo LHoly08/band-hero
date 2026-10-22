@@ -7,7 +7,7 @@
 
 namespace bh {
 
-constexpr Vector2 OriginalWindowSize{.x = 1920, .y = 1080};
+constexpr ::Vector2 OriginalWindowSize{.x = 1920, .y = 1080};
 
 enum class ScreenAxis : std::uint8_t {
   X = 0,
@@ -16,28 +16,28 @@ enum class ScreenAxis : std::uint8_t {
 
 template <typename T>
 concept Scalable = std::is_integral_v<T> || std::is_floating_point_v<T> ||
-                   std::is_same_v<Vector2, T>;
+                   std::is_same_v<::Vector2, T>;
 
 // Layout coordinates use a 1920 x 1080 reference canvas. Scale X and Y
 // independently to raylib's logical screen size (not framebuffer/DPI pixels).
-template <Scalable T = Vector2, ScreenAxis Axis = ScreenAxis::X>
+template <Scalable T = ::Vector2, ScreenAxis Axis = ScreenAxis::X>
 inline T scaledSize(T size) noexcept {
 
-  if constexpr (std::is_same_v<Vector2, T>) {
+  if constexpr (std::is_same_v<::Vector2, T>) {
 
     // Raylib drawing and mouse input both use logical screen coordinates.
-    return Vector2{.x = (size.x * (GetScreenWidth() / OriginalWindowSize.x)),
-                   .y = (size.y * (GetScreenHeight() / OriginalWindowSize.y))};
+    return ::Vector2{.x = (size.x * (::GetScreenWidth() / OriginalWindowSize.x)),
+                   .y = (size.y * (::GetScreenHeight() / OriginalWindowSize.y))};
 
   } else if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
 
     if constexpr (Axis == ScreenAxis::X) {
 
-      return size * (GetScreenWidth() / OriginalWindowSize.x);
+      return size * (::GetScreenWidth() / OriginalWindowSize.x);
 
     } else if constexpr (Axis == ScreenAxis::Y) {
 
-      return size * (GetScreenHeight() / OriginalWindowSize.y);
+      return size * (::GetScreenHeight() / OriginalWindowSize.y);
     }
   }
 }

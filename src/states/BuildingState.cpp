@@ -8,23 +8,23 @@
 
 namespace bh {
 
-void BuildingState::draw() const noexcept {
-  ResourceManager::drawImageTo<Textures::Building::Background>({0, 0, 1920, 1080});
-  m_backButton.draw<WHITE, true, 40, TextAlign::Right>();
+void bh::BuildingState::draw() const noexcept {
+  bh::ResourceManager::drawImageTo<bh::Textures::Building::Background>({0, 0, 1920, 1080});
+  m_backButton.draw<WHITE, true, 40, bh::TextAlign::Right>();
 }
 
-void BuildingState::update(float dt) noexcept { auto _ = dt; }
+void bh::BuildingState::update(float dt) noexcept { auto _ = dt; }
 
-void BuildingState::events() noexcept {
+void bh::BuildingState::events() noexcept {
 
-  if (m_backButton.updateInput(GetMousePosition())) [[unlikely]] {
+  if (m_backButton.updateInput(::GetMousePosition())) [[unlikely]] {
     m_stack.pop();
   }
 }
 
-void BuildingState::onEnter() noexcept {}
+void bh::BuildingState::onEnter() noexcept {}
 
-void BuildingState::onExit() noexcept {
+void bh::BuildingState::onExit() noexcept {
 
   m_backButton.resetInteraction();
 }

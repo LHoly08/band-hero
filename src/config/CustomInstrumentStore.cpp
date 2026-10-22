@@ -16,23 +16,23 @@ namespace {
 // script and helper functions rather than regenerating the entire Lua file.
 constexpr std::string_view Begin = "\n-- BandHero settings overrides v1\n";
 constexpr std::string_view End = "-- End BandHero settings overrides v1\n";
-using Lua = std::unique_ptr<lua_State, decltype(&lua_close)>;
+using Lua = std::unique_ptr<::lua_State, decltype(&::lua_close)>;
 
 Lua newState() {
-  Lua state(luaL_newstate(), lua_close);
+  Lua state(::luaL_newstate(), ::lua_close);
   if (state) {
     // Metadata inspection never opens the OS, filesystem or package libraries.
     for (int i = 1; i <= 3; ++i) {
-      lua_pushinteger(state.get(), i + 2);
-      lua_setglobal(state.get(), ("Custom_" + std::to_string(i)).c_str());
+      ::lua_pushinteger(state.get(), i + 2);
+      ::lua_setglobal(state.get(), ("Custom_" + std::to_string(i)).c_str());
     }
-    lua_sethook(state.get(), [](lua_State *lua, lua_Debug *) {
-      luaL_error(lua, "Instrument initialization exceeded its instruction limit");
+    ::lua_sethook(state.get(), [](::lua_State *lua, ::lua_Debug *) {
+      ::luaL_error(lua, "Instrument initialization exceeded its instruction limit");
     }, LUA_MASKCOUNT, 100000);
   }
   return state;
 }
-bool execute(lua_State *state, const std::string &source, std::string &error) {
+bool execute(::lua_State *state, const std::string &source, std::string &error) {
   if (!state) { error = "Could not open the Lua editor."; return false; }
   if (luaL_loadbuffer(state, source.data(), source.size(), "instrument") != LUA_OK ||
       lua_pcall(state, 0, 0, 0) != LUA_OK) {
@@ -72,23 +72,23 @@ bool namesMatch(std::string_view first, std::string_view second) {
 #if defined(_WIN32)
   // Windows supplies Unicode case comparison for accented instrument names.
   auto wide = [](const std::string &value) {
-    std::wstring result(MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+    std::wstring result(::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
         value.data(), static_cast<int>(value.size()), nullptr, 0), L'\0');
-    if (!result.empty()) MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+    if (!result.empty()) ::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
         value.data(), static_cast<int>(value.size()), result.data(), static_cast<int>(result.size()));
     return result;
   };
   const auto wa = wide(a), wb = wide(b);
-  if (!wa.empty() && !wb.empty()) return CompareStringOrdinal(wa.data(), static_cast<int>(wa.size()),
+  if (!wa.empty() && !wb.empty()) return ::CompareStringOrdinal(wa.data(), static_cast<int>(wa.size()),
       wb.data(), static_cast<int>(wb.size()), TRUE) == CSTR_EQUAL;
 #endif
   return a == b;
 }
-bool valid(const InstrumentDefinition &d, std::string &error) {
-  if (static_cast<std::size_t>(d.sourceStem) >= SourceStemNames.size()) {
+bool valid(const bh::InstrumentDefinition &d, std::string &error) {
+  if (static_cast<std::size_t>(d.sourceStem) >= bh::SourceStemNames.size()) {
     error = "SourceStem must be bass, drums, guitar, piano or other."; return false;
   }
-  if (d.kind != CustomKind::Sections && d.kind != CustomKind::Bits && d.kind != CustomKind::Script) {
+  if (d.kind != bh::CustomKind::Sections && d.kind != bh::CustomKind::Bits && d.kind != bh::CustomKind::Script) {
     error = "Choose an instrument type."; return false;
   }
   if (d.name.empty() || d.name.size() > 64 ||
@@ -96,36 +96,36 @@ bool valid(const InstrumentDefinition &d, std::string &error) {
       std::ranges::any_of(d.name, [](unsigned char c) { return c < 32; })) {
     error = "Enter a name (1-64 characters)."; return false;
   }
-  if (d.kind == CustomKind::Sections &&
+  if (d.kind == bh::CustomKind::Sections &&
       (d.first < 1 || d.second < 1 || d.second > 8 || d.first > 30 / d.second)) {
     error = "Use at least 1 section, 1-8 bits each, and at most 30 bits in total."; return false;
   }
-  if (d.kind == CustomKind::Bits && (d.first < 1 || d.first > 30 || d.second < 1 || d.second > 30)) {
+  if (d.kind == bh::CustomKind::Bits && (d.first < 1 || d.first > 30 || d.second < 1 || d.second > 30)) {
     error = "Easy and Hard must each use 1-30 bits."; return false;
   }
-  if (d.kind == CustomKind::Bits && d.first > d.second) {
+  if (d.kind == bh::CustomKind::Bits && d.first > d.second) {
     error = "Easy bits must be less than or equal to Hard bits."; return false;
   }
-  if (d.kind == CustomKind::Script) {
+  if (d.kind == bh::CustomKind::Script) {
     for (int i = 0; i < 3; ++i) {
       auto state = newState();
       if (!execute(state.get(), d.functions[i], error)) return false;
-      lua_getglobal(state.get(), CustomInstrumentStore::FunctionNames[i]);
+      ::lua_getglobal(state.get(), bh::CustomInstrumentStore::FunctionNames[i]);
       if (!lua_isfunction(state.get(), -1)) {
-        error = std::string("Define function ") + CustomInstrumentStore::FunctionNames[i] + ".";
+        error = std::string("Define function ") + bh::CustomInstrumentStore::FunctionNames[i] + ".";
         return false;
       }
     }
   }
   return true;
 }
-std::string functionSource(lua_State *state, const std::string &source, const char *name) {
+std::string functionSource(::lua_State *state, const std::string &source, const char *name) {
   // Lua supplies the actual function's source line range, avoiding a text scan
   // that could mistake nested blocks or comments for the function boundary.
-  lua_getglobal(state, name);
+  ::lua_getglobal(state, name);
   if (!lua_isfunction(state, -1)) { lua_pop(state, 1); return {}; }
-  lua_Debug info{};
-  if (!lua_getinfo(state, ">S", &info)) return {};
+  ::lua_Debug info{};
+  if (!::lua_getinfo(state, ">S", &info)) return {};
   std::istringstream lines(source);
   std::string line, result;
   for (int number = 1; std::getline(lines, line); ++number) {
@@ -152,7 +152,7 @@ bool writeAtomic(const std::filesystem::path &path, const std::string &source, s
     return false;
   }
 #if defined(_WIN32)
-  const bool success = MoveFileExW(temporary.c_str(), path.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) != 0;
+  const bool success = ::MoveFileExW(temporary.c_str(), path.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) != 0;
 #else
   std::filesystem::rename(temporary, path, ec);
   const bool success = !ec;
@@ -165,8 +165,8 @@ bool writeAtomic(const std::filesystem::path &path, const std::string &source, s
 }
 }
 
-InstrumentDefinition CustomInstrumentStore::load(const std::filesystem::path &path) {
-  InstrumentDefinition d;
+bh::InstrumentDefinition bh::CustomInstrumentStore::load(const std::filesystem::path &path) {
+  bh::InstrumentDefinition d;
   d.path = path;
   d.name = path.stem().string();
   std::error_code ec;
@@ -176,50 +176,50 @@ InstrumentDefinition CustomInstrumentStore::load(const std::filesystem::path &pa
   d.source = read(path);
   auto state = newState();
   if (!execute(state.get(), d.source, d.error)) return d;
-  lua_getglobal(state.get(), "name");
-  if (lua_type(state.get(), -1) == LUA_TSTRING) d.name = lua_tostring(state.get(), -1);
+  ::lua_getglobal(state.get(), "name");
+  if (::lua_type(state.get(), -1) == LUA_TSTRING) d.name = lua_tostring(state.get(), -1);
   lua_pop(state.get(), 1);
   // Definitions written before the selector existed use the default guitar.
-  lua_getglobal(state.get(), "SourceStem");
+  ::lua_getglobal(state.get(), "SourceStem");
   if (!lua_isnil(state.get(), -1)) {
     std::size_t length{};
-    const char *value = lua_type(state.get(), -1) == LUA_TSTRING
-        ? lua_tolstring(state.get(), -1, &length) : nullptr;
-    const auto stem = value ? std::ranges::find(SourceStemNames, std::string_view(value, length))
-                            : SourceStemNames.end();
-    if (stem == SourceStemNames.end()) {
+    const char *value = ::lua_type(state.get(), -1) == LUA_TSTRING
+        ? ::lua_tolstring(state.get(), -1, &length) : nullptr;
+    const auto stem = value ? std::ranges::find(bh::SourceStemNames, std::string_view(value, length))
+                            : bh::SourceStemNames.end();
+    if (stem == bh::SourceStemNames.end()) {
       // Retain the rest of the definition so the editor can repair this field.
-      d.sourceStem = static_cast<bh::SourceStem>(SourceStemNames.size());
+      d.sourceStem = static_cast<bh::SourceStem>(bh::SourceStemNames.size());
     } else {
-      d.sourceStem = static_cast<bh::SourceStem>(stem - SourceStemNames.begin());
+      d.sourceStem = static_cast<bh::SourceStem>(stem - bh::SourceStemNames.begin());
     }
   }
   lua_pop(state.get(), 1);
-  lua_getglobal(state.get(), "Type");
-  const int type = lua_isinteger(state.get(), -1) ? static_cast<int>(lua_tointeger(state.get(), -1)) : 0;
+  ::lua_getglobal(state.get(), "Type");
+  const int type = ::lua_isinteger(state.get(), -1) ? static_cast<int>(lua_tointeger(state.get(), -1)) : 0;
   lua_pop(state.get(), 1);
   if (type < 3 || type > 5) { d.error = "Type must be Custom_1, Custom_2 or Custom_3."; return d; }
-  d.kind = static_cast<CustomKind>(type - 2);
-  if (d.kind == CustomKind::Script) {
+  d.kind = static_cast<bh::CustomKind>(type - 2);
+  if (d.kind == bh::CustomKind::Script) {
     for (int i = 0; i < 3; ++i) d.functions[i] = functionSource(state.get(), d.source, FunctionNames[i]);
   } else {
-    lua_getglobal(state.get(), "Composition");
+    ::lua_getglobal(state.get(), "Composition");
     if (!lua_istable(state.get(), -1)) { d.error = "Missing Composition table."; return d; }
-    const char *first = d.kind == CustomKind::Sections ? "NumberSections" : "NumberEffectiveBitsEasy";
-    const char *second = d.kind == CustomKind::Sections ? "NumberBitsSection" : "NumberEffectiveBitsHard";
-    lua_getfield(state.get(), -1, first);
-    d.first = lua_isinteger(state.get(), -1) ? static_cast<int>(lua_tointeger(state.get(), -1)) : 0;
+    const char *first = d.kind == bh::CustomKind::Sections ? "NumberSections" : "NumberEffectiveBitsEasy";
+    const char *second = d.kind == bh::CustomKind::Sections ? "NumberBitsSection" : "NumberEffectiveBitsHard";
+    ::lua_getfield(state.get(), -1, first);
+    d.first = ::lua_isinteger(state.get(), -1) ? static_cast<int>(lua_tointeger(state.get(), -1)) : 0;
     lua_pop(state.get(), 1);
-    lua_getfield(state.get(), -1, second);
-    d.second = lua_isinteger(state.get(), -1) ? static_cast<int>(lua_tointeger(state.get(), -1)) : 0;
+    ::lua_getfield(state.get(), -1, second);
+    d.second = ::lua_isinteger(state.get(), -1) ? static_cast<int>(lua_tointeger(state.get(), -1)) : 0;
     lua_pop(state.get(), 2);
   }
   valid(d, d.error);
   return d;
 }
 
-std::vector<InstrumentDefinition> CustomInstrumentStore::list() {
-  std::vector<InstrumentDefinition> result;
+std::vector<bh::InstrumentDefinition> bh::CustomInstrumentStore::list() {
+  std::vector<bh::InstrumentDefinition> result;
   std::error_code ec;
   std::filesystem::directory_iterator files("Instruments", ec), end;
   for (; !ec && files != end; files.increment(ec)) {
@@ -239,7 +239,7 @@ std::vector<InstrumentDefinition> CustomInstrumentStore::list() {
   return result;
 }
 
-bool CustomInstrumentStore::save(InstrumentDefinition &d, std::string &error) {
+bool bh::CustomInstrumentStore::save(bh::InstrumentDefinition &d, std::string &error) {
   error.clear();
   if (!valid(d, error)) return false;
   std::error_code ec;
@@ -264,13 +264,13 @@ bool CustomInstrumentStore::save(InstrumentDefinition &d, std::string &error) {
   }
   std::string source = base + std::string(Begin);
   source += "name = " + quote(d.name) + "\nType = Custom_" + std::to_string(static_cast<int>(d.kind)) + "\n";
-  source += "SourceStem = " + quote(std::string(SourceStemNames[static_cast<std::size_t>(d.sourceStem)])) + "\n";
-  if (d.kind == CustomKind::Script) {
+  source += "SourceStem = " + quote(std::string(bh::SourceStemNames[static_cast<std::size_t>(d.sourceStem)])) + "\n";
+  if (d.kind == bh::CustomKind::Script) {
     for (const auto &function : d.functions) source += function + '\n';
   } else {
-    source += d.kind == CustomKind::Sections ? "Composition = { NumberSections = " : "Composition = { NumberEffectiveBitsEasy = ";
+    source += d.kind == bh::CustomKind::Sections ? "Composition = { NumberSections = " : "Composition = { NumberEffectiveBitsEasy = ";
     source += std::to_string(d.first);
-    source += d.kind == CustomKind::Sections ? ", NumberBitsSection = " : ", NumberEffectiveBitsHard = ";
+    source += d.kind == bh::CustomKind::Sections ? ", NumberBitsSection = " : ", NumberEffectiveBitsHard = ";
     source += std::to_string(d.second) + " }\n";
   }
   source += End;
@@ -284,7 +284,7 @@ bool CustomInstrumentStore::save(InstrumentDefinition &d, std::string &error) {
   return true;
 }
 
-bool CustomInstrumentStore::remove(const InstrumentDefinition &d, std::string &error) {
+bool bh::CustomInstrumentStore::remove(const bh::InstrumentDefinition &d, std::string &error) {
   error.clear();
   std::error_code ec;
   const auto root = std::filesystem::canonical("Instruments", ec);
@@ -306,14 +306,14 @@ bool CustomInstrumentStore::remove(const InstrumentDefinition &d, std::string &e
   return true;
 }
 
-bool CustomInstrumentStore::create(std::string name, CustomKind kind,
-                                   InstrumentDefinition &result, std::string &error,
-                                   SourceStem sourceStem) {
-  InstrumentDefinition d;
+bool bh::CustomInstrumentStore::create(std::string name, bh::CustomKind kind,
+                                   bh::InstrumentDefinition &result, std::string &error,
+                                   bh::SourceStem sourceStem) {
+  bh::InstrumentDefinition d;
   d.name = std::move(name);
   d.kind = kind;
   d.sourceStem = sourceStem;
-  if (kind == CustomKind::Bits) {
+  if (kind == bh::CustomKind::Bits) {
     d.first = 2;
     d.second = 3;
   }

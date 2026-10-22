@@ -5,20 +5,20 @@
 #include "raylib.h"
 
 namespace bh {
-DisplaySettings &DisplaySettings::get() {
-  static DisplaySettings settings = [] {
-    DisplaySettings value;
+bh::DisplaySettings &bh::DisplaySettings::get() {
+  static bh::DisplaySettings settings = [] {
+    bh::DisplaySettings value;
     value.load();
     return value;
   }();
   return settings;
 }
 
-void DisplaySettings::load() {
+void bh::DisplaySettings::load() {
   // startup.bin starts with legacy uint16 LE FPS. The optional extension is
   // 'D', version 1, uint16 LE width/height, then fullscreen and FPS-counter bytes.
   // Missing or invalid extension fields retain their default values.
-  *this = DisplaySettings{};
+  *this = bh::DisplaySettings{};
   std::ifstream file("startup.bin", std::ios::binary);
   std::array<unsigned char, 10> bytes{};
   if (!file.read(reinterpret_cast<char *>(bytes.data()), 2)) return;
@@ -36,7 +36,7 @@ void DisplaySettings::load() {
   if (bytes[9] <= 1) showFPS = bytes[9] != 0;
 }
 
-bool DisplaySettings::save() const {
+bool bh::DisplaySettings::save() const {
   const std::array<unsigned char, 10> bytes{
       static_cast<unsigned char>(fps & 255), static_cast<unsigned char>(fps >> 8),
       'D', 1,
@@ -49,19 +49,19 @@ bool DisplaySettings::save() const {
   return !file.fail();
 }
 
-void DisplaySettings::apply() const {
-  if (!IsWindowReady()) return;
-  const bool resize = GetScreenWidth() != width || GetScreenHeight() != height;
+void bh::DisplaySettings::apply() const {
+  if (!::IsWindowReady()) return;
+  const bool resize = ::GetScreenWidth() != width || ::GetScreenHeight() != height;
   // Resize in windowed mode, then restore the requested fullscreen state.
-  if (resize && IsWindowFullscreen()) ToggleFullscreen();
-  if (resize) SetWindowSize(width, height);
-  if (IsWindowFullscreen() != fullscreen) ToggleFullscreen();
+  if (resize && ::IsWindowFullscreen()) ::ToggleFullscreen();
+  if (resize) ::SetWindowSize(width, height);
+  if (::IsWindowFullscreen() != fullscreen) ::ToggleFullscreen();
   if (!fullscreen && resize) {
-    const int monitor = GetCurrentMonitor();
-    const Vector2 origin = GetMonitorPosition(monitor);
-    SetWindowPosition(static_cast<int>(origin.x) + (GetMonitorWidth(monitor) - width) / 2,
-                      static_cast<int>(origin.y) + (GetMonitorHeight(monitor) - height) / 2);
+    const int monitor = ::GetCurrentMonitor();
+    const ::Vector2 origin = ::GetMonitorPosition(monitor);
+    ::SetWindowPosition(static_cast<int>(origin.x) + (::GetMonitorWidth(monitor) - width) / 2,
+                      static_cast<int>(origin.y) + (::GetMonitorHeight(monitor) - height) / 2);
   }
-  SetTargetFPS(fps);
+  ::SetTargetFPS(fps);
 }
 } // namespace bh

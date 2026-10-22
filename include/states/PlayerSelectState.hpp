@@ -23,9 +23,9 @@
 
 namespace bh {
 
-class PlayerSelectState final : public State {
+class PlayerSelectState final : public bh::State {
 public:
-  PlayerSelectState(StateStack &stack, SetList setList) noexcept;
+  PlayerSelectState(bh::StateStack &stack, bh::SetList setList) noexcept;
   ~PlayerSelectState() override = default;
 
   void draw() const noexcept override;
@@ -35,25 +35,25 @@ public:
   void onExit() noexcept override;
 
 private:
-  std::vector<ResourceManager::TextureHandle> m_textures =
-      ResourceManager::acquireTextures<Textures::UI>();
-  AnimatedBackground m_background;
-  serialib m_serial;
-  std::array<ControllerState, 4> m_controllerStates;
+  std::vector<bh::ResourceManager::TextureHandle> m_textures =
+      bh::ResourceManager::acquireTextures<bh::Textures::UI>();
+  bh::AnimatedBackground m_background;
+  ::serialib m_serial;
+  std::array<bh::ControllerState, 4> m_controllerStates;
 
-  Button m_nextButton{
+  bh::Button m_nextButton{
       {.x = 780, .y = 650}, {0, 0, 360, 100}, "Choose Instruments"};
-  Button m_backButton{{.x = 30, .y = 950}, {0, 600, 320, 96}, "Back"};
+  bh::Button m_backButton{{.x = 30, .y = 950}, {0, 600, 320, 96}, "Back"};
 
-  std::vector<CustomInstrumentComposition> m_customInstruments;
+  std::vector<bh::CustomInstrumentComposition> m_customInstruments;
 
   std::inplace_vector<std::uint8_t, 4> m_playerChoices;
-  std::inplace_vector<std::unique_ptr<PlayerBase>, 4> m_players;
+  std::inplace_vector<std::unique_ptr<bh::PlayerBase>, 4> m_players;
   // Each player must send three distinct nonzero note values; releases and
   // repeated/held notes do not advance the controller check.
   std::array<std::inplace_vector<std::uint32_t, 3>, 4> m_testNotes;
 
-  SetList m_setList{};
+  bh::SetList m_setList{};
 
   float m_counter{};
 

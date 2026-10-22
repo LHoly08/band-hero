@@ -55,12 +55,12 @@ public:
   ~AchievementsManager() = default;
 
   static inline void drawMedal(Achievements Medal,
-                               const Vector2 &position) noexcept {
-    drawMedal(Medal, Rectangle{position.x, position.y, 200, 200});
+                               const ::Vector2 &position) noexcept {
+    drawMedal(Medal, ::Rectangle{position.x, position.y, 200, 200});
   }
 
-  static inline void drawMedal(Achievements medal, const Rectangle &destination,
-                               Color tint = WHITE) noexcept {
+  static inline void drawMedal(Achievements medal, const ::Rectangle &destination,
+                               ::Color tint = WHITE) noexcept {
     // Preserve the saved enum IDs; the sprite sheet uses a different order.
     static constexpr std::array<std::uint8_t, MedalCount> Cells{
         0, 2, 1, 3, 4, 5, 6, 7, 13, 8, 9, 10, 11, 12, 14, 15, 16, 17};
@@ -69,7 +69,7 @@ public:
       return;
     }
     const auto index = Cells[value];
-    ResourceManager::drawImageRegionTo<Textures::Achievements::Medals>(
+    bh::ResourceManager::drawImageRegionTo<bh::Textures::Achievements::Medals>(
         {200.f * (index % 9), 200.f * (index / 9), 200, 200}, destination,
         tint);
   }

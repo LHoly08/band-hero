@@ -9,9 +9,9 @@
 
 namespace bh {
 
-class AchievementsState : public State {
+class AchievementsState : public bh::State {
 public:
-  inline AchievementsState(StateStack &stack) noexcept : State(stack) {}
+  inline AchievementsState(bh::StateStack &stack) noexcept : bh::State(stack) {}
   ~AchievementsState() override = default;
 
   void draw() const noexcept override;
@@ -21,11 +21,11 @@ public:
   void onExit() noexcept override;
 
 private:
-  std::vector<ResourceManager::TextureHandle> m_textures =
-      ResourceManager::acquireTextures<Textures::UI, Textures::Achievements>();
-  AnimatedBackground m_background;
+  std::vector<bh::ResourceManager::TextureHandle> m_textures =
+      bh::ResourceManager::acquireTextures<bh::Textures::UI, bh::Textures::Achievements>();
+  bh::AnimatedBackground m_background;
 
-  Button m_menuButton{{100, 885}, {0, 0, 360, 100}, "Main Menu"};
-  std::vector<Achievements> m_medals = AchievementsManager::getEarnedMedals();
+  bh::Button m_menuButton{{100, 885}, {0, 0, 360, 100}, "Main Menu"};
+  std::vector<bh::Achievements> m_medals = bh::AchievementsManager::getEarnedMedals();
 };
 } // namespace bh

@@ -8,10 +8,10 @@
 
 namespace bh {
 
-class PauseMenuState final : public State {
+class PauseMenuState final : public bh::State {
 public:
-  inline PauseMenuState(StateStack &stack) noexcept
-      : State(stack) {}
+  inline PauseMenuState(bh::StateStack &stack) noexcept
+      : bh::State(stack) {}
   ~PauseMenuState() override = default;
 
   void draw() const noexcept override;
@@ -21,19 +21,19 @@ public:
   void onExit() noexcept override;
 
 private:
-  std::vector<ResourceManager::TextureHandle> m_textures =
-      ResourceManager::acquireTextures<Textures::UI>();
-  Button m_continueButton{
+  std::vector<bh::ResourceManager::TextureHandle> m_textures =
+      bh::ResourceManager::acquireTextures<bh::Textures::UI>();
+  bh::Button m_continueButton{
     {.x = 590, .y = 430},
     {.x = 0, .y = 300, .width = 740, .height = 100},
     "Continue"
   };
-  Button m_mainMenuButton{
+  bh::Button m_mainMenuButton{
     {.x = 590, .y = 550},
     {.x = 0, .y = 0, .width = 360, .height = 100},
     "Main Menu"
   };
-  Button m_quitButton{
+  bh::Button m_quitButton{
     {.x = 970, .y = 550},
     {.x = 0, .y = 0, .width = 360, .height = 100},
     "Quit"

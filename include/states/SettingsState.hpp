@@ -8,9 +8,9 @@
 #include "ui/settings/InstrumentSettings.hpp"
 
 namespace bh {
-class SettingsState final : public State {
+class SettingsState final : public bh::State {
 public:
-  explicit SettingsState(StateStack &stack) noexcept;
+  explicit SettingsState(bh::StateStack &stack) noexcept;
   ~SettingsState() override = default;
   
   void draw() const noexcept override;
@@ -20,24 +20,24 @@ public:
   void onExit() noexcept override;
 
 private:
-  std::vector<ResourceManager::TextureHandle> m_textures =
-      ResourceManager::acquireTextures<Textures::UI>();
-  ResourceManager::TextureHandle m_notes =
-      ResourceManager::acquireTexture<Textures::Gameplay::Notes>();
-  AnimatedBackground m_background;
+  std::vector<bh::ResourceManager::TextureHandle> m_textures =
+      bh::ResourceManager::acquireTextures<bh::Textures::UI>();
+  bh::ResourceManager::TextureHandle m_notes =
+      bh::ResourceManager::acquireTexture<bh::Textures::Gameplay::Notes>();
+  bh::AnimatedBackground m_background;
   enum class Section { General, Instruments, Gameplay };
 
   bool commit() noexcept;
 
-  Button m_menuButton{
+  bh::Button m_menuButton{
     {100, 885},
     {0, 0, 360, 100},
     "Main Menu"
   };
 
-  GeneralSettings m_general;
-  GameplaySettings m_gameplay;
-  InstrumentSettings m_instruments;
+  bh::GeneralSettings m_general;
+  bh::GameplaySettings m_gameplay;
+  bh::InstrumentSettings m_instruments;
   Section m_section{Section::General};
   bool m_dirty{};
   bool m_saveFailed{};

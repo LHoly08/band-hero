@@ -56,38 +56,38 @@ std::vector<std::string> serialPortCandidates() {
 
 } // namespace
 
-Settings::Settings() { iLoadSettings(); }
+bh::Settings::Settings() { iLoadSettings(); }
 
-void Settings::setMasterVolume(int percent) noexcept {
+void bh::Settings::setMasterVolume(int percent) noexcept {
   get().masterVolume = std::clamp(percent, 0, 100);
-  if (IsAudioDeviceReady()) {
-    SetMasterVolume(get().masterVolume / 100.f);
+  if (::IsAudioDeviceReady()) {
+    ::SetMasterVolume(get().masterVolume / 100.f);
   }
 }
 
-std::vector<std::string> Settings::getAvailableSerialPorts() {
+std::vector<std::string> bh::Settings::getAvailableSerialPorts() {
   return serialPortCandidates();
 }
 
-void Settings::iDefaultSettings() noexcept {
+void bh::Settings::iDefaultSettings() noexcept {
   guitarBassColors = {RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE};
   serialPort.clear();
   serialBaudRate = 115200;
   masterVolume = 100;
-  if (IsAudioDeviceReady()) {
-    SetMasterVolume(1.f);
+  if (::IsAudioDeviceReady()) {
+    ::SetMasterVolume(1.f);
   }
   iSaveSettings();
 }
 
-void Settings::iLoadSettings() noexcept {
+void bh::Settings::iLoadSettings() noexcept {
   // settings.bin layout: six RGBA colors (24 bytes), uint16 LE port-name byte
   // length, port bytes, uint32 LE baud rate, then optional uint8 volume
   // percent. Decode integers explicitly so this format does not depend on
   // struct padding.
   masterVolume = 100;
-  if (IsAudioDeviceReady()) {
-    SetMasterVolume(1.f);
+  if (::IsAudioDeviceReady()) {
+    ::SetMasterVolume(1.f);
   }
   std::ifstream file{fileName.data(), std::ios::binary};
 
@@ -98,7 +98,7 @@ void Settings::iLoadSettings() noexcept {
     return;
   }
 
-  for (Color &color : guitarBassColors) {
+  for (::Color &color : guitarBassColors) {
     std::array<unsigned char, 4> rgba{};
     if (!file.read(reinterpret_cast<char *>(rgba.data()), rgba.size())) {
       iDefaultSettings();
@@ -137,18 +137,18 @@ void Settings::iLoadSettings() noexcept {
       encodedVolume <= 100) {
     masterVolume = encodedVolume;
   }
-  if (IsAudioDeviceReady()) {
-    SetMasterVolume(masterVolume / 100.f);
+  if (::IsAudioDeviceReady()) {
+    ::SetMasterVolume(masterVolume / 100.f);
   }
 }
 
-bool Settings::iSaveSettings() noexcept {
+bool bh::Settings::iSaveSettings() noexcept {
   std::ofstream file{fileName.data(), std::ios::binary | std::ios::trunc};
   if (!file) {
     return false;
   }
 
-  for (const Color color : guitarBassColors) {
+  for (const ::Color color : guitarBassColors) {
     const std::array<unsigned char, 4> rgba{color.r, color.g, color.b, color.a};
     file.write(reinterpret_cast<const char *>(rgba.data()), rgba.size());
   }
@@ -174,14 +174,14 @@ bool Settings::iSaveSettings() noexcept {
   return !file.fail();
 }
 
-bool Settings::iDetectSerialPort() noexcept {
+bool bh::Settings::iDetectSerialPort() noexcept {
   // This probes whether a port opens, not whether a BandHero controller
   // answers. Explicit port selection in General can override the first openable
   // device.
   try {
     serialPort.clear();
     for (const std::string &candidate : serialPortCandidates()) {
-      serialib device;
+      ::serialib device;
       if (device.openDevice(candidate.c_str(), serialBaudRate) == 1) {
         serialPort = candidate;
         device.closeDevice();
@@ -194,7 +194,7 @@ bool Settings::iDetectSerialPort() noexcept {
   return false;
 }
 
-bool Settings::iSetSerialBaudRate(std::uint32_t baudRate) noexcept {
+bool bh::Settings::iSetSerialBaudRate(std::uint32_t baudRate) noexcept {
   if (!std::ranges::contains(supportedBaudRates, baudRate)) {
     return false;
   }
@@ -202,7 +202,7 @@ bool Settings::iSetSerialBaudRate(std::uint32_t baudRate) noexcept {
   return true;
 }
 
-void Settings::iDefaultStartupSettings() noexcept {
+void bh::Settings::iDefaultStartupSettings() noexcept {
   std::ofstream file(startupFile, std::ios::binary | std::ios::trunc);
 
   constexpr std::uint16_t defaultFPS = 60;

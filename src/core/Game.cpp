@@ -17,14 +17,14 @@
 
 namespace bh {
 
-Game::Game(const Vector2 &windowSize,
+bh::Game::Game(const ::Vector2 &windowSize,
            const std::string_view &&windowName) noexcept {
-  InitWindow(windowSize.x, windowSize.y, windowName.data());
-  InitAudioDevice();
-  SetMasterVolume(Settings::getMasterVolume() / 100.f);
+  ::InitWindow(windowSize.x, windowSize.y, windowName.data());
+  ::InitAudioDevice();
+  ::SetMasterVolume(bh::Settings::getMasterVolume() / 100.f);
 
-  SetExitKey(KeyboardKey::KEY_NULL);
-  DisplaySettings::get().apply();
+  ::SetExitKey(::KeyboardKey::KEY_NULL);
+  bh::DisplaySettings::get().apply();
 
   std::filesystem::path instrumentPaths("Instruments/");
 
@@ -32,17 +32,17 @@ Game::Game(const Vector2 &windowSize,
     std::filesystem::create_directory(instrumentPaths);
   }
 
-  m_stack.push<MainMenuState>();
+  m_stack.push<bh::MainMenuState>();
   m_stack.act();
 }
 
-Game::~Game() noexcept {
+bh::Game::~Game() noexcept {
   // State exit hooks and texture unloading need live graphics/audio devices.
   // Tear down their owners before closing either device.
   m_stack.clear();
-  ResourceManager::unload();
-  CloseAudioDevice();
-  CloseWindow();
+  bh::ResourceManager::unload();
+  ::CloseAudioDevice();
+  ::CloseWindow();
 }
 
 } // namespace bh

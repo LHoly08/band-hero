@@ -54,7 +54,7 @@ public:
     static constexpr auto v = std::define_static_array(std::meta::members_of(
         ^^Textures, std::meta::access_context::current()));
 
-    size_t offset{};
+    std::size_t offset{};
 
     using Enum = decltype(Ty);
     template for (constexpr auto e : v) {
@@ -198,7 +198,7 @@ public:
     TextureHandle &operator=(TextureHandle other) noexcept;
     ~TextureHandle();
 
-    Texture2D texture() const noexcept;
+    ::Texture2D texture() const noexcept;
 
   private:
     friend class ResourceManager;
@@ -241,9 +241,9 @@ public:
   void operator=(ResourceManager &&) = delete;
 
   template <Fonts_t FontType>
-  inline static void drawText(const std::string_view text, const Vector2 &pos,
+  inline static void drawText(const std::string_view text, const ::Vector2 &pos,
                               float fontSize = 64.f,
-                              const Color &tint = BLACK) noexcept {
+                              const ::Color &tint = BLACK) noexcept {
     return get().iDrawText<FontType>(text, pos, fontSize, tint);
   }
 
@@ -255,8 +255,8 @@ public:
 
   template <auto Texture_t>
     requires isTexture<Texture_t>
-  inline static void drawImage(const Rectangle &rect, const Vector2 &pos,
-                               const Color &tint = WHITE) noexcept {
+  inline static void drawImage(const ::Rectangle &rect, const ::Vector2 &pos,
+                               const ::Color &tint = WHITE) noexcept {
     return get().iDrawImage<Texture_t>(rect, pos, tint);
   }
 
@@ -264,38 +264,38 @@ public:
   // it.
   template <auto Texture_t>
     requires isTexture<Texture_t>
-  inline static Texture2D texture() noexcept {
+  inline static ::Texture2D texture() noexcept {
     return get().m_textures[Textures::getOffset<Texture_t>()];
   }
 
   // Draw an entire image at an independent layout size (e.g. a backdrop).
   template <auto Texture_t>
     requires isTexture<Texture_t>
-  inline static void drawImageTo(const Rectangle &destination,
-                                 Color tint = WHITE) noexcept {
+  inline static void drawImageTo(const ::Rectangle &destination,
+                                 ::Color tint = WHITE) noexcept {
     const auto &texture = get().m_textures[Textures::getOffset<Texture_t>()];
-    if (!IsTextureValid(texture))
+    if (!::IsTextureValid(texture))
       return;
-    const Vector2 position = scaledSize(Vector2{destination.x, destination.y});
-    const Vector2 size =
-        scaledSize(Vector2{destination.width, destination.height});
-    DrawTexturePro(texture, {0, 0, float(texture.width), float(texture.height)},
+    const ::Vector2 position = bh::scaledSize(::Vector2{destination.x, destination.y});
+    const ::Vector2 size =
+        bh::scaledSize(::Vector2{destination.width, destination.height});
+    ::DrawTexturePro(texture, {0, 0, float(texture.width), float(texture.height)},
                    {position.x, position.y, size.x, size.y}, {0, 0}, 0, tint);
   }
 
   // Draw a sprite-sheet cell at a chosen layout size.
   template <auto Texture_t>
     requires isTexture<Texture_t>
-  inline static void drawImageRegionTo(const Rectangle &source,
-                                       const Rectangle &destination,
-                                       Color tint = WHITE) noexcept {
+  inline static void drawImageRegionTo(const ::Rectangle &source,
+                                       const ::Rectangle &destination,
+                                       ::Color tint = WHITE) noexcept {
     const auto &texture = get().m_textures[Textures::getOffset<Texture_t>()];
-    if (!IsTextureValid(texture))
+    if (!::IsTextureValid(texture))
       return;
-    const auto position = scaledSize(Vector2{destination.x, destination.y});
+    const auto position = bh::scaledSize(::Vector2{destination.x, destination.y});
     const auto size =
-        scaledSize(Vector2{destination.width, destination.height});
-    DrawTexturePro(texture, source, {position.x, position.y, size.x, size.y},
+        bh::scaledSize(::Vector2{destination.width, destination.height});
+    ::DrawTexturePro(texture, source, {position.x, position.y, size.x, size.y},
                    {0, 0}, 0, tint);
   }
 
@@ -303,20 +303,20 @@ public:
   // sharp while allowing controls of different widths without stretching edges.
   template <auto Texture_t>
     requires isTexture<Texture_t>
-  inline static void drawSettingsSkin(const Rectangle &source,
-                                      const Rectangle &destination) noexcept {
+  inline static void drawSettingsSkin(const ::Rectangle &source,
+                                      const ::Rectangle &destination) noexcept {
     const auto &texture = get().m_textures[Textures::getOffset<Texture_t>()];
-    if (!IsTextureValid(texture))
+    if (!::IsTextureValid(texture))
       return;
-    const Vector2 position = scaledSize(Vector2{destination.x, destination.y});
-    const Vector2 scale = scaledSize(Vector2{.5f, .5f});
-    rlPushMatrix();
-    rlTranslatef(position.x, position.y, 0);
-    rlScalef(scale.x, scale.y, 1);
-    DrawTextureNPatch(texture, {source, 48, 48, 48, 48, NPATCH_NINE_PATCH},
+    const ::Vector2 position = bh::scaledSize(::Vector2{destination.x, destination.y});
+    const ::Vector2 scale = bh::scaledSize(::Vector2{.5f, .5f});
+    ::rlPushMatrix();
+    ::rlTranslatef(position.x, position.y, 0);
+    ::rlScalef(scale.x, scale.y, 1);
+    ::DrawTextureNPatch(texture, {source, 48, 48, 48, 48, ::NPATCH_NINE_PATCH},
                       {0, 0, destination.width * 2, destination.height * 2},
                       {0, 0}, 0, WHITE);
-    rlPopMatrix();
+    ::rlPopMatrix();
   }
 
   template <TextureType... Types> inline static void loadTextures() {
@@ -340,8 +340,8 @@ public:
 
 private:
   template <Fonts_t FontType>
-  void iDrawText(const std::string_view text, const Vector2 &pos,
-                 float fontSize, const Color &tint) const noexcept;
+  void iDrawText(const std::string_view text, const ::Vector2 &pos,
+                 float fontSize, const ::Color &tint) const noexcept;
 
   template <Fonts_t FontType>
   float iMeasureText(const std::string_view text,
@@ -349,8 +349,8 @@ private:
 
   template <auto Texture_t>
     requires isTexture<Texture_t>
-  void iDrawImage(const Rectangle &rect, const Vector2 &pos,
-                  const Color &tint) const noexcept;
+  void iDrawImage(const ::Rectangle &rect, const ::Vector2 &pos,
+                  const ::Color &tint) const noexcept;
 
   template <TextureType... Types> void iLoadTextures() noexcept;
   template <TextureType... Types> void iUnloadTextures() noexcept;
@@ -390,28 +390,28 @@ private:
 
   ResourceManager();
 
-  std::vector<Texture2D> m_textures;
+  std::vector<::Texture2D> m_textures;
   std::vector<std::size_t> m_textureUsers;
-  std::vector<Font> m_fonts;
+  std::vector<::Font> m_fonts;
 };
 
 template <Fonts_t FontType>
-void ResourceManager::iDrawText(const std::string_view text, const Vector2 &pos,
+void ResourceManager::iDrawText(const std::string_view text, const ::Vector2 &pos,
                                 float fontSize,
-                                const Color &tint) const noexcept {
+                                const ::Color &tint) const noexcept {
 
   if (text.empty() || fontSize <= 0.f) {
     return;
   }
   const std::string terminatedText(text);
-  const Vector2 scale = scaledSize(Vector2{1.f, 1.f});
-  const Vector2 scaledPos = scaledSize(pos);
-  rlPushMatrix();
-  rlTranslatef(scaledPos.x, scaledPos.y, 0.f);
-  rlScalef(scale.x, scale.y, 1.f);
-  DrawTextEx(m_fonts[(std::uint8_t)FontType], terminatedText.c_str(),
+  const ::Vector2 scale = bh::scaledSize(::Vector2{1.f, 1.f});
+  const ::Vector2 scaledPos = bh::scaledSize(pos);
+  ::rlPushMatrix();
+  ::rlTranslatef(scaledPos.x, scaledPos.y, 0.f);
+  ::rlScalef(scale.x, scale.y, 1.f);
+  ::DrawTextEx(m_fonts[(std::uint8_t)FontType], terminatedText.c_str(),
              {0.f, 0.f}, fontSize, fontSize * (5.f / 64.f), tint);
-  rlPopMatrix();
+  ::rlPopMatrix();
 }
 
 template <Fonts_t FontType>
@@ -422,8 +422,8 @@ float ResourceManager::iMeasureText(const std::string_view text,
     return 0.f;
   }
   const std::string terminatedText(text);
-  Vector2 res =
-      MeasureTextEx(m_fonts[(std::uint8_t)FontType], terminatedText.c_str(),
+  ::Vector2 res =
+      ::MeasureTextEx(m_fonts[(std::uint8_t)FontType], terminatedText.c_str(),
                     fontSize, fontSize * (5.f / 64.f));
 
   return res.x;
@@ -431,15 +431,15 @@ float ResourceManager::iMeasureText(const std::string_view text,
 
 template <auto Texture_t>
   requires isTexture<Texture_t>
-void ResourceManager::iDrawImage(const Rectangle &rect, const Vector2 &pos,
-                                 const Color &tint) const noexcept {
+void ResourceManager::iDrawImage(const ::Rectangle &rect, const ::Vector2 &pos,
+                                 const ::Color &tint) const noexcept {
 
-  const Vector2 scaledPos = scaledSize(pos);
-  Rectangle dest{scaledPos.x, scaledPos.y,
-                 scaledSize<float, ScreenAxis::X>(rect.width),
-                 scaledSize<float, ScreenAxis::Y>(rect.height)};
+  const ::Vector2 scaledPos = bh::scaledSize(pos);
+  ::Rectangle dest{scaledPos.x, scaledPos.y,
+                 bh::scaledSize<float, bh::ScreenAxis::X>(rect.width),
+                 bh::scaledSize<float, bh::ScreenAxis::Y>(rect.height)};
 
-  DrawTexturePro(m_textures[Textures::getOffset<Texture_t>()], rect, dest,
+  ::DrawTexturePro(m_textures[Textures::getOffset<Texture_t>()], rect, dest,
                  {0, 0}, 0, tint);
 }
 

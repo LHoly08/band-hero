@@ -10,18 +10,18 @@
 
 namespace bh {
 
-void GamemodeState::draw() const noexcept {
+void bh::GamemodeState::draw() const noexcept {
   m_background.draw();
-  m_localButton.draw<WHITE, true, 40, TextAlign::Center>();
-  m_lanButton.draw<WHITE, true, 40, TextAlign::Center>();
-  m_onlineButton.draw<WHITE, true, 40, TextAlign::Center>();
-  m_backButton.draw<WHITE, true, 40, TextAlign::Center>();
+  m_localButton.draw<WHITE, true, 40, bh::TextAlign::Center>();
+  m_lanButton.draw<WHITE, true, 40, bh::TextAlign::Center>();
+  m_onlineButton.draw<WHITE, true, 40, bh::TextAlign::Center>();
+  m_backButton.draw<WHITE, true, 40, bh::TextAlign::Center>();
 }
 
-void GamemodeState::update(float dt) noexcept { m_background.update(dt); }
+void bh::GamemodeState::update(float dt) noexcept { m_background.update(dt); }
 
-void GamemodeState::events() noexcept {
-  const Vector2 mousePos = GetMousePosition();
+void bh::GamemodeState::events() noexcept {
+  const ::Vector2 mousePos = ::GetMousePosition();
   
   const bool localClicked = m_localButton.updateInput(mousePos);
   const bool lanClicked = m_lanButton.updateInput(mousePos);
@@ -29,22 +29,22 @@ void GamemodeState::events() noexcept {
   const bool backClicked = m_backButton.updateInput(mousePos);
 
   if (localClicked) [[unlikely]] {
-    m_stack.reset<SongSelectState>();
+    m_stack.reset<bh::SongSelectState>();
 
   } else if (lanClicked) [[unlikely]] {
-    m_stack.push<BuildingState>();
+    m_stack.push<bh::BuildingState>();
 
   } else if (onlineClicked) [[unlikely]] {
-    m_stack.push<BuildingState>();
+    m_stack.push<bh::BuildingState>();
 
   } else if (backClicked) [[unlikely]] {
     m_stack.pop();
   }
 }
 
-void GamemodeState::onEnter() noexcept {}
+void bh::GamemodeState::onEnter() noexcept {}
 
-void GamemodeState::onExit() noexcept {
+void bh::GamemodeState::onExit() noexcept {
   m_localButton.resetInteraction();
   m_lanButton.resetInteraction();
   m_onlineButton.resetInteraction();

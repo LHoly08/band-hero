@@ -17,23 +17,23 @@
 
 namespace bh {
 
-void MainMenuState::draw() const noexcept {
-  ResourceManager::drawImageTo<Textures::MainMenu::Background>(
+void bh::MainMenuState::draw() const noexcept {
+  bh::ResourceManager::drawImageTo<bh::Textures::MainMenu::Background>(
       {0, 0, 1920, 1080});
-  ResourceManager::drawImage<Textures::MainMenu::Title>({0, 0, 600, 160},
+  bh::ResourceManager::drawImage<bh::Textures::MainMenu::Title>({0, 0, 600, 160},
                                                         {140, 250});
-  m_playButton.draw<WHITE, true, 40, TextAlign::Center>();
-  m_quitButton.draw<WHITE, true, 40, TextAlign::Center>();
+  m_playButton.draw<WHITE, true, 40, bh::TextAlign::Center>();
+  m_quitButton.draw<WHITE, true, 40, bh::TextAlign::Center>();
   m_settingsButton.draw<WHITE, false>();
   m_guidesButton.draw<WHITE, false>();
   m_achievementsButton.draw<WHITE, false>();
 }
 
-void MainMenuState::update(float dt) noexcept { auto _ = dt; }
+void bh::MainMenuState::update(float dt) noexcept { auto _ = dt; }
 
-void MainMenuState::events() noexcept {
+void bh::MainMenuState::events() noexcept {
 
-  const Vector2 MousePos = GetMousePosition();
+  const ::Vector2 MousePos = ::GetMousePosition();
 
   const bool playClicked = m_playButton.updateInput(MousePos);
   const bool quitClicked = m_quitButton.updateInput(MousePos);
@@ -42,26 +42,26 @@ void MainMenuState::events() noexcept {
   const bool achievementsClicked = m_achievementsButton.updateInput(MousePos);
 
   if (playClicked) [[unlikely]] {
-    m_stack.push<GamemodeState>();
+    m_stack.push<bh::GamemodeState>();
 
   } else if (quitClicked) [[unlikely]] {
     m_stack.quit = true;
     return;
 
   } else if (settingsClicked) [[unlikely]] {
-    m_stack.push<SettingsState>();
+    m_stack.push<bh::SettingsState>();
 
   } else if (guidesClicked) [[unlikely]] {
-    m_stack.push<GuidesState>();
+    m_stack.push<bh::GuidesState>();
 
   } else if (achievementsClicked) [[unlikely]] {
-    m_stack.push<AchievementsState>();
+    m_stack.push<bh::AchievementsState>();
   }
 }
 
-void MainMenuState::onEnter() noexcept {}
+void bh::MainMenuState::onEnter() noexcept {}
 
-void MainMenuState::onExit() noexcept {
+void bh::MainMenuState::onExit() noexcept {
   m_playButton.resetInteraction();
   m_quitButton.resetInteraction();
   m_settingsButton.resetInteraction();

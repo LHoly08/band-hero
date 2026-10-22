@@ -22,21 +22,21 @@ namespace bh {
 
 struct CustomInstrumentComposition {
   std::string name;
-  std::variant<InstrumentComposition<InstrumentType::Custom_1>,
-               InstrumentComposition<InstrumentType::Custom_2>,
-               InstrumentComposition<InstrumentType::Custom_3>>
+  std::variant<bh::InstrumentComposition<bh::InstrumentType::Custom_1>,
+               bh::InstrumentComposition<bh::InstrumentType::Custom_2>,
+               bh::InstrumentComposition<bh::InstrumentType::Custom_3>>
       composition;
 };
 
-template <InstrumentType Type, Difficulty Dif>
-  requires CustomType<Type>
-class Custom final : public Instrument<Type, Dif> {
+template <bh::InstrumentType Type, bh::Difficulty Dif>
+  requires bh::CustomType<Type>
+class Custom final : public bh::Instrument<Type, Dif> {
 public:
-  using Base = Instrument<Type, Dif>;
+  using Base = bh::Instrument<Type, Dif>;
 
   explicit Custom(std::uint32_t &noteCount, std::string filename,
                   std::string_view instrumentName,
-                  InstrumentComposition<Type> instrumentComposition);
+                  bh::InstrumentComposition<Type> instrumentComposition);
   ~Custom() override = default;
 
   bool getPlay(std::uint32_t playedNote) noexcept override {
@@ -50,23 +50,23 @@ public:
 
 private:
   std::string m_name;
-  InstrumentComposition<Type> m_composition;
+  bh::InstrumentComposition<Type> m_composition;
 };
 
-template <Difficulty Dif>
-class Custom<InstrumentType::Custom_3, Dif> final
-    : public Instrument<InstrumentType::Custom_3, Dif> {
+template <bh::Difficulty Dif>
+class Custom<bh::InstrumentType::Custom_3, Dif> final
+    : public bh::Instrument<bh::InstrumentType::Custom_3, Dif> {
 public:
-  using Base = Instrument<InstrumentType::Custom_3, Dif>;
+  using Base = bh::Instrument<bh::InstrumentType::Custom_3, Dif>;
 
   explicit Custom(
       std::uint32_t &noteCount, std::string filename,
       std::string_view instrumentName,
-      InstrumentComposition<InstrumentType::Custom_3> instrumentComposition);
+      bh::InstrumentComposition<bh::InstrumentType::Custom_3> instrumentComposition);
 
   ~Custom() override {
     if (m_lua) {
-      lua_close(m_lua);
+      ::lua_close(m_lua);
     }
   };
 
@@ -79,7 +79,7 @@ public:
 
 private:
   std::string m_name;
-  lua_State *m_lua;
+  ::lua_State *m_lua;
 
   // Lua's drawNote callback records a request rather than drawing directly.
   // C++ adds the player's X origin, timestamp-based Y, tint and sprite shape.
@@ -90,18 +90,18 @@ private:
   };
 
   mutable Notification m_notification;
-  InstrumentComposition<InstrumentType::Custom_3> m_composition;
+  bh::InstrumentComposition<bh::InstrumentType::Custom_3> m_composition;
 };
 
-template <Difficulty Dif> static consteval auto getDifficultyString() {
+template <bh::Difficulty Dif> static consteval auto getDifficultyString() {
 
   std::string path{};
 
   static constexpr auto enumerators = std::define_static_array(
-      std::meta::enumerators_of(std::meta::dealias(^^Difficulty)));
+      std::meta::enumerators_of(std::meta::dealias(^^bh::Difficulty)));
 
   template for (constexpr auto enumerator : enumerators) {
-    if constexpr (std::meta::extract<Difficulty>(enumerator) == Dif) {
+    if constexpr (std::meta::extract<bh::Difficulty>(enumerator) == Dif) {
 
       path.append(std::meta::identifier_of(enumerator));
     }
@@ -110,25 +110,25 @@ template <Difficulty Dif> static consteval auto getDifficultyString() {
   return std::define_static_string(path);
 }
 
-template <InstrumentType Type, Difficulty Dif>
-  requires CustomType<Type>
+template <bh::InstrumentType Type, bh::Difficulty Dif>
+  requires bh::CustomType<Type>
 Custom<Type, Dif>::Custom(std::uint32_t &noteCount, std::string filename,
                           std::string_view instrumentName,
-                          InstrumentComposition<Type> instrumentComposition)
+                          bh::InstrumentComposition<Type> instrumentComposition)
     : Base(noteCount, std::move(filename.append(instrumentName)
                                     .append(getDifficultyString<Dif>())
                                     .append(".file"))),
       m_name(instrumentName), m_composition(instrumentComposition) {}
 
-template <Difficulty Dif>
-Custom<InstrumentType::Custom_3, Dif>::Custom(
+template <bh::Difficulty Dif>
+Custom<bh::InstrumentType::Custom_3, Dif>::Custom(
     std::uint32_t &noteCount, std::string filename,
     std::string_view instrumentName,
-    InstrumentComposition<InstrumentType::Custom_3> instrumentComposition)
+    bh::InstrumentComposition<bh::InstrumentType::Custom_3> instrumentComposition)
     : Base(noteCount, std::move(filename.append(instrumentName)
                                     .append(getDifficultyString<Dif>())
                                     .append(".file"))),
-      m_name(instrumentName), m_lua(luaL_newstate()),
+      m_name(instrumentName), m_lua(::luaL_newstate()),
       m_composition(instrumentComposition) {
 
   if (!m_lua) {
@@ -140,15 +140,15 @@ Custom<InstrumentType::Custom_3, Dif>::Custom(
   file.append(".lua");
 
   if (luaL_dofile(m_lua, file.c_str()) != LUA_OK) {
-    lua_close(m_lua);
+    ::lua_close(m_lua);
     m_lua = nullptr;
   }
 }
 
-template <InstrumentType Type, Difficulty Dif>
-  requires CustomType<Type>
+template <bh::InstrumentType Type, bh::Difficulty Dif>
+  requires bh::CustomType<Type>
 void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
-  if constexpr (Type == InstrumentType::Custom_1) {
+  if constexpr (Type == bh::InstrumentType::Custom_1) {
 
     for (const auto &note : this->m_activeBuffer) {
       if (note.timeStamp - this->m_time > 2.f) {
@@ -170,21 +170,21 @@ void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
           this->drawNote(
               {.x = static_cast<float>(startingPositionX + fretVal * 50),
                .y = static_cast<float>((note.timeStamp - this->m_time) * 5 +
-                                       (OriginalWindowSize.y - 30))},
-              Settings::getNoteTint(i), note.shape);
+                                       (bh::OriginalWindowSize.y - 30))},
+              bh::Settings::getNoteTint(i), note.shape);
         }
       }
     }
 
-  } else if constexpr (Type == InstrumentType::Custom_2) {
+  } else if constexpr (Type == bh::InstrumentType::Custom_2) {
 
     for (const auto &note : this->m_activeBuffer) {
       if (note.timeStamp - this->m_time > 2.f) {
         break;
       }
       const auto bits =
-          (Dif == Difficulty::Easy) * m_composition.NumberEffectiveBitsEasy +
-          (Dif == Difficulty::Hard) * m_composition.NumberEffectiveBitsHard;
+          (Dif == bh::Difficulty::Easy) * m_composition.NumberEffectiveBitsEasy +
+          (Dif == bh::Difficulty::Hard) * m_composition.NumberEffectiveBitsHard;
 
       for (std::uint8_t i{}; i < std::min<unsigned>(bits, 30); ++i) {
 
@@ -193,16 +193,16 @@ void Custom<Type, Dif>::draw(std::uint32_t startingPositionX) const noexcept {
           this->drawNote(
               {.x = static_cast<float>(startingPositionX + i * 50),
                .y = static_cast<float>((note.timeStamp - this->m_time) * 5 +
-                                       (OriginalWindowSize.y - 30))},
-              Settings::getNoteTint(i), note.shape);
+                                       (bh::OriginalWindowSize.y - 30))},
+              bh::Settings::getNoteTint(i), note.shape);
         }
       }
     }
   }
 }
 
-template <Difficulty Dif>
-void Custom<InstrumentType::Custom_3, Dif>::draw(
+template <bh::Difficulty Dif>
+void Custom<bh::InstrumentType::Custom_3, Dif>::draw(
     std::uint32_t startingPositionX) const noexcept {
 
   m_notification = {};
@@ -210,17 +210,17 @@ void Custom<InstrumentType::Custom_3, Dif>::draw(
   const bool existsLua = m_lua;
 
   if (existsLua) [[likely]] {
-    lua_pushlightuserdata(m_lua, &m_notification);
+    ::lua_pushlightuserdata(m_lua, &m_notification);
 
-    lua_pushcclosure(
+    ::lua_pushcclosure(
         m_lua,
-        [](lua_State *l) -> int {
+        [](::lua_State *l) -> int {
           auto *flag = static_cast<Notification *>(
-              lua_touserdata(l, lua_upvalueindex(1)));
+              ::lua_touserdata(l, lua_upvalueindex(1)));
 
-          const float position = static_cast<float>(luaL_checknumber(l, 1));
+          const float position = static_cast<float>(::luaL_checknumber(l, 1));
           const std::uint8_t color =
-              std::saturating_cast<std::uint8_t>(luaL_optinteger(l, 2, 0));
+              std::saturating_cast<std::uint8_t>(::luaL_optinteger(l, 2, 0));
 
           flag->position = position;
           flag->called = true;
@@ -230,19 +230,19 @@ void Custom<InstrumentType::Custom_3, Dif>::draw(
         },
         1);
 
-    lua_setglobal(m_lua, "drawNote");
+    ::lua_setglobal(m_lua, "drawNote");
   }
 
   for (const auto &note : this->m_activeBuffer) {
 
     const float posY = static_cast<float>(note.timeStamp - this->m_time) * 5 +
-                       OriginalWindowSize.y - 30;
+                       bh::OriginalWindowSize.y - 30;
 
     if (existsLua) [[likely]] {
-      lua_getglobal(m_lua, "Draw");
+      ::lua_getglobal(m_lua, "Draw");
 
       if (lua_isfunction(m_lua, -1)) [[likely]] {
-        lua_pushinteger(m_lua, static_cast<lua_Integer>(note.note));
+        ::lua_pushinteger(m_lua, static_cast<::lua_Integer>(note.note));
 
         if (lua_pcall(m_lua, 1, 0, 0) != LUA_OK) [[unlikely]] {
           lua_pop(m_lua, 1);
@@ -257,7 +257,7 @@ void Custom<InstrumentType::Custom_3, Dif>::draw(
         this->drawNote({.x = static_cast<float>(startingPositionX) +
                              m_notification.position,
                         .y = posY},
-                       Settings::getNoteTint(m_notification.colorIndex),
+                       bh::Settings::getNoteTint(m_notification.colorIndex),
                        note.shape);
 
       } else [[unlikely]] {
@@ -265,7 +265,7 @@ void Custom<InstrumentType::Custom_3, Dif>::draw(
         this->drawNote(
             {.x = static_cast<float>(startingPositionX + note.note * 5),
              .y = posY},
-            Settings::getNoteTint(1), note.shape);
+            bh::Settings::getNoteTint(1), note.shape);
       }
 
       m_notification.called = false;
@@ -275,19 +275,19 @@ void Custom<InstrumentType::Custom_3, Dif>::draw(
       this->drawNote(
           {.x = static_cast<float>(startingPositionX + note.note * 5),
            .y = posY},
-          Settings::getNoteTint(1), note.shape);
+          bh::Settings::getNoteTint(1), note.shape);
     }
   }
 }
 
-template <Difficulty Dif>
-bool Custom<InstrumentType::Custom_3, Dif>::getPlay(
+template <bh::Difficulty Dif>
+bool Custom<bh::InstrumentType::Custom_3, Dif>::getPlay(
     std::uint32_t playedNote) noexcept {
   // PlayEasy/PlayHard transforms controller bits; the base class still owns
   // timing and chord completion. A missing function uses the original input.
 
   if (m_lua) [[likely]] {
-    lua_getglobal(m_lua, []<Difficulty D> consteval -> auto {
+    ::lua_getglobal(m_lua, []<bh::Difficulty D> consteval -> auto {
       std::string luaFunctionName{"Play"};
 
       luaFunctionName.append(getDifficultyString<D>());
@@ -300,10 +300,10 @@ bool Custom<InstrumentType::Custom_3, Dif>::getPlay(
       return Base::getPlay(playedNote);
     }
 
-    lua_pushinteger(m_lua, static_cast<lua_Integer>(playedNote));
+    ::lua_pushinteger(m_lua, static_cast<::lua_Integer>(playedNote));
 
     if (lua_pcall(m_lua, 1, 1, 0) == LUA_OK) [[likely]] {
-      if (lua_isinteger(m_lua, -1)) [[likely]] {
+      if (::lua_isinteger(m_lua, -1)) [[likely]] {
         playedNote = static_cast<std::uint32_t>(lua_tointeger(m_lua, -1));
       }
     }
@@ -314,19 +314,19 @@ bool Custom<InstrumentType::Custom_3, Dif>::getPlay(
 }
 
 template <>
-bool Custom<InstrumentType::Custom_1, Difficulty::Easy>::getPlay(
+bool Custom<bh::InstrumentType::Custom_1, bh::Difficulty::Easy>::getPlay(
     std::uint32_t playedNote) noexcept;
 
 template <>
-bool Custom<InstrumentType::Custom_1, Difficulty::Hard>::getPlay(
+bool Custom<bh::InstrumentType::Custom_1, bh::Difficulty::Hard>::getPlay(
     std::uint32_t playedNote) noexcept;
 
 template <>
-bool Custom<InstrumentType::Custom_2, Difficulty::Easy>::getPlay(
+bool Custom<bh::InstrumentType::Custom_2, bh::Difficulty::Easy>::getPlay(
     std::uint32_t playedNote) noexcept;
 
 template <>
-bool Custom<InstrumentType::Custom_2, Difficulty::Hard>::getPlay(
+bool Custom<bh::InstrumentType::Custom_2, bh::Difficulty::Hard>::getPlay(
     std::uint32_t playedNote) noexcept;
 
 } // namespace bh

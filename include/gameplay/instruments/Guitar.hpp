@@ -12,26 +12,26 @@
 
 namespace bh {
 
-template <Difficulty Dif> struct GuitarComposition;
+template <bh::Difficulty Dif> struct GuitarComposition;
 
-template <> struct GuitarComposition<Difficulty::Easy> {
+template <> struct GuitarComposition<bh::Difficulty::Easy> {
   enum : std::uint8_t {
     FretBits = 5,
     Strings = 6,
   };
 };
 
-template <> struct GuitarComposition<Difficulty::Hard> {
+template <> struct GuitarComposition<bh::Difficulty::Hard> {
   enum : std::uint8_t {
     FretBits = 5,
     Strings = 6,
   };
 };
 
-template <Difficulty Dif>
-class Guitar final : public Instrument<InstrumentType::Guitar, Dif> {
+template <bh::Difficulty Dif>
+class Guitar final : public bh::Instrument<bh::InstrumentType::Guitar, Dif> {
 public:
-  using Base = Instrument<InstrumentType::Guitar, Dif>;
+  using Base = bh::Instrument<bh::InstrumentType::Guitar, Dif>;
 
   inline explicit Guitar(std::uint32_t &noteCount, std::string filename)
       : Base(noteCount, std::move(filename)) {}
@@ -57,7 +57,7 @@ public:
 private:
 };
 
-template <Difficulty Dif>
+template <bh::Difficulty Dif>
 void Guitar<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 
   for (const auto &note : this->m_activeBuffer) {
@@ -73,12 +73,12 @@ void Guitar<Dif>::draw(std::uint32_t startingPositionX) const noexcept {
 
       if (fretVal) [[unlikely]] {
         const float posY =
-            (note.timeStamp - this->m_time) * 5 + (OriginalWindowSize.y - 30);
+            (note.timeStamp - this->m_time) * 5 + (bh::OriginalWindowSize.y - 30);
 
         this->drawNote(
             {.x = static_cast<float>(startingPositionX + fretVal * 50),
              .y = posY},
-            Settings::getNoteTint(i), note.shape);
+            bh::Settings::getNoteTint(i), note.shape);
       }
     }
   }

@@ -24,10 +24,10 @@ public:
     return s_instance;
   }
 
-  inline static Color getNoteTint(std::uint8_t index) noexcept {
+  inline static ::Color getNoteTint(std::uint8_t index) noexcept {
     return get().iGetNoteTint(index);
   }
-  inline static void setNoteTint(std::uint8_t index, Color color) noexcept {
+  inline static void setNoteTint(std::uint8_t index, ::Color color) noexcept {
     if (index < get().guitarBassColors.size()) {
       color.a = 255;
       get().guitarBassColors[index] = color;
@@ -78,8 +78,8 @@ public:
     return get().iDefaultStartupSettings();
   }
 
-  template <InstrumentType Type>
-    requires CustomType<Type>
+  template <bh::InstrumentType Type>
+    requires bh::CustomType<Type>
   inline static void createCustomInstrument(std::string name,
                                             std::uint8_t n1 = 0,
                                             std::uint8_t n2 = 0) {
@@ -106,7 +106,7 @@ private:
 
   void iDefaultStartupSettings() noexcept;
 
-  inline Color iGetNoteTint(std::uint8_t index) const noexcept {
+  inline ::Color iGetNoteTint(std::uint8_t index) const noexcept {
     try {
       return guitarBassColors.at(index);
     } catch (...) {
@@ -114,25 +114,25 @@ private:
     }
   }
 
-  template <InstrumentType Type>
-    requires CustomType<Type>
+  template <bh::InstrumentType Type>
+    requires bh::CustomType<Type>
   void iCreateCustomInstrument(std::string &&name, std::uint8_t n1,
                                std::uint8_t n2);
 
   static constexpr std::string_view fileName{"settings.bin"};
 
-  std::array<Color, 6> guitarBassColors{RED,   ORANGE, YELLOW,
+  std::array<::Color, 6> guitarBassColors{RED,   ORANGE, YELLOW,
                                         GREEN, BLUE,   PURPLE};
   std::string serialPort;
   std::uint32_t serialBaudRate{115200};
   int masterVolume{100};
 };
 
-template <InstrumentType Type>
-  requires CustomType<Type>
+template <bh::InstrumentType Type>
+  requires bh::CustomType<Type>
 void Settings::iCreateCustomInstrument(std::string &&name, std::uint8_t n1,
                                        std::uint8_t n2) {
-  if constexpr (Type != InstrumentType::Custom_3) {
+  if constexpr (Type != bh::InstrumentType::Custom_3) {
     if (!n1 || !n2) {
       return;
     }
@@ -152,12 +152,12 @@ void Settings::iCreateCustomInstrument(std::string &&name, std::uint8_t n1,
   file << "---@type string\n";
   file << "name = \"" << name << "\"\n\n";
 
-  constexpr std::string_view TypeText = []<InstrumentType T> consteval -> auto {
+  constexpr std::string_view TypeText = []<bh::InstrumentType T> consteval -> auto {
     static constexpr auto enumerators =
-        std::define_static_array(std::meta::enumerators_of(^^InstrumentType));
+        std::define_static_array(std::meta::enumerators_of(^^bh::InstrumentType));
 
     template for (constexpr auto enumerator : enumerators) {
-      if (std::meta::extract<InstrumentType>(enumerator) == T) {
+      if (std::meta::extract<bh::InstrumentType>(enumerator) == T) {
         return std::meta::identifier_of(enumerator);
       }
     }
@@ -170,13 +170,13 @@ void Settings::iCreateCustomInstrument(std::string &&name, std::uint8_t n1,
 
   file << "-- For " << TypeText << " Only!\n";
 
-  if constexpr (Type != InstrumentType::Custom_3) {
+  if constexpr (Type != bh::InstrumentType::Custom_3) {
 
-    const InstrumentComposition<Type> composition{n1, n2};
+    const bh::InstrumentComposition<Type> composition{n1, n2};
 
     static constexpr auto members =
         std::define_static_array(std::meta::nonstatic_data_members_of(
-            ^^InstrumentComposition<Type>,
+            ^^bh::InstrumentComposition<Type>,
             std::meta::access_context::current()));
 
     file << "Composition = {\n";
@@ -193,7 +193,7 @@ void Settings::iCreateCustomInstrument(std::string &&name, std::uint8_t n1,
     file << '\n';
 
     static constexpr auto Difficulties =
-        std::define_static_array(std::meta::enumerators_of(^^Difficulty));
+        std::define_static_array(std::meta::enumerators_of(^^bh::Difficulty));
 
     template for (constexpr auto Dif : Difficulties) {
       constexpr auto DifIdentifier = std::meta::identifier_of(Dif);

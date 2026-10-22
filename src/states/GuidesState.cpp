@@ -13,18 +13,18 @@
 
 namespace bh {
 
-void GuidesState::draw() const noexcept {
+void bh::GuidesState::draw() const noexcept {
   m_background.draw();
-  m_mainMenuButton.draw<WHITE, true, 40, TextAlign::Center>();
-  m_firstGuideButton.draw<WHITE, true, 40, TextAlign::Center>();
-  m_secondGuideButton.draw<WHITE, true, 40, TextAlign::Center>();
-  m_thirdGuideButton.draw<WHITE, true, 40, TextAlign::Center>();
+  m_mainMenuButton.draw<WHITE, true, 40, bh::TextAlign::Center>();
+  m_firstGuideButton.draw<WHITE, true, 40, bh::TextAlign::Center>();
+  m_secondGuideButton.draw<WHITE, true, 40, bh::TextAlign::Center>();
+  m_thirdGuideButton.draw<WHITE, true, 40, bh::TextAlign::Center>();
 }
 
-void GuidesState::update(float dt) noexcept { m_background.update(dt); }
+void bh::GuidesState::update(float dt) noexcept { m_background.update(dt); }
 
-void GuidesState::events() noexcept {
-  const Vector2 MousePos = GetMousePosition();
+void bh::GuidesState::events() noexcept {
+  const ::Vector2 MousePos = ::GetMousePosition();
 
   const bool mainMenuClicked = m_mainMenuButton.updateInput(MousePos);
   const bool firstClicked = m_firstGuideButton.updateInput(MousePos);
@@ -47,7 +47,7 @@ void GuidesState::events() noexcept {
   }
 }
 
-void GuidesState::changeGuide(Guide newGuide) noexcept {
+void bh::GuidesState::changeGuide(Guide newGuide) noexcept {
   constexpr std::array guides{Guide::Bass, Guide::Drums, Guide::Guitar,
                               Guide::Hub};
 
@@ -70,9 +70,9 @@ void GuidesState::changeGuide(Guide newGuide) noexcept {
   }
 }
 
-void GuidesState::onEnter() noexcept {}
+void bh::GuidesState::onEnter() noexcept {}
 
-void GuidesState::onExit() noexcept {
+void bh::GuidesState::onExit() noexcept {
 
   m_mainMenuButton.resetInteraction();
   m_firstGuideButton.resetInteraction();

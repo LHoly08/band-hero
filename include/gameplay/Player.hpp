@@ -34,7 +34,7 @@ public:
   virtual void controlAudio(bool resume) noexcept = 0;
   virtual std::uint8_t getInstrumentType() noexcept = 0;
   virtual std::unique_ptr<PlayerBase> changeSong(std::string songPath) = 0;
-  virtual std::vector<Achievements> getUnlockedAchievements() = 0;
+  virtual std::vector<bh::Achievements> getUnlockedAchievements() = 0;
   virtual float getCompletion() = 0;
   virtual std::uint32_t getLoadedNoteCount() const noexcept = 0;
   virtual std::uint32_t getHitNoteCount() const noexcept = 0;
@@ -50,30 +50,30 @@ protected:
   inline static std::uint8_t PlayerCount = 1;
 };
 
-template <InstrumentType Type, Difficulty Dif> struct InstrumentFor;
+template <bh::InstrumentType Type, bh::Difficulty Dif> struct InstrumentFor;
 
-template <Difficulty Dif> struct InstrumentFor<InstrumentType::Bass, Dif> {
-  using type = Bass<Dif>;
+template <bh::Difficulty Dif> struct InstrumentFor<bh::InstrumentType::Bass, Dif> {
+  using type = bh::Bass<Dif>;
 };
 
-template <Difficulty Dif> struct InstrumentFor<InstrumentType::Guitar, Dif> {
-  using type = Guitar<Dif>;
+template <bh::Difficulty Dif> struct InstrumentFor<bh::InstrumentType::Guitar, Dif> {
+  using type = bh::Guitar<Dif>;
 };
 
-template <Difficulty Dif> struct InstrumentFor<InstrumentType::Drums, Dif> {
-  using type = Drums<Dif>;
+template <bh::Difficulty Dif> struct InstrumentFor<bh::InstrumentType::Drums, Dif> {
+  using type = bh::Drums<Dif>;
 };
 
-template <InstrumentType Type, Difficulty Dif>
-  requires CustomType<Type>
+template <bh::InstrumentType Type, bh::Difficulty Dif>
+  requires bh::CustomType<Type>
 struct InstrumentFor<Type, Dif> {
-  using type = Custom<Type, Dif>;
+  using type = bh::Custom<Type, Dif>;
 };
 
-template <InstrumentType Type, Difficulty Dif>
+template <bh::InstrumentType Type, bh::Difficulty Dif>
 using InstrumentFor_t = typename InstrumentFor<Type, Dif>::type;
 
-template <InstrumentType Type, Difficulty Dif>
+template <bh::InstrumentType Type, bh::Difficulty Dif>
 class Player final : public PlayerBase {
 public:
   template <typename... Args> Player(std::uint32_t id, Args &&...args);
@@ -89,13 +89,13 @@ public:
 
   inline void play(std::uint32_t notePlayed) noexcept override {
     std::uint32_t presses{};
-    if constexpr (Type == InstrumentType::Bass) {
-      presses = m_controllerState.update(notePlayed, BassComposition<Dif>::Strings,
-                                         BassComposition<Dif>::FretBits);
-    } else if constexpr (Type == InstrumentType::Guitar) {
-      presses = m_controllerState.update(notePlayed, GuitarComposition<Dif>::Strings,
-                                         GuitarComposition<Dif>::FretBits);
-    } else if constexpr (Type == InstrumentType::Custom_1) {
+    if constexpr (Type == bh::InstrumentType::Bass) {
+      presses = m_controllerState.update(notePlayed, bh::BassComposition<Dif>::Strings,
+                                         bh::BassComposition<Dif>::FretBits);
+    } else if constexpr (Type == bh::InstrumentType::Guitar) {
+      presses = m_controllerState.update(notePlayed, bh::GuitarComposition<Dif>::Strings,
+                                         bh::GuitarComposition<Dif>::FretBits);
+    } else if constexpr (Type == bh::InstrumentType::Custom_1) {
       const auto composition = m_instrument.getComposition();
       presses = m_controllerState.update(notePlayed, composition.NumberSections,
                                          composition.NumberBitsSection);
@@ -111,7 +111,7 @@ public:
   }
 
   inline void draw() const noexcept override {
-    m_instrument.draw((OriginalWindowSize.x / PlayerCount) * id);
+    m_instrument.draw((bh::OriginalWindowSize.x / PlayerCount) * id);
   }
 
   inline void update(float dt) override { m_instrument.update(dt); }
@@ -131,7 +131,7 @@ public:
     return m_instrument.getType();
   }
   inline std::unique_ptr<PlayerBase> changeSong(std::string songPath) override {
-    if constexpr (CustomType<Type>) {
+    if constexpr (bh::CustomType<Type>) {
       return std::make_unique<Player<Type, Dif>>(id, std::move(songPath),
                                                  m_instrument.getName(),
                                                  m_instrument.getComposition());
@@ -139,7 +139,7 @@ public:
       return std::make_unique<Player<Type, Dif>>(id, std::move(songPath));
     }
   }
-  std::vector<Achievements> getUnlockedAchievements() override;
+  std::vector<bh::Achievements> getUnlockedAchievements() override;
   inline std::uint32_t getLoadedNoteCount() const noexcept override {
     return m_instrument.getLoadedNoteCount();
   }
@@ -159,41 +159,41 @@ private:
   const std::uint32_t id;
 
   std::uint32_t m_passedNotes{};
-  ControllerState m_controllerState;
+  bh::ControllerState m_controllerState;
   InstrumentFor_t<Type, Dif> m_instrument;
 };
 
-template <InstrumentType Type, Difficulty Dif>
+template <bh::InstrumentType Type, bh::Difficulty Dif>
 template <typename... Args>
 Player<Type, Dif>::Player(std::uint32_t id, Args &&...args)
     : id(id), m_instrument(m_passedNotes, std::forward<Args>(args)...) {}
 
-template <InstrumentType Type, Difficulty Dif>
-std::vector<Achievements> Player<Type, Dif>::getUnlockedAchievements() {
-  std::vector<Achievements> earned;
+template <bh::InstrumentType Type, bh::Difficulty Dif>
+std::vector<bh::Achievements> Player<Type, Dif>::getUnlockedAchievements() {
+  std::vector<bh::Achievements> earned;
   if (!hasCompletedSong()) {
     return earned;
   }
-  earned.push_back(Achievements::FirstGig);
-  earned.push_back(Dif == Difficulty::Hard ? Achievements::Hard
-                                          : Achievements::Easy);
+  earned.push_back(bh::Achievements::FirstGig);
+  earned.push_back(Dif == bh::Difficulty::Hard ? bh::Achievements::Hard
+                                          : bh::Achievements::Easy);
 
   const bool allHit = getLoadedNoteCount() == getHitNoteCount();
   const bool full = allHit && !m_instrument.hadIncorrectInput();
 
   if (allHit) {
-    earned.push_back(Achievements::Completion);
+    earned.push_back(bh::Achievements::Completion);
   }
 
   if (full) {
-    earned.push_back(Achievements::FullCombo);
+    earned.push_back(bh::Achievements::FullCombo);
   }
-  if (m_instrument.getBestStreak() >= AchievementsManager::StreakTarget) {
-    earned.push_back(Achievements::Streak);
+  if (m_instrument.getBestStreak() >= bh::AchievementsManager::StreakTarget) {
+    earned.push_back(bh::Achievements::Streak);
   }
 
-  constexpr std::array<Achievements, 3> InstrumentAchievements{
-      Achievements::Bass, Achievements::Drums, Achievements::Guitar};
+  constexpr std::array<bh::Achievements, 3> InstrumentAchievements{
+      bh::Achievements::Bass, bh::Achievements::Drums, bh::Achievements::Guitar};
 
   constexpr auto index = static_cast<std::uint8_t>(Type);
 
@@ -202,11 +202,11 @@ std::vector<Achievements> Player<Type, Dif>::getUnlockedAchievements() {
   if constexpr (isInstrument) {
     earned.push_back(InstrumentAchievements[index]);
   }
-  if constexpr (isInstrument && Dif == Difficulty::Hard) {
+  if constexpr (isInstrument && Dif == bh::Difficulty::Hard) {
     if (full) {
-      constexpr std::array<Achievements, 3> InstrumentMastery{
-          Achievements::BassMastery, Achievements::DrumsMastery,
-          Achievements::GuitarMastery};
+      constexpr std::array<bh::Achievements, 3> InstrumentMastery{
+          bh::Achievements::BassMastery, bh::Achievements::DrumsMastery,
+          bh::Achievements::GuitarMastery};
       earned.push_back(InstrumentMastery[index]);
     }
   }

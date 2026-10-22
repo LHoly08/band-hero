@@ -32,12 +32,12 @@ public:
   int nextFrame() const noexcept;
   float frameBlend() const noexcept;
 
-  Rectangle sourceRectangle(Texture2D texture) const noexcept;
-  void draw(Texture2D texture, const Rectangle &destination,
-            Color tint = WHITE, float rotation = 0.f) const noexcept;
+  ::Rectangle sourceRectangle(::Texture2D texture) const noexcept;
+  void draw(::Texture2D texture, const ::Rectangle &destination,
+            ::Color tint = WHITE, float rotation = 0.f) const noexcept;
 
 private:
-  Rectangle sourceRectangle(Texture2D texture, int frame) const noexcept;
+  ::Rectangle sourceRectangle(::Texture2D texture, int frame) const noexcept;
   Clip m_clip{};
   double m_frameTime{};
   int m_frame{};

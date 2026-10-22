@@ -2,9 +2,9 @@
 
 namespace bh {
 
-StateStack::StateStack() { m_stack.reserve(3); }
+bh::StateStack::StateStack() { m_stack.reserve(3); }
 
-void StateStack::clear() noexcept {
+void bh::StateStack::clear() noexcept {
   if (!m_stack.empty()) {
     m_stack.back()->onExit();
   }
@@ -15,7 +15,7 @@ void StateStack::clear() noexcept {
   }
 }
 
-void StateStack::act() noexcept {
+void bh::StateStack::act() noexcept {
 
   while (!actions.empty()) {
     Action action = std::move(actions.front());

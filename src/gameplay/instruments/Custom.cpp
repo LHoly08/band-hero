@@ -5,7 +5,7 @@
 namespace bh {
 
 template <>
-bool Custom<InstrumentType::Custom_1, Difficulty::Easy>::getPlay(
+bool bh::Custom<bh::InstrumentType::Custom_1, bh::Difficulty::Easy>::getPlay(
     std::uint32_t playedNote) noexcept {
   // Easy accepts any input within a section; Hard compares its complete value.
   // Both discard bits outside the composition.
@@ -20,7 +20,7 @@ bool Custom<InstrumentType::Custom_1, Difficulty::Easy>::getPlay(
 }
 
 template <>
-bool Custom<InstrumentType::Custom_1, Difficulty::Hard>::getPlay(
+bool bh::Custom<bh::InstrumentType::Custom_1, bh::Difficulty::Hard>::getPlay(
     std::uint32_t playedNote) noexcept {
 
   playedNote &=
@@ -33,7 +33,7 @@ bool Custom<InstrumentType::Custom_1, Difficulty::Hard>::getPlay(
 }
 
 template <>
-bool Custom<InstrumentType::Custom_2, Difficulty::Easy>::getPlay(
+bool bh::Custom<bh::InstrumentType::Custom_2, bh::Difficulty::Easy>::getPlay(
     std::uint32_t playedNote) noexcept {
 
   const std::uint32_t UsedBits =
@@ -45,7 +45,7 @@ bool Custom<InstrumentType::Custom_2, Difficulty::Easy>::getPlay(
 }
 
 template <>
-bool Custom<InstrumentType::Custom_2, Difficulty::Hard>::getPlay(
+bool bh::Custom<bh::InstrumentType::Custom_2, bh::Difficulty::Hard>::getPlay(
     std::uint32_t playedNote) noexcept {
 
   const std::uint32_t UsedBits =

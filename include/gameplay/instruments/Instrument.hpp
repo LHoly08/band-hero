@@ -98,9 +98,9 @@ public:
     requires(!CustomType<Type>);
 
   virtual ~Instrument() {
-    if (IsMusicValid(m_audio)) {
-      StopMusicStream(m_audio);
-      UnloadMusicStream(m_audio);
+    if (::IsMusicValid(m_audio)) {
+      ::StopMusicStream(m_audio);
+      ::UnloadMusicStream(m_audio);
     }
   };
 
@@ -133,30 +133,30 @@ public:
       std::unreachable();
     }.template operator()<Type>());
 
-    if (IsMusicValid(m_audio)) {
-      StopMusicStream(m_audio);
-      UnloadMusicStream(m_audio);
+    if (::IsMusicValid(m_audio)) {
+      ::StopMusicStream(m_audio);
+      ::UnloadMusicStream(m_audio);
     }
-    m_audio = LoadMusicStream(path.c_str());
+    m_audio = ::LoadMusicStream(path.c_str());
     m_audio.looping = false;
-    if (IsMusicValid(m_audio)) {
-      SetMusicVolume(m_audio, m_audioVolume);
+    if (::IsMusicValid(m_audio)) {
+      ::SetMusicVolume(m_audio, m_audioVolume);
     }
   }
 
   inline void startAudio() noexcept {
-    if (IsMusicValid(m_audio)) {
-      PlayMusicStream(m_audio);
+    if (::IsMusicValid(m_audio)) {
+      ::PlayMusicStream(m_audio);
     }
   }
   template <bool Resume> inline void controlAudio() noexcept {
-    if (!IsMusicValid(m_audio)) {
+    if (!::IsMusicValid(m_audio)) {
       return;
     }
     if constexpr (Resume) {
-      ResumeMusicStream(m_audio);
+      ::ResumeMusicStream(m_audio);
     } else {
-      PauseMusicStream(m_audio);
+      ::PauseMusicStream(m_audio);
     }
   }
 
@@ -194,10 +194,10 @@ public:
   }
 
 protected:
-  inline void drawNote(const Vector2 &position, const Color &tint,
+  inline void drawNote(const ::Vector2 &position, const ::Color &tint,
                        std::uint8_t shape) const noexcept {
 
-    ResourceManager::drawImage<Textures::Gameplay::Notes>(
+    bh::ResourceManager::drawImage<bh::Textures::Gameplay::Notes>(
         {.x = 150.f * (shape % 2), .y = 0, .width = 150, .height = 150},
         position, tint);
   }
@@ -214,8 +214,8 @@ protected:
       return;
     }
     m_audioVolume = volume;
-    if (IsMusicValid(m_audio)) {
-      SetMusicVolume(m_audio, volume);
+    if (::IsMusicValid(m_audio)) {
+      ::SetMusicVolume(m_audio, volume);
     }
   }
   bool rejectInput() noexcept {
@@ -241,7 +241,7 @@ protected:
 
   std::mutex m_bufferMutex;
 
-  Music m_audio{};
+  ::Music m_audio{};
   float m_audioVolume{1.f};
 
   std::uint32_t m_originalNote{};
@@ -339,8 +339,8 @@ void Instrument<Type, Dif>::update(float dt) {
   }
   m_time += dt;
 
-  if (IsMusicValid(m_audio)) {
-    UpdateMusicStream(m_audio);
+  if (::IsMusicValid(m_audio)) {
+    ::UpdateMusicStream(m_audio);
   }
 
   if (m_activeBuffer.empty() ||
@@ -355,7 +355,7 @@ void Instrument<Type, Dif>::update(float dt) {
     }
     if (!batch.empty()) {
       for (auto &note : batch) {
-        note.shape = static_cast<std::uint8_t>(GetRandomValue(0, 1));
+        note.shape = static_cast<std::uint8_t>(::GetRandomValue(0, 1));
         m_activeBuffer.push_back(note);
       }
       batch.clear();
@@ -414,7 +414,7 @@ void Instrument<Type, Dif>::loadFile(std::stop_token stopToken,
 
   std::ifstream file(filename, std::ios::binary);
   if (!file) {
-    TraceLog(LOG_WARNING, "Could not open chart: %s", filename.c_str());
+    ::TraceLog(LOG_WARNING, "Could not open chart: %s", filename.c_str());
     return;
   }
 

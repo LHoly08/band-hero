@@ -25,14 +25,14 @@
 
 namespace bh {
 namespace {
-constexpr Rectangle DecreaseCount{760, 480, 90, 80};
-constexpr Rectangle IncreaseCount{1070, 480, 90, 80};
+constexpr ::Rectangle DecreaseCount{760, 480, 90, 80};
+constexpr ::Rectangle IncreaseCount{1070, 480, 90, 80};
 
 struct InstrumentCardLayout {
-  Rectangle panel;
-  Rectangle previous;
-  Rectangle next;
-  Rectangle difficulty;
+  ::Rectangle panel;
+  ::Rectangle previous;
+  ::Rectangle next;
+  ::Rectangle difficulty;
 };
 
 // Draw and input share the same layout, centered for one through four players.
@@ -46,43 +46,43 @@ InstrumentCardLayout instrumentCard(std::size_t index, std::size_t count) {
 }
 } // namespace
 
-void PlayerSelectState::draw() const noexcept {
+void bh::PlayerSelectState::draw() const noexcept {
   m_background.draw();
 
   switch (m_stage) {
   case Stage::ChoosingPlayerCount: {
-    using namespace settings_ui;
-    card({620, 300, 680, 480});
-    text("PLAYER SETUP", {670, 335}, 21, theme::Primary);
-    text("How many players?", {670, 375}, 44);
-    text("Choose 1-4 players to join the band.", {670, 435}, 25,
-         theme::MutedText);
-    choice(DecreaseCount, "<");
-    choice(IncreaseCount, ">");
+
+    bh::settings_ui::card({620, 300, 680, 480});
+    bh::settings_ui::text("PLAYER SETUP", {670, 335}, 21, bh::theme::Primary);
+    bh::settings_ui::text("How many players?", {670, 375}, 44);
+    bh::settings_ui::text("Choose 1-4 players to join the band.", {670, 435}, 25,
+         bh::theme::MutedText);
+    bh::settings_ui::choice(DecreaseCount, "<");
+    bh::settings_ui::choice(IncreaseCount, ">");
     const std::string count(1, m_playerCount);
     const float countWidth =
-        ResourceManager::measureText<Fonts_t::Buttons>(count, 90);
-    text(count, {960 - countWidth / 2, 475}, 90, theme::Highlight);
+        bh::ResourceManager::measureText<bh::Fonts_t::Buttons>(count, 90);
+    bh::settings_ui::text(count, {960 - countWidth / 2, 475}, 90, bh::theme::Highlight);
     const std::string caption = m_playerCount == '1'   ? "Solo"
                                 : m_playerCount == '2' ? "Duo"
                                 : m_playerCount == '3' ? "Trio"
                                                        : "Squad";
     const float captionWidth =
-        ResourceManager::measureText<Fonts_t::Buttons>(caption, 26);
-    text(caption, {960 - captionWidth / 2, 585}, 26, theme::MutedText);
-    m_nextButton.draw<WHITE, true, 30, TextAlign::Center>();
+        bh::ResourceManager::measureText<bh::Fonts_t::Buttons>(caption, 26);
+    bh::settings_ui::text(caption, {960 - captionWidth / 2, 585}, 26, bh::theme::MutedText);
+    m_nextButton.draw<WHITE, true, 30, bh::TextAlign::Center>();
 
     break;
   }
   case Stage::ChoosingInstruments: {
-    using namespace settings_ui;
+
     const std::string heading = "Choose instruments";
     const float headingWidth =
-        ResourceManager::measureText<Fonts_t::Buttons>(heading, 48);
-    text(heading, {960 - headingWidth / 2, 140}, 48);
-    text("Pick an instrument and difficulty for each player.", {620, 210}, 26,
-         theme::MutedText);
-    m_nextButton.draw<WHITE, true, 40, TextAlign::Center>();
+        bh::ResourceManager::measureText<bh::Fonts_t::Buttons>(heading, 48);
+    bh::settings_ui::text(heading, {960 - headingWidth / 2, 140}, 48);
+    bh::settings_ui::text("Pick an instrument and difficulty for each player.", {620, 210}, 26,
+         bh::theme::MutedText);
+    m_nextButton.draw<WHITE, true, 40, bh::TextAlign::Center>();
 
     for (std::size_t i = 0; i < m_playerChoices.size(); ++i) {
       const auto choice = m_playerChoices[i];
@@ -95,26 +95,26 @@ void PlayerSelectState::draw() const noexcept {
                                    ? "Drums"
                                    : m_customInstruments[instrument - 3].name;
 
-      card(layout.panel);
-      text("Player " + std::to_string(i + 1), {x + 32, 315}, 32,
-           theme::Primary);
-      text("INSTRUMENT", {x + 32, 365}, 20, theme::MutedText);
+      bh::settings_ui::card(layout.panel);
+      bh::settings_ui::text("Player " + std::to_string(i + 1), {x + 32, 315}, 32,
+           bh::theme::Primary);
+      bh::settings_ui::text("INSTRUMENT", {x + 32, 365}, 20, bh::theme::MutedText);
       const float nameWidth =
-          ResourceManager::measureText<Fonts_t::Buttons>(name, 32);
+          bh::ResourceManager::measureText<bh::Fonts_t::Buttons>(name, 32);
       const float nameSize =
           std::min(32.f, 280.f * 32.f / std::max(1.f, nameWidth));
       const float fittedWidth =
-          ResourceManager::measureText<Fonts_t::Buttons>(name, nameSize);
-      text(name, {x + (340 - fittedWidth) / 2, 510}, nameSize, theme::Text);
-      settings_ui::choice(layout.previous, "<");
-      settings_ui::choice(layout.next, ">");
-      text("DIFFICULTY", {x + 32, 710}, 20, theme::MutedText);
-      settings_ui::choice(layout.difficulty, choice & 1 ? "Easy" : "Hard");
+          bh::ResourceManager::measureText<bh::Fonts_t::Buttons>(name, nameSize);
+      bh::settings_ui::text(name, {x + (340 - fittedWidth) / 2, 510}, nameSize, bh::theme::Text);
+      bh::settings_ui::choice(layout.previous, "<");
+      bh::settings_ui::choice(layout.next, ">");
+      bh::settings_ui::text("DIFFICULTY", {x + 32, 710}, 20, bh::theme::MutedText);
+      bh::settings_ui::choice(layout.difficulty, choice & 1 ? "Easy" : "Hard");
     }
     break;
   }
   case Stage::TestingInstruments: {
-    using namespace settings_ui;
+
     const auto count = static_cast<std::size_t>(m_playerCount - '0');
     const bool ready = std::ranges::all_of(
         m_testNotes | std::views::take(count),
@@ -123,37 +123,37 @@ void PlayerSelectState::draw() const noexcept {
     unsigned int completedSteps{};
     for (std::size_t i = 0; i < count; ++i)
       completedSteps += m_testNotes[i].size();
-    card({400, 130, 1120, 780});
-    text("SOUNDCHECK", {460, 175}, 21, theme::Primary);
-    text("Test your instruments", {460, 220}, 48);
-    text("A quick check before the band takes the stage.", {460, 285}, 25,
-         theme::MutedText);
+    bh::settings_ui::card({400, 130, 1120, 780});
+    bh::settings_ui::text("SOUNDCHECK", {460, 175}, 21, bh::theme::Primary);
+    bh::settings_ui::text("Test your instruments", {460, 220}, 48);
+    bh::settings_ui::text("A quick check before the band takes the stage.", {460, 285}, 25,
+         bh::theme::MutedText);
     constexpr const char *labels[]{"1  Connect", "2  Test inputs", "3  Ready"};
     for (int i = 0; i < 3; ++i) {
       const float x = 460 + i * 340.f;
-      panel({x, 345, 320, 12}, i <= stage ? theme::Primary : theme::Border);
+      bh::settings_ui::panel({x, 345, 320, 12}, i <= stage ? bh::theme::Primary : bh::theme::Border);
       const float progress =
           i < stage                  ? 1.f
           : i == stage && ready      ? std::clamp(m_counter / 3.f, 0.f, 1.f)
           : i == stage && stage == 1 ? completedSteps / (3.f * count)
                                      : 0.f;
       if (progress > 0)
-        panel({x, 345, 320 * progress, 12}, theme::Highlight);
-      text(labels[i], {x, 380}, 28,
-           i <= stage ? theme::Text : theme::MutedText);
+        bh::settings_ui::panel({x, 345, 320 * progress, 12}, bh::theme::Highlight);
+      bh::settings_ui::text(labels[i], {x, 380}, 28,
+           i <= stage ? bh::theme::Text : bh::theme::MutedText);
     }
     if (!m_serial.isDeviceOpen()) {
-      text(Settings::getSerialPort().empty()
+      bh::settings_ui::text(bh::Settings::getSerialPort().empty()
                ? "No controller port selected"
                : "Could not open the controller port",
-           {460, 445}, 28, theme::Error);
-      text("Connect your controller, then retry. Choose its port in Settings.",
-           {460, 490}, 23, theme::MutedText);
-      m_nextButton.draw<WHITE, true, 30, TextAlign::Center>();
+           {460, 445}, 28, bh::theme::Error);
+      bh::settings_ui::text("Connect your controller, then retry. Choose its port in Settings.",
+           {460, 490}, 23, bh::theme::MutedText);
+      m_nextButton.draw<WHITE, true, 30, bh::TextAlign::Center>();
     } else {
-      text(ready ? "All instruments passed"
+      bh::settings_ui::text(ready ? "All instruments passed"
                  : "Play three distinct notes on each instrument.",
-           {460, 445}, 28, ready ? theme::Highlight : theme::Text);
+           {460, 445}, 28, ready ? bh::theme::Highlight : bh::theme::Text);
       constexpr const char *prompts[]{"Play the first note",
                                       "Play a different note",
                                       "Play a third distinct note", "Passed"};
@@ -167,34 +167,34 @@ void PlayerSelectState::draw() const noexcept {
                                  : instrument == 2
                                      ? "Drums"
                                      : m_customInstruments[instrument - 3].name;
-        fittedText("P" + std::to_string(i + 1) + "  " + name, {460, y, 310, 28},
-                   26, theme::Text);
-        text(prompts[step], {460, y + 32}, 20,
-             step == 3 ? theme::Highlight : theme::MutedText);
+        bh::settings_ui::fittedText("P" + std::to_string(i + 1) + "  " + name, {460, y, 310, 28},
+                   26, bh::theme::Text);
+        bh::settings_ui::text(prompts[step], {460, y + 32}, 20,
+             step == 3 ? bh::theme::Highlight : bh::theme::MutedText);
         for (int j = 0; j < 3; ++j) {
           const float x = 830 + j * 205.f;
-          panel({x, y + 4, 185, 8},
-                j < step ? theme::Highlight : theme::Border);
-          text(steps[j], {x, y + 25}, 22,
-               j < step    ? theme::Highlight
-               : j == step ? theme::Text
-                           : theme::Disabled);
+          bh::settings_ui::panel({x, y + 4, 185, 8},
+                j < step ? bh::theme::Highlight : bh::theme::Border);
+          bh::settings_ui::text(steps[j], {x, y + 25}, 22,
+               j < step    ? bh::theme::Highlight
+               : j == step ? bh::theme::Text
+                           : bh::theme::Disabled);
         }
       }
       if (ready)
-        text("Starting in " +
+        bh::settings_ui::text("Starting in " +
                  std::to_string(std::max(1, 3 - static_cast<int>(m_counter))) +
                  "...",
-             {460, 840}, 25, theme::Highlight);
+             {460, 840}, 25, bh::theme::Highlight);
     }
     break;
   }
   }
 
-  m_backButton.draw<WHITE, true, 40, TextAlign::Center>();
+  m_backButton.draw<WHITE, true, 40, bh::TextAlign::Center>();
 }
 
-void PlayerSelectState::update(float dt) noexcept {
+void bh::PlayerSelectState::update(float dt) noexcept {
   m_background.update(dt);
 
   switch (m_stage) {
@@ -226,7 +226,7 @@ void PlayerSelectState::update(float dt) noexcept {
         } else if (choice >= 3) {
           const auto &composition = m_customInstruments[choice - 3].composition;
           if (const auto *layout = std::get_if<
-                  InstrumentComposition<InstrumentType::Custom_1>>(&composition)) {
+                  bh::InstrumentComposition<bh::InstrumentType::Custom_1>>(&composition)) {
             sections = layout->NumberSections;
             bits = layout->NumberBitsSection;
           }
@@ -247,7 +247,7 @@ void PlayerSelectState::update(float dt) noexcept {
     if (m_counter >= 3.f) {
 
       auto move = []<std::size_t N>(auto &v) {
-        std::array<std::unique_ptr<PlayerBase>, N> players;
+        std::array<std::unique_ptr<bh::PlayerBase>, N> players;
 
         std::ranges::transform(v | std::views::take(N), players.begin(),
                                [](auto &ptr) { return std::move(ptr); });
@@ -260,25 +260,25 @@ void PlayerSelectState::update(float dt) noexcept {
 
       switch (m_playerCount) {
       case '1': {
-        m_stack.reset<GameState<1>>(move.operator()<1>(m_players),
+        m_stack.reset<bh::GameState<1>>(move.operator()<1>(m_players),
                                    std::move(audioDirectory),
                                    std::move(m_setList));
         break;
       }
       case '2': {
-        m_stack.reset<GameState<2>>(move.operator()<2>(m_players),
+        m_stack.reset<bh::GameState<2>>(move.operator()<2>(m_players),
                                    std::move(audioDirectory),
                                    std::move(m_setList));
         break;
       }
       case '3': {
-        m_stack.reset<GameState<3>>(move.operator()<3>(m_players),
+        m_stack.reset<bh::GameState<3>>(move.operator()<3>(m_players),
                                    std::move(audioDirectory),
                                    std::move(m_setList));
         break;
       }
       case '4': {
-        m_stack.reset<GameState<4>>(move.operator()<4>(m_players),
+        m_stack.reset<bh::GameState<4>>(move.operator()<4>(m_players),
                                    std::move(audioDirectory),
                                    std::move(m_setList));
         break;
@@ -294,9 +294,9 @@ void PlayerSelectState::update(float dt) noexcept {
   }
 }
 
-void PlayerSelectState::events() noexcept {
+void bh::PlayerSelectState::events() noexcept {
 
-  const Vector2 mousePos = GetMousePosition();
+  const ::Vector2 mousePos = ::GetMousePosition();
 
   const bool choosingCount = m_stage == Stage::ChoosingPlayerCount;
   const bool testing = m_stage == Stage::TestingInstruments;
@@ -304,9 +304,9 @@ void PlayerSelectState::events() noexcept {
   const bool nextClicked =
       m_nextButton.updateInput(mousePos, !testing || !m_serial.isDeviceOpen());
   const bool increaseClicked =
-      choosingCount && settings_ui::clicked(IncreaseCount);
+      choosingCount && bh::settings_ui::clicked(IncreaseCount);
   const bool decreaseClicked =
-      choosingCount && settings_ui::clicked(DecreaseCount);
+      choosingCount && bh::settings_ui::clicked(DecreaseCount);
   const bool backClicked = m_backButton.updateInput(mousePos);
 
   if (m_stage == Stage::ChoosingInstruments) {
@@ -314,22 +314,22 @@ void PlayerSelectState::events() noexcept {
     for (std::size_t i = 0; i < m_playerChoices.size(); ++i) {
       const auto layout = instrumentCard(i, m_playerChoices.size());
       auto &choice = m_playerChoices[i];
-      const int step = settings_ui::clicked(layout.previous) ? -1
-                       : settings_ui::clicked(layout.next)   ? 1
+      const int step = bh::settings_ui::clicked(layout.previous) ? -1
+                       : bh::settings_ui::clicked(layout.next)   ? 1
                                                              : 0;
       if (step)
         choice = static_cast<std::uint8_t>(
             (((choice >> 1) + step + count) % count) * 2 + (choice & 1));
-      if (settings_ui::clicked(layout.difficulty))
+      if (bh::settings_ui::clicked(layout.difficulty))
         choice ^= 1;
     }
   }
 
   if (testing && !m_serial.isDeviceOpen() && nextClicked && !backClicked) {
     m_serial.closeDevice();
-    if (!Settings::getSerialPort().empty() &&
-        m_serial.openDevice(Settings::getSerialPort().c_str(),
-                            Settings::getSerialBaudRate()) != 1) {
+    if (!bh::Settings::getSerialPort().empty() &&
+        m_serial.openDevice(bh::Settings::getSerialPort().c_str(),
+                            bh::Settings::getSerialBaudRate()) != 1) {
       m_serial.closeDevice();
     }
     if (m_serial.isDeviceOpen()) {
@@ -411,10 +411,10 @@ void PlayerSelectState::events() noexcept {
 
           if (playerChoice & 1) {
             m_players[i] = std::make_unique<
-                Player<InstrumentType::Guitar, Difficulty::Easy>>(i, songName);
+                bh::Player<bh::InstrumentType::Guitar, bh::Difficulty::Easy>>(i, songName);
           } else {
             m_players[i] = std::make_unique<
-                Player<InstrumentType::Guitar, Difficulty::Hard>>(i, songName);
+                bh::Player<bh::InstrumentType::Guitar, bh::Difficulty::Hard>>(i, songName);
           }
           break;
         }
@@ -423,10 +423,10 @@ void PlayerSelectState::events() noexcept {
 
           if (playerChoice & 1) {
             m_players[i] = std::make_unique<
-                Player<InstrumentType::Bass, Difficulty::Easy>>(i, songName);
+                bh::Player<bh::InstrumentType::Bass, bh::Difficulty::Easy>>(i, songName);
           } else {
             m_players[i] = std::make_unique<
-                Player<InstrumentType::Bass, Difficulty::Hard>>(i, songName);
+                bh::Player<bh::InstrumentType::Bass, bh::Difficulty::Hard>>(i, songName);
           }
           break;
         }
@@ -435,10 +435,10 @@ void PlayerSelectState::events() noexcept {
 
           if (playerChoice & 1) {
             m_players[i] = std::make_unique<
-                Player<InstrumentType::Drums, Difficulty::Easy>>(i, songName);
+                bh::Player<bh::InstrumentType::Drums, bh::Difficulty::Easy>>(i, songName);
           } else {
             m_players[i] = std::make_unique<
-                Player<InstrumentType::Drums, Difficulty::Hard>>(i, songName);
+                bh::Player<bh::InstrumentType::Drums, bh::Difficulty::Hard>>(i, songName);
           }
           break;
         }
@@ -452,68 +452,68 @@ void PlayerSelectState::events() noexcept {
           if (playerChoice & 1) {
 
             if (std::holds_alternative<
-                    InstrumentComposition<InstrumentType::Custom_1>>(
+                    bh::InstrumentComposition<bh::InstrumentType::Custom_1>>(
                     customComposition)) {
               // Holds Custom_1
 
               m_players[i] = std::make_unique<
-                  Player<InstrumentType::Custom_1, Difficulty::Easy>>(
+                  bh::Player<bh::InstrumentType::Custom_1, bh::Difficulty::Easy>>(
                   i, songName, customInstrument.name,
-                  std::get<InstrumentComposition<InstrumentType::Custom_1>>(
+                  std::get<bh::InstrumentComposition<bh::InstrumentType::Custom_1>>(
                       customComposition));
 
             } else if (std::holds_alternative<
-                           InstrumentComposition<InstrumentType::Custom_2>>(
+                           bh::InstrumentComposition<bh::InstrumentType::Custom_2>>(
                            customComposition)) {
               // Holds Custom_2
 
               m_players[i] = std::make_unique<
-                  Player<InstrumentType::Custom_2, Difficulty::Easy>>(
+                  bh::Player<bh::InstrumentType::Custom_2, bh::Difficulty::Easy>>(
                   i, songName, customInstrument.name,
-                  std::get<InstrumentComposition<InstrumentType::Custom_2>>(
+                  std::get<bh::InstrumentComposition<bh::InstrumentType::Custom_2>>(
                       customComposition));
 
             } else {
               // Holds Custom_3
 
               m_players[i] = std::make_unique<
-                  Player<InstrumentType::Custom_3, Difficulty::Easy>>(
+                  bh::Player<bh::InstrumentType::Custom_3, bh::Difficulty::Easy>>(
                   i, songName, customInstrument.name,
-                  std::get<InstrumentComposition<InstrumentType::Custom_3>>(
+                  std::get<bh::InstrumentComposition<bh::InstrumentType::Custom_3>>(
                       customComposition));
             }
 
           } else {
 
             if (std::holds_alternative<
-                    InstrumentComposition<InstrumentType::Custom_1>>(
+                    bh::InstrumentComposition<bh::InstrumentType::Custom_1>>(
                     customComposition)) {
               // Holds Custom 1
 
               m_players[i] = std::make_unique<
-                  Player<InstrumentType::Custom_1, Difficulty::Hard>>(
+                  bh::Player<bh::InstrumentType::Custom_1, bh::Difficulty::Hard>>(
                   i, songName, customInstrument.name,
-                  std::get<InstrumentComposition<InstrumentType::Custom_1>>(
+                  std::get<bh::InstrumentComposition<bh::InstrumentType::Custom_1>>(
                       customComposition));
 
             } else if (std::holds_alternative<
-                           InstrumentComposition<InstrumentType::Custom_2>>(
+                           bh::InstrumentComposition<bh::InstrumentType::Custom_2>>(
                            customComposition)) {
               // Holds Custom 2
 
               m_players[i] = std::make_unique<
-                  Player<InstrumentType::Custom_2, Difficulty::Hard>>(
+                  bh::Player<bh::InstrumentType::Custom_2, bh::Difficulty::Hard>>(
                   i, songName, customInstrument.name,
-                  std::get<InstrumentComposition<InstrumentType::Custom_2>>(
+                  std::get<bh::InstrumentComposition<bh::InstrumentType::Custom_2>>(
                       customComposition));
 
             } else {
               // Holds Custom 3
 
               m_players[i] = std::make_unique<
-                  Player<InstrumentType::Custom_3, Difficulty::Hard>>(
+                  bh::Player<bh::InstrumentType::Custom_3, bh::Difficulty::Hard>>(
                   i, songName, customInstrument.name,
-                  std::get<InstrumentComposition<InstrumentType::Custom_3>>(
+                  std::get<bh::InstrumentComposition<bh::InstrumentType::Custom_3>>(
                       customComposition));
             }
           }
@@ -531,9 +531,9 @@ void PlayerSelectState::events() noexcept {
       m_testNotes = {};
       m_counter = 0;
       m_serial.closeDevice();
-      if (!Settings::getSerialPort().empty() &&
-          m_serial.openDevice(Settings::getSerialPort().c_str(),
-                              Settings::getSerialBaudRate()) != 1) {
+      if (!bh::Settings::getSerialPort().empty() &&
+          m_serial.openDevice(bh::Settings::getSerialPort().c_str(),
+                              bh::Settings::getSerialBaudRate()) != 1) {
         m_serial.closeDevice();
       }
       if (m_serial.isDeviceOpen()) {
@@ -575,21 +575,21 @@ void PlayerSelectState::events() noexcept {
   }
 }
 
-PlayerSelectState::PlayerSelectState(StateStack &stack,
-                                     SetList setList) noexcept
-    : State(stack), m_setList(std::move(setList)) {
+bh::PlayerSelectState::PlayerSelectState(bh::StateStack &stack,
+                                     bh::SetList setList) noexcept
+    : bh::State(stack), m_setList(std::move(setList)) {
   m_customInstruments.clear();
-  for (const auto &definition : CustomInstrumentStore::list()) {
+  for (const auto &definition : bh::CustomInstrumentStore::list()) {
     if (!definition.error.empty() || m_customInstruments.size() >= 125)
       continue;
-    CustomInstrumentComposition instrument;
+    bh::CustomInstrumentComposition instrument;
     instrument.name = definition.name;
-    if (definition.kind == CustomKind::Sections) {
-      instrument.composition = InstrumentComposition<InstrumentType::Custom_1>{
+    if (definition.kind == bh::CustomKind::Sections) {
+      instrument.composition = bh::InstrumentComposition<bh::InstrumentType::Custom_1>{
           static_cast<std::uint8_t>(definition.first),
           static_cast<std::uint8_t>(definition.second)};
-    } else if (definition.kind == CustomKind::Bits) {
-      instrument.composition = InstrumentComposition<InstrumentType::Custom_2>{
+    } else if (definition.kind == bh::CustomKind::Bits) {
+      instrument.composition = bh::InstrumentComposition<bh::InstrumentType::Custom_2>{
           static_cast<std::uint8_t>(definition.first),
           static_cast<std::uint8_t>(definition.second)};
     } else {
@@ -600,7 +600,7 @@ PlayerSelectState::PlayerSelectState(StateStack &stack,
       if (error != std::errc{} || end != stem.data() + stem.size() ||
           number == 0 || number > 65535)
         continue;
-      instrument.composition = InstrumentComposition<InstrumentType::Custom_3>{
+      instrument.composition = bh::InstrumentComposition<bh::InstrumentType::Custom_3>{
           static_cast<std::uint16_t>(number)};
     }
     m_customInstruments.push_back(std::move(instrument));
@@ -611,15 +611,15 @@ PlayerSelectState::PlayerSelectState(StateStack &stack,
   }
 }
 
-void PlayerSelectState::onEnter() noexcept {
-  if (!Settings::getSerialPort().empty() &&
-      m_serial.openDevice(Settings::getSerialPort().c_str(),
-                          Settings::getSerialBaudRate()) != 1) {
+void bh::PlayerSelectState::onEnter() noexcept {
+  if (!bh::Settings::getSerialPort().empty() &&
+      m_serial.openDevice(bh::Settings::getSerialPort().c_str(),
+                          bh::Settings::getSerialBaudRate()) != 1) {
     m_serial.closeDevice();
   }
 }
 
-void PlayerSelectState::onExit() noexcept {
+void bh::PlayerSelectState::onExit() noexcept {
   m_serial.closeDevice();
 
   m_backButton.resetInteraction();

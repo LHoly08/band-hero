@@ -9,10 +9,10 @@
 
 namespace bh {
 
-class GuidesState final : public State {
+class GuidesState final : public bh::State {
 public:
-  inline GuidesState(StateStack &stack) noexcept
-      : State(stack) {}
+  inline GuidesState(bh::StateStack &stack) noexcept
+      : bh::State(stack) {}
   ~GuidesState() override = default;
 
   void draw() const noexcept override;
@@ -22,26 +22,26 @@ public:
   void onExit() noexcept override;
 
 private:
-  std::vector<ResourceManager::TextureHandle> m_textures =
-      ResourceManager::acquireTextures<Textures::UI>();
-  AnimatedBackground m_background;
+  std::vector<bh::ResourceManager::TextureHandle> m_textures =
+      bh::ResourceManager::acquireTextures<bh::Textures::UI>();
+  bh::AnimatedBackground m_background;
 
-  Button m_mainMenuButton{
+  bh::Button m_mainMenuButton{
     {.x = 1350, .y = 30},
     {.x = 0, .y = 0, .width = 360, .height = 100},
     "Main Menu"
   };
-  Button m_firstGuideButton{
+  bh::Button m_firstGuideButton{
     {.x = 195, .y = 30},
     {.x = 0, .y = 0, .width = 360, .height = 100},
     "Bass Guide"
   };
-  Button m_secondGuideButton{
+  bh::Button m_secondGuideButton{
     {.x = 580, .y = 30},
     {.x = 0, .y = 0, .width = 360, .height = 100},
     "Drums Guide"
   };
-  Button m_thirdGuideButton{
+  bh::Button m_thirdGuideButton{
     {.x = 965, .y = 30},
     {.x = 0, .y = 0, .width = 360, .height = 100},
     "Guitar Guide"

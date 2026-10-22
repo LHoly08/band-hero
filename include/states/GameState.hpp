@@ -27,17 +27,17 @@
 namespace bh {
 
 template <std::uint8_t PlayerCount>
-  requires MaxPlayerAmount<PlayerCount>
+  requires bh::MaxPlayerAmount<PlayerCount>
 class GameEndState;
 
 template <std::uint8_t PlayerCount>
-  requires MaxPlayerAmount<PlayerCount>
-class GameState final : public State {
+  requires bh::MaxPlayerAmount<PlayerCount>
+class GameState final : public bh::State {
 public:
   inline GameState(
-      StateStack &stack,
-      std::array<std::unique_ptr<PlayerBase>, PlayerCount> &&players,
-      std::string &&filename, SetList setList,
+      bh::StateStack &stack,
+      std::array<std::unique_ptr<bh::PlayerBase>, PlayerCount> &&players,
+      std::string &&filename, bh::SetList setList,
       std::uint32_t completedSongs = 0, bool allSongsCompleted = true) noexcept;
   ~GameState() override;
 
@@ -48,12 +48,12 @@ public:
   void onExit() noexcept override;
 
 private:
-  ResourceManager::TextureHandle m_notes =
-      ResourceManager::acquireTexture<Textures::Gameplay::Notes>();
-  serialib m_serial;
-  std::array<std::unique_ptr<PlayerBase>, PlayerCount> m_players;
-  std::inplace_vector<Music, 6> m_audios;
-  SetList m_setList{};
+  bh::ResourceManager::TextureHandle m_notes =
+      bh::ResourceManager::acquireTexture<bh::Textures::Gameplay::Notes>();
+  ::serialib m_serial;
+  std::array<std::unique_ptr<bh::PlayerBase>, PlayerCount> m_players;
+  std::inplace_vector<::Music, 6> m_audios;
+  bh::SetList m_setList{};
   std::uint32_t m_completedSongs{};
   bool m_allSongsCompleted{true};
 
@@ -63,18 +63,18 @@ private:
 };
 
 template <std::uint8_t PlayerCount>
-  requires MaxPlayerAmount<PlayerCount>
+  requires bh::MaxPlayerAmount<PlayerCount>
 GameState<PlayerCount>::GameState(
-    StateStack &stack,
-    std::array<std::unique_ptr<PlayerBase>, PlayerCount> &&players,
-    std::string &&filename, SetList setList, std::uint32_t completedSongs,
+    bh::StateStack &stack,
+    std::array<std::unique_ptr<bh::PlayerBase>, PlayerCount> &&players,
+    std::string &&filename, bh::SetList setList, std::uint32_t completedSongs,
     bool allSongsCompleted) noexcept
-    : State(stack), m_players(std::move(players)),
+    : bh::State(stack), m_players(std::move(players)),
       m_setList(std::move(setList)), m_completedSongs(completedSongs),
       m_allSongsCompleted(allSongsCompleted), m_duration([filename] -> float {
-        Music temp = LoadMusicStream((filename + "main.mp3").c_str());
-        const float duration = GetMusicTimeLength(temp);
-        UnloadMusicStream(temp);
+        ::Music temp = ::LoadMusicStream((filename + "main.mp3").c_str());
+        const float duration = ::GetMusicTimeLength(temp);
+        ::UnloadMusicStream(temp);
         return duration + 1;
       }()) {
   // Only the standard instruments own one of the six backing stems.
@@ -102,8 +102,8 @@ GameState<PlayerCount>::GameState(
     }
     std::string audioPath = filename;
     audioPath.append(AudioNames[i]);
-    auto audio = LoadMusicStream(audioPath.c_str());
-    if (IsMusicValid(audio)) {
+    auto audio = ::LoadMusicStream(audioPath.c_str());
+    if (::IsMusicValid(audio)) {
       audio.looping = false;
       m_audios.emplace_back(audio);
     }
@@ -111,16 +111,16 @@ GameState<PlayerCount>::GameState(
 }
 
 template <std::uint8_t PlayerCount>
-  requires MaxPlayerAmount<PlayerCount>
+  requires bh::MaxPlayerAmount<PlayerCount>
 GameState<PlayerCount>::~GameState() {
   for (auto &audio : m_audios) {
-    StopMusicStream(audio);
-    UnloadMusicStream(audio);
+    ::StopMusicStream(audio);
+    ::UnloadMusicStream(audio);
   }
 }
 
 template <std::uint8_t PlayerCount>
-  requires MaxPlayerAmount<PlayerCount>
+  requires bh::MaxPlayerAmount<PlayerCount>
 void GameState<PlayerCount>::draw() const noexcept {
   if (m_time >= m_duration) {
     return;
@@ -132,7 +132,7 @@ void GameState<PlayerCount>::draw() const noexcept {
 }
 
 template <std::uint8_t PlayerCount>
-  requires MaxPlayerAmount<PlayerCount>
+  requires bh::MaxPlayerAmount<PlayerCount>
 void GameState<PlayerCount>::update(float dt) noexcept {
   m_time += dt;
 
@@ -149,7 +149,7 @@ void GameState<PlayerCount>::update(float dt) noexcept {
   }
 
   for (auto &audio : m_audios) {
-    UpdateMusicStream(audio);
+    ::UpdateMusicStream(audio);
   }
 
   for (auto &player : m_players) {
@@ -173,20 +173,20 @@ void GameState<PlayerCount>::update(float dt) noexcept {
 }
 
 template <std::uint8_t PlayerCount>
-  requires MaxPlayerAmount<PlayerCount>
+  requires bh::MaxPlayerAmount<PlayerCount>
 void GameState<PlayerCount>::events() noexcept {
 
-  if (IsKeyPressed(KEY_ESCAPE)) [[unlikely]] {
-    m_stack.push<PauseMenuState>();
+  if (::IsKeyPressed(::KEY_ESCAPE)) [[unlikely]] {
+    m_stack.push<bh::PauseMenuState>();
   }
 }
 
 template <std::uint8_t PlayerCount>
-  requires MaxPlayerAmount<PlayerCount>
+  requires bh::MaxPlayerAmount<PlayerCount>
 void GameState<PlayerCount>::onEnter() noexcept {
-  if (!Settings::getSerialPort().empty() &&
-      m_serial.openDevice(Settings::getSerialPort().c_str(),
-                          Settings::getSerialBaudRate()) != 1) {
+  if (!bh::Settings::getSerialPort().empty() &&
+      m_serial.openDevice(bh::Settings::getSerialPort().c_str(),
+                          bh::Settings::getSerialBaudRate()) != 1) {
     m_serial.closeDevice();
   }
   if (m_serial.isDeviceOpen()) {
@@ -206,16 +206,16 @@ void GameState<PlayerCount>::onEnter() noexcept {
   }
   for (auto &audio : m_audios) {
     if (m_audioStarted) {
-      ResumeMusicStream(audio);
+      ::ResumeMusicStream(audio);
     } else {
-      PlayMusicStream(audio);
+      ::PlayMusicStream(audio);
     }
   }
   m_audioStarted = true;
 }
 
 template <std::uint8_t PlayerCount>
-  requires MaxPlayerAmount<PlayerCount>
+  requires bh::MaxPlayerAmount<PlayerCount>
 void GameState<PlayerCount>::onExit() noexcept {
   m_serial.closeDevice();
 
@@ -227,7 +227,7 @@ void GameState<PlayerCount>::onExit() noexcept {
     }
   }
   for (auto &audio : m_audios) {
-    PauseMusicStream(audio);
+    ::PauseMusicStream(audio);
   }
 }
 

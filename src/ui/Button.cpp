@@ -2,19 +2,19 @@
 
 namespace bh {
 
-bool Button::updateInput(Vector2 mousePosition, bool enabled) noexcept {
-  if (!enabled || !IsWindowFocused()) {
+bool bh::Button::updateInput(::Vector2 mousePosition, bool enabled) noexcept {
+  if (!enabled || !::IsWindowFocused()) {
     resetInteraction();
     return false;
   }
 
   const bool hovered = pressed(mousePosition);
-  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+  if (::IsMouseButtonPressed(::MOUSE_BUTTON_LEFT)) {
     m_armed = hovered;
   }
   const bool clicked =
-      m_armed && hovered && IsMouseButtonReleased(MOUSE_BUTTON_LEFT);
-  const bool down = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
+      m_armed && hovered && ::IsMouseButtonReleased(::MOUSE_BUTTON_LEFT);
+  const bool down = ::IsMouseButtonDown(::MOUSE_BUTTON_LEFT);
   if (!down) {
     m_armed = false;
   }
@@ -24,15 +24,15 @@ bool Button::updateInput(Vector2 mousePosition, bool enabled) noexcept {
   return clicked;
 }
 
-void Button::resetInteraction() noexcept {
+void bh::Button::resetInteraction() noexcept {
   m_armed = false;
   m_visualState = VisualState::Normal;
 }
 
-Rectangle Button::sourceRectangle() const noexcept {
+::Rectangle bh::Button::sourceRectangle() const noexcept {
   // Each group is normal, hover, pressed, matching
   // assets/textures/UI/Buttons.json.
-  static constexpr Rectangle frames[][3] = {
+  static constexpr ::Rectangle frames[][3] = {
       {{0, 0, 360, 100}, {0, 100, 360, 100}, {0, 200, 360, 100}},
       {{500, 0, 96, 96}, {648, 0, 96, 96}, {796, 0, 96, 96}},
       {{500, 100, 96, 96}, {648, 100, 96, 96}, {796, 100, 96, 96}},
@@ -52,19 +52,19 @@ Rectangle Button::sourceRectangle() const noexcept {
   return m_rect;
 }
 
-bool Button::pressed(Vector2 mousePosition) const noexcept {
+bool bh::Button::pressed(::Vector2 mousePosition) const noexcept {
   if (m_rect.width <= 0.f || m_rect.height <= 0.f) {
     return false;
   }
-  const Vector2 pos = scaledSize(m_position);
+  const ::Vector2 pos = bh::scaledSize(m_position);
 
   bool insideX = (pos.x <= mousePosition.x &&
                   mousePosition.x <
-                      pos.x + scaledSize<float, ScreenAxis::X>(m_rect.width));
+                      pos.x + bh::scaledSize<float, bh::ScreenAxis::X>(m_rect.width));
 
   bool insideY = (pos.y <= mousePosition.y &&
                   mousePosition.y <
-                      pos.y + scaledSize<float, ScreenAxis::Y>(m_rect.height));
+                      pos.y + bh::scaledSize<float, bh::ScreenAxis::Y>(m_rect.height));
 
   return insideX && insideY;
 }
