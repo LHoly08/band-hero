@@ -1,5 +1,27 @@
 # band-hero
 
+Desktop rhythm game with serial instrument input and customizable Lua instruments.
+
+## Build and run
+
+Use CMake 3.31 or newer and a C++26 compiler with reflection support
+(`-freflection` and `<meta>`). Select that compiler when configuring a new
+build directory; a compiler accepting C++26 without reflection is insufficient.
+CMake fetches raylib 5.5 and Lua 5.4.8 during configuration.
+
+From the repository root, with the selected compiler available as `g++`:
+
+```sh
+cmake -S . -B build -DCMAKE_CXX_COMPILER=g++
+cmake --build build --parallel
+./build/BandHero
+```
+
+Run in a graphical session. CMake copies `assets/` beside the executable;
+run from the repository root to keep settings and player saves in one place.
+The current CMake project does not define automated test targets or a
+`BANDHERO_BUILD_TESTS` option.
+
 ## License
 
 Copyright (c) 2026 LHoly08. BandHero is licensed under the
@@ -40,14 +62,6 @@ Settings controls live under `include/ui/settings/` and `src/ui/settings/`;
 persistence and instrument validation live under `include/config/` and
 `src/config/`.
 
-To build and run the isolated settings persistence tests:
-
-```sh
-cmake -S . -B build -DBANDHERO_BUILD_TESTS=ON
-cmake --build build --parallel
-ctest --test-dir build --output-on-failure
-```
-
 During gameplay, missing a chart note lowers that player's instrument stem to
 25% volume. The next successfully completed note or chord restores full volume.
 The stem keeps playing in time with the song, and the master volume setting
@@ -60,9 +74,11 @@ configured serial baud rate and write exactly four binary bytes per packet,
 least significant byte first:
 
 ```cpp
-uint32_t packet = (state << 2) | playerId; // playerId: 0-3, state: 30 bits
+#include <cstdint>
+
+std::uint32_t packet = (state << 2) | playerId; // playerId: 0-3, state: 30 bits
 for (unsigned i = 0; i < 4; ++i)
-    Serial.write(static_cast<uint8_t>(packet >> (8 * i)));
+    ::Serial.write(static_cast<std::uint8_t>(packet >> (8 * i)));
 ```
 
 Communication is one-way: instruments send packets and the game only reads.
@@ -113,18 +129,6 @@ menu shows saved unlocks and dims locked medals.
 
 LAN, Online, and Medium medals are reserved for modes not yet implemented.
 
-Build and run the achievement tests with:
-
-```sh
-cmake -S . -B build -DBANDHERO_BUILD_TESTS=ON
-cmake --build build --parallel
-ctest --test-dir build --output-on-failure
-```
-
-For menu screenshots in a graphical session, run `AchievementsTests --render`
-from `build/achievement-tests/` (the executable is in its parent directory).
-The harness uses isolated fixture folders and saves, leaving player data intact.
-
 ## Python stem splitter
 
 From `tools/song_processor/python/`, install into an activated Python virtual
@@ -145,3 +149,13 @@ CUDA execution requires a compatible NVIDIA GPU and driver; no separate CUDA
 Toolkit installation is needed. The CUDA-enabled build is a larger download
 even on machines that will run on CPU.
 
+## C++ namespace convention
+
+Qualify symbols defined in another file, even when they belong to the current
+namespace: `bh::` for project symbols, `std::` for the standard library, and
+`::` for APIs and types in the global namespace. Keep same-file names
+unqualified when lookup permits; avoid `using namespace` directives.
+
+Retain required class and enum scopes, such as `Game::run()` and
+`ScreenAxis::X`. Macros have no namespace and stay unqualified, including
+raylib color macros such as `WHITE` and `stdout`.
