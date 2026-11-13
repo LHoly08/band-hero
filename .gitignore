@@ -37,3 +37,18 @@ dist/
 /tools/song_processor/**/*.mp3
 /tools/song_processor/**/*.wav
 /tools/song_processor/**/*.flac
+
+# Additional CMake build output
+build-*/
+cmake-build-*/
+CMakeLists.txt.user.*
+
+# Local editor and tool state
+.idea/
+.nvimlog
+*.swp
+*.swo
+
+# Operating system metadata
+.DS_Store
+Thumbs.db
